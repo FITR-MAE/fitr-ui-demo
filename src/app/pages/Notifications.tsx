@@ -1,4 +1,4 @@
-import { ChevronRight, MessageCircle } from "lucide-react";
+import { BadgeCent, ChevronRight, Heart, MessageCircle, Send, Share, Share2, Store } from "lucide-react";
 
 import { Link } from "react-router";
 
@@ -84,10 +84,47 @@ export function NotificationsPage() {
             <div className="min-w-0 flex-1">
               <div className="flex items-center gap-2">
                 <MessageCircle className="w-4 h-4 text-muted-foreground" />
-                <span className="text-sm font-medium">{activityItem.user}</span>
+                <Heart className="w-4 h-4 text-muted-foreground" />
+                <Send className="w-4 h-4 text-muted-foreground" />
               </div>
-              <div className="mt-1 flex items-center justify-between gap-3">
-                <span className="truncate text-sm">{activityItem.preview}</span>
+              <div className=" flex items-center justify-between gap-3">
+                <span className="text-xs">{activityItem.user} and 71 others liked your post</span>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
+              <span className="text-xs text-muted-foreground">{activityItem.time}</span>
+              <ChevronRight className="mt-1 w-4 h-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+          <Link
+            to="/notifications/sales"
+            className="flex items-center gap-3 rounded-2xl px-1 py-1.5 transition-colors hover:bg-muted/60"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <BadgeCent className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Upcoming sales</span>
+              </div>
+              <div className=" flex items-center justify-between gap-3">
+                <span className="text-xs">Maison Margiela and 3 other brands you follow have upcoming sales</span>
+              </div>
+            </div>
+            <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
+              <span className="text-xs text-muted-foreground">{activityItem.time}</span>
+              <ChevronRight className="mt-1 w-4 h-4 shrink-0 text-muted-foreground" />
+            </div>
+          </Link>
+          <Link
+            to="/notifications/near-you"
+            className="flex items-center gap-3 rounded-2xl px-1 py-1.5 transition-colors hover:bg-muted/60"
+          >
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-2">
+                <Store className="w-4 h-4 text-muted-foreground" />
+                <span className="text-sm font-medium">Near you</span>
+              </div>
+              <div className=" flex items-center justify-between gap-3">
+                <span className="text-xs">you have 3 fashion stores in a walking distance</span>
               </div>
             </div>
             <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">

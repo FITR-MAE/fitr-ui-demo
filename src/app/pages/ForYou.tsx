@@ -194,21 +194,21 @@ export function ForYou() {
             </div>
 
             <div className="absolute left-4 right-24 z-10 text-white" style={{ bottom: feedPaddingBottom }}>
-              <div className="space-y-3 rounded-3xl border border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md">
-                <div className="flex items-center gap-3">
-                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-medium text-white">
+              <div className="space-y-2">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-white/15 bg-black/25 text-sm font-medium text-white backdrop-blur-sm">
                     {outfit.user.charAt(0)}
                   </div>
                   <div className="min-w-0">
                     <p className="truncate text-sm font-medium text-white">{outfit.user}</p>
                   </div>
                 </div>
-                <p className="text-sm leading-6 text-white/90">{outfit.caption}</p>
-                <div className="flex flex-wrap gap-2">
+                <p className="text-sm leading-5 text-white/90">{outfit.caption}</p>
+                <div className="flex flex-wrap gap-1.5">
                   {outfit.tags.map((tag) => (
                     <span
                       key={tag}
-                      className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] tracking-wide text-white drop-shadow-lg"
+                      className="rounded-full border border-white/20 bg-white/15 px-2 py-0.5 text-[11px] tracking-wide text-white drop-shadow-lg"
                     >
                       #{tag}
                     </span>
