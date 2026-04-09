@@ -178,7 +178,7 @@ export function Profile() {
 
         <div
           ref={scrollRef}
-          className="pt-6 overflow-x-auto snap-x snap-mandatory touch-pan-x hide-scrollbar"
+          className="pt-6 overflow-x-auto snap-x snap-mandatory hide-scrollbar"
           style={{ scrollBehavior: "smooth" }}
         >
           <div className="flex">

@@ -1,5 +1,5 @@
 import { motion } from "motion/react";
-import { RefreshCw, Heart, Check, Palette, Droplet, Shirt, Sparkles, Camera, Plus } from "lucide-react";
+import { RefreshCw, Heart, Check, Palette, Droplet, Shirt, Camera, Plus } from "lucide-react";
 import { useState, type ReactNode } from "react";
 
 import { PageHeader, PageSection, PageShell } from "../components/Page";
@@ -116,29 +116,25 @@ export function Stylist() {
     <PageShell>
       <PageHeader title="Stylist" />
 
-      <div className="app-page-content space-y-3">
+      <div className="app-page-content space-y-2">
         <motion.section
           initial={{ opacity: 0, y: 12 }}
           animate={{ opacity: 1, y: 0 }}
-          className="app-surface overflow-hidden p-3"
+          className="app-surface p-2"
         >
-          <div className="flex items-start justify-between gap-4">
-            <div className="min-w-0">
-              <div className="app-chip mb-1.5 inline-flex items-center gap-2">
-                <Sparkles className="h-3.5 w-3.5" />
-                Daily edit
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-2.5 flex items-center justify-between rounded-[16px] bg-muted/60 px-3 py-2">
+          <div className="flex items-center justify-between gap-2 rounded-[12px] bg-muted/60 px-2.5 py-1.5">
             <div className="min-w-0">
               <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Current mix</div>
-              <div className="mt-1 truncate text-sm font-medium text-foreground">
+              <div className="truncate text-sm font-medium text-foreground">
                 {Array.from(selectedPreferences).slice(0, 2).join(" + ") || "Curated basics"}
               </div>
             </div>
-            <Button onClick={generateOutfits} disabled={generating} className="h-10 rounded-full px-3.5">
+            <Button
+              onClick={generateOutfits}
+              disabled={generating}
+              variant="outline"
+              className="h-8 rounded-full border-border bg-card px-2.5 text-foreground shadow-none"
+            >
               Refresh
             </Button>
           </div>
@@ -150,7 +146,7 @@ export function Stylist() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
-                className={`flex min-h-[36px] items-center gap-1.5 rounded-full px-3 py-1.5 text-sm whitespace-nowrap transition-colors ${
+                className={`flex min-h-[32px] items-center gap-1 rounded-full px-2.5 py-1 text-sm whitespace-nowrap transition-colors ${
                   activeTab === tab.id
                     ? "bg-foreground text-background shadow-sm"
                     : "border border-border bg-background text-muted-foreground"
@@ -164,29 +160,25 @@ export function Stylist() {
         </div>
 
         {activeTab === "colour" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2.5">
-            <PageSection className="px-3.5 py-2.5">
-              <p className="text-sm font-medium">Your best colour direction</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">Keep the palette narrow.</p>
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1.5">
+            <PageSection className="px-2.5 py-2">
+              <p className="text-sm font-medium">Colour direction</p>
             </PageSection>
 
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               {colorPalettes.map((palette) => (
-                <PageSection key={palette.name} className="p-3">
-                  <div className="mb-2.5 flex items-start justify-between gap-4">
+                <PageSection key={palette.name} className="p-2">
+                  <div className="mb-1.5 flex items-start justify-between gap-3">
                     <div>
                       <div className="text-sm font-medium">{palette.name}</div>
-                      <div className="mt-1 text-xs leading-5 text-muted-foreground">{palette.mood}</div>
-                    </div>
-                    <div className="rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                      Palette
+                      <div className="mt-0.5 text-xs leading-4 text-muted-foreground">{palette.mood}</div>
                     </div>
                   </div>
-                  <div className="flex gap-2">
+                  <div className="flex gap-1.5">
                     {palette.colors.map((color) => (
                       <div
                         key={color}
-                        className="h-12 flex-1 rounded-2xl border border-border"
+                        className="h-10 flex-1 rounded-xl border border-border"
                         style={{ backgroundColor: color }}
                       />
                     ))}
@@ -198,29 +190,28 @@ export function Stylist() {
         )}
 
         {activeTab === "discover" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <PageSection className="overflow-hidden p-3.5">
-              <div className="mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+            <PageSection className="overflow-hidden p-2.5">
+              <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                 <Camera className="h-5 w-5" />
               </div>
-              <h2 className="text-base font-semibold">Find your best tones from a photo</h2>
-              <p className="mt-1.5 text-sm leading-5 text-muted-foreground">Use daylight and a clean background.</p>
-              <Button className="mt-2.5 h-10 w-full rounded-2xl">
+              <h2 className="text-sm font-medium">Find tones from a photo</h2>
+              <Button variant="outline" className="mt-1.5 h-8 w-full rounded-xl border-border bg-card text-foreground shadow-none">
                 <Droplet className="h-4 w-4" />
                 Upload photo
               </Button>
             </PageSection>
 
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               {[
                 ["Undertone", "Warm-neutral"],
                 ["Contrast", "Medium-high"],
                 ["Metals", "Gold"],
                 ["Focus", "Soft tailoring"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[16px] border border-border bg-card p-2.5 shadow-sm">
+                <div key={label} className="rounded-[14px] border border-border bg-card p-2 shadow-sm">
                   <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-                  <div className="mt-1.5 text-sm font-medium leading-5">{value}</div>
+                  <div className="mt-1 text-sm font-medium leading-5">{value}</div>
                 </div>
               ))}
             </div>
@@ -228,23 +219,23 @@ export function Stylist() {
         )}
 
         {activeTab === "recommendations" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <PageSection className="p-3">
-              <div className="mb-2.5 flex items-start justify-between gap-3">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+            <PageSection className="p-2">
+              <div className="mb-1.5 flex items-start justify-between gap-2">
                 <div>
-                  <div className="text-base font-medium">Style preferences</div>
+                  <div className="text-sm font-medium">Style filters</div>
                 </div>
                 <div className="rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                   {selectedPreferences.size} selected
                 </div>
               </div>
 
-              <div className="mb-3 flex flex-wrap gap-2">
+              <div className="mb-2 flex flex-wrap gap-1">
                 {preferences.map((pref) => (
                   <button
                     key={pref.id}
                     onClick={() => togglePreference(pref.id)}
-                    className={`flex min-h-[38px] items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors ${
+                    className={`flex min-h-[30px] items-center gap-1 rounded-full border px-2 py-1 text-sm transition-colors ${
                       selectedPreferences.has(pref.id)
                         ? "border-foreground bg-foreground text-background"
                         : "border-border bg-background"
@@ -257,54 +248,56 @@ export function Stylist() {
                 ))}
               </div>
 
-              <motion.button
-                whileTap={{ scale: 0.98 }}
-                onClick={generateOutfits}
-                disabled={generating}
-                className="flex h-10 w-full items-center justify-center gap-2 rounded-2xl bg-foreground px-4 text-sm font-medium text-background disabled:opacity-50"
-              >
-                <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
-                {generating ? "Generating..." : "Refresh outfits"}
-              </motion.button>
+              <motion.div whileTap={{ scale: 0.98 }}>
+                <Button
+                  onClick={generateOutfits}
+                  disabled={generating}
+                  variant="outline"
+                  className="h-8 w-full rounded-xl border-border bg-card text-foreground shadow-none"
+                >
+                  <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+                  {generating ? "Generating..." : "Refresh"}
+                </Button>
+              </motion.div>
             </PageSection>
 
-            <div className="space-y-2.5">
+            <div className="space-y-1.5">
               {recommendations.map((rec) => (
                 <motion.article
                   key={rec.id}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
-                  className="app-surface overflow-hidden p-3"
+                  className="app-surface overflow-hidden p-2"
                 >
-                  <div className="mb-2.5 flex items-start justify-between gap-3">
-                    <div>
-                      <div className="mb-1.5 inline-flex rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                  <div className="mb-1.5 flex items-start justify-between gap-2">
+                    <div className="min-w-0">
+                      <div className="mb-1 inline-flex rounded-full bg-muted px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                         {rec.occasion}
                       </div>
                       <div className="text-sm font-medium">{rec.style}</div>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                    <div className="flex items-center gap-1.5">
+                      <span className="rounded-full bg-muted px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
                         {rec.confidence}% match
                       </span>
                       <button
                         onClick={() => toggleLike(rec.id)}
-                        className="flex min-h-[40px] min-w-[40px] items-center justify-center rounded-full bg-muted transition-transform active:scale-95"
+                        className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full border border-border bg-card text-foreground transition active:scale-95"
                         aria-label={likedOutfits.has(rec.id) ? "Unlike outfit" : "Like outfit"}
                       >
-                        <Heart className={`h-5 w-5 ${likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : ""}`} />
+                        <Heart className={`h-4 w-4 ${likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
                       </button>
                     </div>
                   </div>
 
-                  <div className="space-y-2 rounded-[16px] bg-muted/50 p-2">
+                  <div className="space-y-1 rounded-[12px] bg-muted/50 p-1.5">
                     {[
                       { label: "Top", item: rec.outfit.top, emoji: "👕" },
                       { label: "Bottom", item: rec.outfit.bottom, emoji: "👖" },
                       { label: "Shoes", item: rec.outfit.shoes, emoji: "👞" },
                     ].map(({ label, item, emoji }) => (
-                      <div key={label} className="flex items-center gap-2 rounded-[14px] bg-background px-2.5 py-2">
-                        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-muted text-sm">
+                      <div key={label} className="flex items-center gap-2 rounded-[10px] bg-background px-2 py-1.5">
+                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-muted text-xs">
                           {emoji}
                         </div>
                         <div className="min-w-0 flex-1">
@@ -315,8 +308,10 @@ export function Stylist() {
                     ))}
                   </div>
 
-                  <div className="mt-2 flex items-center justify-end text-sm">
-                    <button className="font-medium text-foreground">Details</button>
+                  <div className="mt-1 flex items-center justify-end text-sm">
+                    <Button variant="ghost" className="h-7 rounded-full px-2.5 text-foreground">
+                      Details
+                    </Button>
                   </div>
                 </motion.article>
               ))}
@@ -325,26 +320,26 @@ export function Stylist() {
         )}
 
         {activeTab === "wardrobe" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-3">
-            <PageSection className="border-dashed p-4 text-center">
-              <div className="mx-auto mb-2.5 flex h-10 w-10 items-center justify-center rounded-xl bg-muted">
+          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
+            <PageSection className="border-dashed p-2.5 text-center">
+              <div className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
                 <Shirt className="h-6 w-6 text-muted-foreground" />
               </div>
-              <h2 className="text-base font-semibold">Build your wardrobe</h2>
-              <Button className="mt-2.5 h-10 rounded-2xl px-5">
+              <h2 className="text-sm font-medium">Build your wardrobe</h2>
+              <Button variant="outline" className="mt-1.5 h-8 rounded-xl border-border bg-card px-3 text-foreground shadow-none">
                 <Plus className="h-4 w-4" />
                 Add items
               </Button>
             </PageSection>
 
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-2 gap-2">
               {[
                 ["Outerwear", "0 pieces"],
                 ["Tops", "0 pieces"],
                 ["Bottoms", "0 pieces"],
                 ["Shoes", "0 pieces"],
               ].map(([label, value]) => (
-                <div key={label} className="rounded-[16px] border border-border bg-card p-2.5 shadow-sm">
+                <div key={label} className="rounded-[14px] border border-border bg-card p-2 shadow-sm">
                   <div className="text-sm font-medium">{label}</div>
                   <div className="mt-1 text-sm text-muted-foreground">{value}</div>
                 </div>

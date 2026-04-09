@@ -5,6 +5,15 @@ import { useState } from "react";
 import { PageHeader, PageSection, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 
+const glassInputClassName =
+  "rounded-xl border border-border bg-background px-3 text-foreground outline-none transition focus:ring-2 focus:ring-ring";
+
+const utilityRowClassName =
+  "flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-muted/60";
+
+const profileButtonClassName =
+  "rounded-xl border border-border bg-card text-foreground shadow-none hover:bg-muted/60";
+
 export function Post() {
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -30,68 +39,86 @@ export function Post() {
 
   return (
     <PageShell contentClassName="pb-24">
-      <PageHeader title="New Post" trailing={<Button className="rounded-full px-5">Share</Button>} />
+      <PageHeader
+        title="New Post"
+        trailing={
+          <Button
+            variant="outline"
+            className="h-9 rounded-full border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted/60"
+          >
+            Share
+          </Button>
+        }
+      />
 
-      <div className="app-page-content">
+      <div className="mx-auto w-full max-w-lg px-4 pt-4 pb-6">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="space-y-6">
-            {selectedImage ? (
-              <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                className="app-surface relative aspect-[3/4] overflow-hidden"
-              >
-                <img
-                  src={selectedImage}
-                  alt="Selected outfit"
-                  className="w-full h-full object-cover"
-                />
-                <button
-                  onClick={() => setSelectedImage(null)}
-                  className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
+          <div className="space-y-2.5">
+            <PageSection className="p-3">
+              <div className="mb-2.5 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-medium">Photo</h2>
+                <span className="text-xs text-muted-foreground">Required</span>
+              </div>
+              {selectedImage ? (
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.95 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  className="relative aspect-[10/12] overflow-hidden rounded-xl"
                 >
-                  <X className="w-5 h-5" />
-                </button>
-              </motion.div>
-            ) : (
-              <motion.button
-                whileHover={{ scale: 1.01 }}
-                whileTap={{ scale: 0.99 }}
-                onClick={handleImageSelect}
-                className="app-surface flex aspect-[3/4] w-full flex-col items-center justify-center gap-4 border-2 border-dashed border-muted-foreground/30 bg-muted/40 hover:border-foreground/50 transition-colors"
-              >
-                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background">
-                  <Image className="w-8 h-8" />
-                </div>
-                <div className="text-center">
-                  <div className="mb-1 font-medium">Add Photo or Video</div>
-                  <div className="text-sm text-muted-foreground">
-                    Tap to select from your device
+                  <img
+                    src={selectedImage}
+                    alt="Selected outfit"
+                    className="h-full w-full object-cover"
+                  />
+                  <button
+                    onClick={() => setSelectedImage(null)}
+                    className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/60"
+                    aria-label="Remove selected image"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </motion.div>
+              ) : (
+                <motion.button
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  onClick={handleImageSelect}
+                  className="flex aspect-[10/12] w-full flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-5 text-center transition-colors hover:border-foreground/40"
+                >
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background">
+                    <Image className="h-6 w-6" />
                   </div>
-                </div>
-              </motion.button>
-            )}
+                  <div className="mt-2.5 space-y-0.5">
+                    <div className="font-medium">Add Photo or Video</div>
+                    <div className="text-sm text-muted-foreground">Tap to upload</div>
+                  </div>
+                </motion.button>
+              )}
+            </PageSection>
 
-            <PageSection className="p-5">
-              <label className="block mb-2 text-sm">Caption</label>
+            <PageSection className="p-3">
+              <div className="mb-2.5 flex items-center justify-between gap-3">
+                <h2 className="text-sm font-medium">Caption</h2>
+                <span className="text-xs text-muted-foreground">Optional</span>
+              </div>
               <textarea
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Share details about your outfit..."
-                className="h-32 w-full resize-none rounded-2xl border border-border bg-muted/50 px-4 py-3 outline-none focus:ring-2 focus:ring-ring"
+                className={`h-24 w-full resize-none py-2.5 ${glassInputClassName}`}
               />
             </PageSection>
 
-            <PageSection className="p-5">
-              <label className="block mb-2 text-sm flex items-center gap-2">
-                <Tag className="w-4 h-4" />
+            <PageSection className="p-3">
+              <label className="mb-2.5 flex items-center gap-2 text-sm font-medium">
+                <Tag className="h-4 w-4" />
                 Tags
               </label>
-              <div className="flex gap-2 mb-3">
+              <div className="mb-2.5 flex gap-2">
                 <input
                   type="text"
                   value={currentTag}
@@ -103,9 +130,13 @@ export function Post() {
                     }
                   }}
                   placeholder="Add a tag..."
-                  className="h-11 flex-1 rounded-2xl border border-border bg-muted/50 px-4 outline-none focus:ring-2 focus:ring-ring"
+                  className={`h-10 flex-1 ${glassInputClassName}`}
                 />
-                <Button onClick={addTag} variant="outline" className="h-11 rounded-2xl px-5">
+                <Button
+                  onClick={addTag}
+                  variant="outline"
+                  className={`h-10 px-3.5 text-sm ${profileButtonClassName}`}
+                >
                   Add
                 </Button>
               </div>
@@ -116,14 +147,15 @@ export function Post() {
                       key={tag}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-sm text-background"
+                      className="flex items-center gap-1.5 rounded-full bg-foreground px-2.5 py-1 text-xs text-background"
                     >
                       #{tag}
                       <button
                         onClick={() => removeTag(tag)}
-                        className="hover:opacity-70"
+                        className="transition hover:opacity-70"
+                        aria-label={`Remove ${tag} tag`}
                       >
-                        <X className="w-3 h-3" />
+                        <X className="h-3 w-3" />
                       </button>
                     </motion.span>
                   ))}
@@ -131,31 +163,43 @@ export function Post() {
               )}
             </PageSection>
 
-            <PageSection className="space-y-3 p-4">
-              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
-                <MapPin className="w-5 h-5" />
-                <span>Add Location</span>
-              </button>
+            <PageSection className="p-3">
+              <div className="mb-2.5">
+                <h2 className="text-sm font-medium">Details</h2>
+              </div>
+              <div className="space-y-1">
+                <button className={utilityRowClassName}>
+                  <MapPin className="h-5 w-5" />
+                  <span className="flex-1">Add Location</span>
+                  <span className="text-xs text-muted-foreground">Soon</span>
+                </button>
 
-              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
-                <Users className="w-5 h-5" />
-                <span>Tag People</span>
-              </button>
+                <button className={utilityRowClassName}>
+                  <Users className="h-5 w-5" />
+                  <span className="flex-1">Tag People</span>
+                  <span className="text-xs text-muted-foreground">Soon</span>
+                </button>
 
-              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
-                <Tag className="w-5 h-5" />
-                <span>Tag Items from Wardrobe</span>
-              </button>
+                <button className={utilityRowClassName}>
+                  <Tag className="h-5 w-5" />
+                  <span className="flex-1">Tag Items</span>
+                  <span className="text-xs text-muted-foreground">Soon</span>
+                </button>
+              </div>
             </PageSection>
 
-            <div className="pt-2">
-              <motion.button
+            <div>
+              <motion.div
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="h-12 w-full rounded-2xl bg-foreground text-sm font-medium text-background"
               >
-                Share to Feed
-              </motion.button>
+                <Button
+                  variant="outline"
+                  className={`h-11 w-full text-sm font-semibold ${profileButtonClassName}`}
+                >
+                  Share to Feed
+                </Button>
+              </motion.div>
             </div>
           </div>
         </motion.div>
