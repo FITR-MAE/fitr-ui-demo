@@ -17,6 +17,11 @@ export default defineConfig({
     },
   },
 
+  server: {
+    host: "0.0.0.0",
+    allowedHosts: [".lhr.life", ".ngrok-free.app"],
+  },
+
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ["**/*.svg", "**/*.csv"],
 });

@@ -1,6 +1,7 @@
 import { motion } from "motion/react";
 import { Heart, MessageCircle, Share2, Bookmark, Search } from "lucide-react";
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 
 const outfits = [
   {
@@ -69,6 +70,9 @@ export function ForYou() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [saved, setSaved] = useState<Set<number>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
+  const navigate = useNavigate();
+
+  const feedPaddingBottom = "calc(6rem + env(safe-area-inset-bottom))";
 
   const toggleLike = (id: number) => {
     setLiked((prev) => {
@@ -100,8 +104,8 @@ export function ForYou() {
 
     const handleScroll = () => {
       const scrollTop = container.scrollTop;
-      const itemHeight = window.innerHeight;
-      const index = Math.round(scrollTop / itemHeight);
+      const itemHeight = container.clientHeight || window.innerHeight;
+      const index = Math.min(outfits.length - 1, Math.max(0, Math.round(scrollTop / itemHeight)));
       setCurrentIndex(index);
     };
 
@@ -110,45 +114,52 @@ export function ForYou() {
   }, []);
 
   return (
-    <div
-      id="feed-container"
-      className="h-screen overflow-y-scroll snap-y snap-mandatory hide-scrollbar"
-      style={{
-        scrollbarWidth: "none",
-        msOverflowStyle: "none",
-      }}
-    >
-      <style>{`
-        .hide-scrollbar::-webkit-scrollbar {
-          display: none;
-        }
-      `}</style>
-      {outfits.map((outfit, index) => (
-        <div key={outfit.id} className="h-screen w-full snap-start relative flex items-center justify-center bg-black">
+    <div className="relative h-[100dvh] bg-black">
+      <div
+        className="pointer-events-none absolute left-4 right-4 z-20"
+        style={{ top: "calc(0.75rem + env(safe-area-inset-top))" }}
+      >
+        <div className="flex items-center justify-end">
+          <button
+            type="button"
+            onClick={() => navigate("/search")}
+            className="flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-black/10 p-2 backdrop-blur-md"
+            aria-label="Open search"
+          >
+            <Search className="w-5 h-5 text-white" />
+          </button>
+        </div>
+      </div>
+
+      <div
+        id="feed-container"
+        className="hide-scrollbar h-[100dvh] overflow-y-auto overscroll-y-contain snap-y snap-mandatory touch-pan-y bg-black"
+        style={{
+          scrollbarWidth: "none",
+          msOverflowStyle: "none",
+        }}
+      >
+        <style>{`
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
+        {outfits.map((outfit) => (
+          <div key={outfit.id} className="relative flex h-[100dvh] w-full snap-start items-center justify-center bg-black">
           <img src={outfit.image} alt={outfit.caption} className="absolute inset-0 w-full h-full object-cover" />
 
-          <div className="absolute inset-0 bg-gradient-to-b from-transparent via-transparent to-black/60" />
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/75" />
 
-          <div className="absolute top-4 left-4 right-4 z-10">
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-purple-400 to-pink-400 flex items-center justify-center shrink-0">
-                <span className="text-white text-sm">S</span>
-              </div>
-              <span className="text-white drop-shadow-lg font-medium">StyleIcon</span>
-              <div className="flex-1" />
-              <button className="p-2 min-w-[44px] min-h-[44px] flex items-center justify-center bg-white/20 backdrop-blur-sm border border-white/30 rounded-full">
-                <Search className="w-5 h-5 text-white" />
-              </button>
-            </div>
-          </div>
-
-          <div className="absolute right-4 bottom-20 z-10 flex flex-col gap-4 p-4">
+          <div
+            className="absolute right-4 z-10 flex flex-col gap-3"
+            style={{ bottom: feedPaddingBottom }}
+          >
             <motion.button
               whileTap={{ scale: 0.9 }}
               onClick={() => toggleLike(outfit.id)}
               className="flex flex-col items-center gap-1"
             >
-              <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                 <Heart className={`w-5 h-5 ${liked.has(outfit.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
               </div>
               <span className="text-white text-xs drop-shadow-lg">
@@ -159,14 +170,14 @@ export function ForYou() {
             </motion.button>
 
             <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
-              <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                 <MessageCircle className="w-5 h-5 text-white" />
               </div>
               <span className="text-white text-xs drop-shadow-lg">{outfit.comments}</span>
             </motion.button>
 
             <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
-              <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                 <Share2 className="w-5 h-5 text-white" />
               </div>
               <span className="text-white text-xs drop-shadow-lg">Share</span>
@@ -177,30 +188,43 @@ export function ForYou() {
               onClick={() => toggleSave(outfit.id)}
               className="flex flex-col items-center gap-1"
             >
-              <div className="w-11 h-11 rounded-full bg-white/20 backdrop-blur-sm border border-white/30 flex items-center justify-center">
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                 <Bookmark className={`w-5 h-5 ${saved.has(outfit.id) ? "fill-white text-white" : "text-white"}`} />
               </div>
               <span className="text-white text-xs drop-shadow-lg">Save</span>
             </motion.button>
           </div>
 
-          <div className="absolute left-4 right-4 bottom-20 z-10 text-white p-4">
-            <p className="mb-2 drop-shadow-lg">
-              <span className="opacity-90">{outfit.user}</span> {outfit.caption}
-            </p>
-            <div className="flex gap-2 flex-wrap">
-              {outfit.tags.map((tag) => (
-                <span
-                  key={tag}
-                  className="px-2 py-0.5 bg-white/20 backdrop-blur-sm border border-white/30 text-xs rounded-full drop-shadow-lg"
-                >
-                  #{tag}
-                </span>
-              ))}
+          <div
+            className="absolute left-4 right-24 z-10 text-white"
+            style={{ bottom: feedPaddingBottom }}
+          >
+            <div className="space-y-3 rounded-3xl border border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md">
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-medium text-white">
+                  {outfit.user.charAt(0)}
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-sm font-medium text-white">{outfit.user}</p>
+                  <p className="text-xs text-white/70">Featured look</p>
+                </div>
+              </div>
+              <p className="text-sm leading-6 text-white/90">{outfit.caption}</p>
+              <div className="flex flex-wrap gap-2">
+                {outfit.tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] tracking-wide text-white drop-shadow-lg"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
             </div>
           </div>
-        </div>
-      ))}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
