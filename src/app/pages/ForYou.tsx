@@ -145,83 +145,77 @@ export function ForYou() {
           }
         `}</style>
         {outfits.map((outfit) => (
-          <div key={outfit.id} className="relative flex h-[100dvh] w-full snap-start items-center justify-center bg-black">
-          <img src={outfit.image} alt={outfit.caption} className="absolute inset-0 w-full h-full object-cover" />
-
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/75" />
-
           <div
-            className="absolute right-4 z-10 flex flex-col gap-3"
-            style={{ bottom: feedPaddingBottom }}
+            key={outfit.id}
+            className="relative flex h-[100dvh] w-full snap-start items-center justify-center bg-black"
           >
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => toggleLike(outfit.id)}
-              className="flex flex-col items-center gap-1"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
-                <Heart className={`w-5 h-5 ${liked.has(outfit.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
-              </div>
-              <span className="text-white text-xs drop-shadow-lg">
-                {outfit.likes + (liked.has(outfit.id) ? 1 : 0) > 999
-                  ? `${Math.floor((outfit.likes + (liked.has(outfit.id) ? 1 : 0)) / 1000)}k`
-                  : outfit.likes + (liked.has(outfit.id) ? 1 : 0)}
-              </span>
-            </motion.button>
+            <img src={outfit.image} alt={outfit.caption} className="absolute inset-0 w-full h-full object-cover" />
 
-            <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
-                <MessageCircle className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white text-xs drop-shadow-lg">{outfit.comments}</span>
-            </motion.button>
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/75" />
 
-            <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
-                <Share2 className="w-5 h-5 text-white" />
-              </div>
-              <span className="text-white text-xs drop-shadow-lg">Share</span>
-            </motion.button>
-
-            <motion.button
-              whileTap={{ scale: 0.9 }}
-              onClick={() => toggleSave(outfit.id)}
-              className="flex flex-col items-center gap-1"
-            >
-              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
-                <Bookmark className={`w-5 h-5 ${saved.has(outfit.id) ? "fill-white text-white" : "text-white"}`} />
-              </div>
-              <span className="text-white text-xs drop-shadow-lg">Save</span>
-            </motion.button>
-          </div>
-
-          <div
-            className="absolute left-4 right-24 z-10 text-white"
-            style={{ bottom: feedPaddingBottom }}
-          >
-            <div className="space-y-3 rounded-3xl border border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md">
-              <div className="flex items-center gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-medium text-white">
-                  {outfit.user.charAt(0)}
+            <div className="absolute right-4 z-10 flex flex-col gap-3" style={{ bottom: feedPaddingBottom }}>
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => toggleLike(outfit.id)}
+                className="flex flex-col items-center gap-1"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
+                  <Heart className={`w-5 h-5 ${liked.has(outfit.id) ? "fill-red-500 text-red-500" : "text-white"}`} />
                 </div>
-                <div className="min-w-0">
-                  <p className="truncate text-sm font-medium text-white">{outfit.user}</p>
-                  <p className="text-xs text-white/70">Featured look</p>
+                <span className="text-white text-xs drop-shadow-lg">
+                  {outfit.likes + (liked.has(outfit.id) ? 1 : 0) > 999
+                    ? `${Math.floor((outfit.likes + (liked.has(outfit.id) ? 1 : 0)) / 1000)}k`
+                    : outfit.likes + (liked.has(outfit.id) ? 1 : 0)}
+                </span>
+              </motion.button>
+
+              <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
+                  <MessageCircle className="w-5 h-5 text-white" />
                 </div>
-              </div>
-              <p className="text-sm leading-6 text-white/90">{outfit.caption}</p>
-              <div className="flex flex-wrap gap-2">
-                {outfit.tags.map((tag) => (
-                  <span
-                    key={tag}
-                    className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] tracking-wide text-white drop-shadow-lg"
-                  >
-                    #{tag}
-                  </span>
-                ))}
+                <span className="text-white text-xs drop-shadow-lg">{outfit.comments}</span>
+              </motion.button>
+
+              <motion.button whileTap={{ scale: 0.9 }} className="flex flex-col items-center gap-1">
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
+                  <Share2 className="w-5 h-5 text-white" />
+                </div>
+              </motion.button>
+
+              <motion.button
+                whileTap={{ scale: 0.9 }}
+                onClick={() => toggleSave(outfit.id)}
+                className="flex flex-col items-center gap-1"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
+                  <Bookmark className={`w-5 h-5 ${saved.has(outfit.id) ? "fill-white text-white" : "text-white"}`} />
+                </div>
+              </motion.button>
+            </div>
+
+            <div className="absolute left-4 right-24 z-10 text-white" style={{ bottom: feedPaddingBottom }}>
+              <div className="space-y-3 rounded-3xl border border-white/10 bg-black/25 px-4 py-4 backdrop-blur-md">
+                <div className="flex items-center gap-3">
+                  <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-medium text-white">
+                    {outfit.user.charAt(0)}
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-medium text-white">{outfit.user}</p>
+                  </div>
+                </div>
+                <p className="text-sm leading-6 text-white/90">{outfit.caption}</p>
+                <div className="flex flex-wrap gap-2">
+                  {outfit.tags.map((tag) => (
+                    <span
+                      key={tag}
+                      className="rounded-full border border-white/20 bg-white/15 px-2.5 py-1 text-[11px] tracking-wide text-white drop-shadow-lg"
+                    >
+                      #{tag}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
           </div>
         ))}
       </div>

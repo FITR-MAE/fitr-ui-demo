@@ -2,6 +2,9 @@ import { motion } from "motion/react";
 import { Image, Tag, MapPin, Users, X } from "lucide-react";
 import { useState } from "react";
 
+import { PageHeader, PageSection, PageShell } from "../components/Page";
+import { Button } from "../components/ui/button";
+
 export function Post() {
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
@@ -26,26 +29,21 @@ export function Post() {
   };
 
   return (
-    <div className="min-h-screen bg-background">
-      <div className="max-w-2xl mx-auto px-4 py-6">
+    <PageShell contentClassName="pb-24">
+      <PageHeader title="New Post" trailing={<Button className="rounded-full px-5">Share</Button>} />
+
+      <div className="app-page-content">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
         >
-          <div className="flex items-center justify-between mb-8">
-            <h1>New Post</h1>
-            <button className="px-6 py-2 bg-foreground text-background rounded-lg">
-              Share
-            </button>
-          </div>
-
           <div className="space-y-6">
             {selectedImage ? (
               <motion.div
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
-                className="relative aspect-[3/4] bg-muted rounded-2xl overflow-hidden"
+                className="app-surface relative aspect-[3/4] overflow-hidden"
               >
                 <img
                   src={selectedImage}
@@ -54,7 +52,7 @@ export function Post() {
                 />
                 <button
                   onClick={() => setSelectedImage(null)}
-                  className="absolute top-4 right-4 w-10 h-10 bg-black/50 backdrop-blur-sm rounded-full flex items-center justify-center text-white"
+                  className="absolute top-4 right-4 flex h-10 w-10 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm"
                 >
                   <X className="w-5 h-5" />
                 </button>
@@ -64,13 +62,13 @@ export function Post() {
                 whileHover={{ scale: 1.01 }}
                 whileTap={{ scale: 0.99 }}
                 onClick={handleImageSelect}
-                className="w-full aspect-[3/4] bg-muted rounded-2xl flex flex-col items-center justify-center gap-4 border-2 border-dashed border-muted-foreground/30 hover:border-foreground/50 transition-colors"
+                className="app-surface flex aspect-[3/4] w-full flex-col items-center justify-center gap-4 border-2 border-dashed border-muted-foreground/30 bg-muted/40 hover:border-foreground/50 transition-colors"
               >
-                <div className="w-16 h-16 rounded-full bg-background flex items-center justify-center">
+                <div className="flex h-16 w-16 items-center justify-center rounded-full bg-background">
                   <Image className="w-8 h-8" />
                 </div>
                 <div className="text-center">
-                  <div className="mb-1">Add Photo or Video</div>
+                  <div className="mb-1 font-medium">Add Photo or Video</div>
                   <div className="text-sm text-muted-foreground">
                     Tap to select from your device
                   </div>
@@ -78,17 +76,17 @@ export function Post() {
               </motion.button>
             )}
 
-            <div>
+            <PageSection className="p-5">
               <label className="block mb-2 text-sm">Caption</label>
               <textarea
                 value={caption}
                 onChange={(e) => setCaption(e.target.value)}
                 placeholder="Share details about your outfit..."
-                className="w-full h-32 px-4 py-3 bg-muted border-0 rounded-lg outline-none focus:ring-2 focus:ring-ring resize-none"
+                className="h-32 w-full resize-none rounded-2xl border border-border bg-muted/50 px-4 py-3 outline-none focus:ring-2 focus:ring-ring"
               />
-            </div>
+            </PageSection>
 
-            <div>
+            <PageSection className="p-5">
               <label className="block mb-2 text-sm flex items-center gap-2">
                 <Tag className="w-4 h-4" />
                 Tags
@@ -105,23 +103,20 @@ export function Post() {
                     }
                   }}
                   placeholder="Add a tag..."
-                  className="flex-1 px-4 py-3 bg-muted border-0 rounded-lg outline-none focus:ring-2 focus:ring-ring"
+                  className="h-11 flex-1 rounded-2xl border border-border bg-muted/50 px-4 outline-none focus:ring-2 focus:ring-ring"
                 />
-                <button
-                  onClick={addTag}
-                  className="px-6 py-3 bg-muted rounded-lg hover:bg-accent transition-colors"
-                >
+                <Button onClick={addTag} variant="outline" className="h-11 rounded-2xl px-5">
                   Add
-                </button>
+                </Button>
               </div>
               {tags.length > 0 && (
-                <div className="flex gap-2 flex-wrap">
+                <div className="flex flex-wrap gap-2">
                   {tags.map((tag) => (
                     <motion.span
                       key={tag}
                       initial={{ scale: 0 }}
                       animate={{ scale: 1 }}
-                      className="px-3 py-1.5 bg-foreground text-background rounded-full text-sm flex items-center gap-2"
+                      className="flex items-center gap-2 rounded-full bg-foreground px-3 py-1.5 text-sm text-background"
                     >
                       #{tag}
                       <button
@@ -134,30 +129,30 @@ export function Post() {
                   ))}
                 </div>
               )}
-            </div>
+            </PageSection>
 
-            <div className="space-y-3">
-              <button className="w-full px-4 py-4 bg-card border border-border rounded-xl flex items-center gap-3 hover:bg-accent transition-colors">
+            <PageSection className="space-y-3 p-4">
+              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
                 <MapPin className="w-5 h-5" />
                 <span>Add Location</span>
               </button>
 
-              <button className="w-full px-4 py-4 bg-card border border-border rounded-xl flex items-center gap-3 hover:bg-accent transition-colors">
+              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
                 <Users className="w-5 h-5" />
                 <span>Tag People</span>
               </button>
 
-              <button className="w-full px-4 py-4 bg-card border border-border rounded-xl flex items-center gap-3 hover:bg-accent transition-colors">
+              <button className="flex min-h-[48px] w-full items-center gap-3 rounded-2xl border border-border bg-card px-4 transition-colors hover:bg-accent">
                 <Tag className="w-5 h-5" />
                 <span>Tag Items from Wardrobe</span>
               </button>
-            </div>
+            </PageSection>
 
-            <div className="pt-4">
+            <div className="pt-2">
               <motion.button
                 whileHover={{ scale: 1.02 }}
                 whileTap={{ scale: 0.98 }}
-                className="w-full py-4 bg-foreground text-background rounded-xl"
+                className="h-12 w-full rounded-2xl bg-foreground text-sm font-medium text-background"
               >
                 Share to Feed
               </motion.button>
@@ -165,6 +160,6 @@ export function Post() {
           </div>
         </motion.div>
       </div>
-    </div>
+    </PageShell>
   );
 }
