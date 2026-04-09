@@ -1,10 +1,11 @@
 import { createBrowserRouter } from "react-router";
 import { Layout } from "./components/Layout";
 import { ForYou } from "./pages/ForYou";
-import { Wardrobe } from "./pages/Wardrobe";
 import { Post } from "./pages/Post";
-import { AIStylist } from "./pages/AIStylist";
+import { Stylist } from "./pages/Stylist";
 import { Profile } from "./pages/Profile";
+import { SearchPage } from "./pages/Search";
+import { NotificationsPage } from "./pages/Notifications";
 
 export const router = createBrowserRouter([
   {
@@ -12,10 +13,11 @@ export const router = createBrowserRouter([
     Component: Layout,
     children: [
       { index: true, Component: ForYou },
-      { path: "wardrobe", Component: Wardrobe },
+      { path: "search", Component: SearchPage },
       { path: "post", Component: Post },
-      { path: "stylist", Component: AIStylist },
+      { path: "stylist", Component: Stylist },
       { path: "profile", Component: Profile },
+      { path: "notifications", Component: NotificationsPage },
     ],
   },
 ]);

@@ -120,12 +120,36 @@
 }
 
 @layer base {
+  .hide-scrollbar {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+
   * {
     @apply border-border outline-ring/50;
   }
 
   body {
     @apply bg-background text-foreground;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
+  img, video {
+    max-width: 100%;
+    height: auto;
+  }
+
+  input, textarea, select, button {
+    font-size: 16px;
   }
 
   /**
