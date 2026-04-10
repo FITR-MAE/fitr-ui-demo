@@ -145,12 +145,16 @@
     scroll-behavior: smooth;
   }
 
-  img, video {
+  img,
+  video {
     max-width: 100%;
     height: auto;
   }
 
-  input, textarea, select, button {
+  input,
+  textarea,
+  select,
+  button {
     font-size: 16px;
     font-family: inherit;
   }
@@ -233,11 +237,11 @@
   }
 
   .app-surface {
-    @apply rounded-3xl border border-border bg-card shadow-sm;
+    @apply rounded-2xl border border-border bg-card shadow-sm;
   }
 
   .app-chip {
-    @apply rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground;
+    @apply rounded-md bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground;
   }
 
   .app-section-title {

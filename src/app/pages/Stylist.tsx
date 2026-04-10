@@ -1,20 +1,29 @@
-import { motion } from "motion/react";
-import { RefreshCw, Heart, Check, Palette, Droplet, Shirt, Camera, Plus } from "lucide-react";
-import { useState, type ReactNode } from "react";
+import {
+  RefreshCw,
+  Heart,
+  Check,
+  Palette,
+  Droplet,
+  Shirt,
+  Plus,
+  Sparkles,
+  Sun,
+  Cloud,
+  Send,
+  ChevronRight,
+} from "lucide-react";
+import { useState, useRef, useEffect } from "react";
 
-import { PageHeader, PageSection, PageShell } from "../components/Page";
+import { PageHeader, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 
 interface OutfitRecommendation {
   id: number;
-  outfit: {
-    top: string;
-    bottom: string;
-    shoes: string;
-  };
+  outfit: { top: string; bottom: string; shoes: string };
   occasion: string;
   style: string;
   confidence: number;
+  weather: "sunny" | "cloudy" | "rainy";
 }
 
 const mockRecommendations: OutfitRecommendation[] = [
@@ -24,6 +33,7 @@ const mockRecommendations: OutfitRecommendation[] = [
     occasion: "Casual Office",
     style: "Minimalist Chic",
     confidence: 94,
+    weather: "sunny",
   },
   {
     id: 2,
@@ -31,6 +41,7 @@ const mockRecommendations: OutfitRecommendation[] = [
     occasion: "Business Meeting",
     style: "Professional",
     confidence: 91,
+    weather: "cloudy",
   },
   {
     id: 3,
@@ -38,6 +49,15 @@ const mockRecommendations: OutfitRecommendation[] = [
     occasion: "Weekend Brunch",
     style: "Relaxed",
     confidence: 88,
+    weather: "sunny",
+  },
+  {
+    id: 4,
+    outfit: { top: "Navy Polo", bottom: "Khaki Chinos", shoes: "White Sneakers" },
+    occasion: "Outdoor Lunch",
+    style: "Smart Casual",
+    confidence: 86,
+    weather: "rainy",
   },
 ];
 
@@ -51,43 +71,99 @@ const preferences = [
 ];
 
 const colorPalettes = [
-  {
-    name: "Spring Warm",
-    mood: "Soft neutrals with bright citrus accents.",
-    colors: ["#FF6B6B", "#FFA06B", "#FFE66D", "#A8E6CF"],
-  },
-  {
-    name: "Summer Cool",
-    mood: "Dusty blues and breezy powder tones.",
-    colors: ["#7FDBFF", "#B8C5D6", "#F5E6D3", "#C9B8A8"],
-  },
-  {
-    name: "Autumn Earth",
-    mood: "Rich clay, espresso, and toasted tan.",
-    colors: ["#8B4513", "#A0522D", "#CD853F", "#DEB887"],
-  },
-  {
-    name: "Winter Deep",
-    mood: "Ink navy, true black, and one sharp pop.",
-    colors: ["#1A1A2E", "#16213E", "#0F3460", "#E94560"],
-  },
+  { name: "Spring Warm", colors: ["#FF6B6B", "#FFA06B", "#FFE66D", "#A8E6CF"] },
+  { name: "Summer Cool", colors: ["#7FDBFF", "#B8C5D6", "#F5E6D3", "#C9B8A8"] },
+  { name: "Autumn Earth", colors: ["#8B4513", "#A0522D", "#CD853F", "#DEB887"] },
+  { name: "Winter Deep", colors: ["#1A1A2E", "#16213E", "#0F3460", "#E94560"] },
 ];
 
-type TabId = "recommendations" | "colour" | "discover" | "wardrobe";
-
-const tabs: { id: TabId; label: string; icon?: ReactNode }[] = [
-  { id: "recommendations", label: "Outfits" },
-  { id: "colour", label: "Colour", icon: <Palette className="w-4 h-4" /> },
-  { id: "discover", label: "Discover", icon: <Droplet className="w-4 h-4" /> },
-  { id: "wardrobe", label: "Wardrobe", icon: <Shirt className="w-4 h-4" /> },
+const skinTones = [
+  { id: "fair", label: "Fair", recommended: "Soft pastels, lavender, rose, sky blue" },
+  { id: "light", label: "Light", recommended: "Dusty rose, mint, peach, soft blue" },
+  { id: "medium", label: "Medium", recommended: "Warm terracotta, olive, camel, emerald" },
+  { id: "tan", label: "Tan", recommended: "Rust, mustard, deep teal, burgundy" },
+  { id: "dark", label: "Dark", recommended: "Ivory, cobalt, forest green, vibrant prints" },
 ];
+
+const wardrobeItems = [
+  { id: 1, name: "White Linen Shirt", category: "Tops", color: "#FFFFFF" },
+  { id: 2, name: "Beige Wide-Leg Trousers", category: "Bottoms", color: "#E8D9C5" },
+  { id: 3, name: "Navy Polo", category: "Tops", color: "#1A1A2E" },
+  { id: 4, name: "Khaki Chinos", category: "Bottoms", color: "#C3B091" },
+  { id: 5, name: "Camel Blazer", category: "Outerwear", color: "#A0522D" },
+  { id: 6, name: "Black Tailored Pants", category: "Bottoms", color: "#1A1A1A" },
+];
+
+const tabs = [
+  { id: "ai", icon: Sparkles },
+  { id: "outfits", icon: Shirt },
+  { id: "colour", icon: Palette },
+];
+
+const weather = {
+  sunny: { icon: Sun, label: "24°", hint: "Light layers" },
+  cloudy: { icon: Cloud, label: "18°", hint: "Light jacket" },
+  rainy: { icon: Droplet, label: "14°", hint: "Water-resistant" },
+};
+
+type TabId = "ai" | "outfits" | "colour";
+
+interface ChatMessage {
+  id: number;
+  role: "user" | "ai";
+  text: string;
+}
 
 export function Stylist() {
-  const [activeTab, setActiveTab] = useState<TabId>("recommendations");
+  const [activeTab, setActiveTab] = useState<TabId>("ai");
   const [recommendations] = useState<OutfitRecommendation[]>(mockRecommendations);
   const [selectedPreferences, setSelectedPreferences] = useState<Set<string>>(new Set(["casual", "minimal"]));
   const [generating, setGenerating] = useState(false);
   const [likedOutfits, setLikedOutfits] = useState<Set<number>>(new Set());
+  const [selectedSkinTone, setSelectedSkinTone] = useState<string | null>(null);
+  const [chatInput, setChatInput] = useState("");
+  const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
+    {
+      id: 1,
+      role: "ai",
+      text: "Hi! I'm your AI stylist. Ask me anything about outfits, colours that suit you, or how to style pieces from your wardrobe.",
+    },
+  ]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+
+  const currentWeather = weather.sunny;
+  const WeatherIcon = currentWeather.icon;
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [chatMessages]);
+
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+
+    const handleScroll = () => {
+      const panelWidth = el.clientWidth;
+      if (panelWidth === 0) return;
+      const index = Math.round(el.scrollLeft / panelWidth);
+      const newTab = tabs[index]?.id as TabId;
+      if (newTab && newTab !== activeTab) {
+        setActiveTab(newTab);
+      }
+    };
+
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    return () => el.removeEventListener("scroll", handleScroll);
+  }, [activeTab]);
+
+  const handleTabClick = (tabId: TabId) => {
+    setActiveTab(tabId);
+    const index = tabs.findIndex((t) => t.id === tabId);
+    if (panelRef.current) {
+      panelRef.current.scrollTo({ left: index * panelRef.current.clientWidth, behavior: "smooth" });
+    }
+  };
 
   const togglePreference = (id: string) => {
     setSelectedPreferences((prev) => {
@@ -112,241 +188,247 @@ export function Stylist() {
     });
   };
 
+  const handleSendMessage = () => {
+    if (!chatInput.trim()) return;
+    const userMsg: ChatMessage = { id: Date.now(), role: "user", text: chatInput.trim() };
+    setChatMessages((prev) => [...prev, userMsg]);
+    setChatInput("");
+    setTimeout(() => {
+      setChatMessages((prev) => [
+        ...prev,
+        {
+          id: Date.now() + 1,
+          role: "ai",
+          text: "Based on your style profile and today's weather, I'd suggest light layers — breathable linen with tailored trousers works well.",
+        },
+      ]);
+    }, 1000);
+  };
+
   return (
-    <PageShell>
+    <PageShell contentClassName="!p-0">
       <PageHeader title="Stylist" />
 
-      <div className="app-page-content space-y-2">
-        <motion.section
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="app-surface p-2"
-        >
-          <div className="flex items-center justify-between gap-2 rounded-[12px] bg-muted/60 px-2.5 py-1.5">
-            <div className="min-w-0">
-              <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Current mix</div>
-              <div className="truncate text-sm font-medium text-foreground">
-                {Array.from(selectedPreferences).slice(0, 2).join(" + ") || "Curated basics"}
-              </div>
+      <div className="flex flex-col overflow-hidden">
+        <div className="px-4 pt-4">
+          <div className="mx-auto flex max-w-2xl items-center gap-3">
+            <div className="flex items-center gap-2 rounded-2xl border border-border bg-card px-3 py-2">
+              <WeatherIcon className="h-4 w-4 text-foreground" />
+              <span className="text-sm font-medium">{currentWeather.label}</span>
             </div>
-            <Button
-              onClick={generateOutfits}
-              disabled={generating}
-              variant="outline"
-              className="h-8 rounded-full border-border bg-card px-2.5 text-foreground shadow-none"
-            >
-              Refresh
-            </Button>
-          </div>
-        </motion.section>
-
-        <div className="hide-scrollbar overflow-x-auto pb-1">
-          <div className="flex min-w-max gap-2">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`flex min-h-[32px] items-center gap-1 rounded-full px-2.5 py-1 text-sm whitespace-nowrap transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-foreground text-background shadow-sm"
-                    : "border border-border bg-background text-muted-foreground"
-                }`}
-              >
-                {tab.icon}
-                {tab.label}
-              </button>
-            ))}
+            <p className="text-sm text-muted-foreground">{currentWeather.hint}</p>
           </div>
         </div>
 
-        {activeTab === "colour" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-1.5">
-            <PageSection className="px-2.5 py-2">
-              <p className="text-sm font-medium">Colour direction</p>
-            </PageSection>
-
-            <div className="space-y-1.5">
-              {colorPalettes.map((palette) => (
-                <PageSection key={palette.name} className="p-2">
-                  <div className="mb-1.5 flex items-start justify-between gap-3">
-                    <div>
-                      <div className="text-sm font-medium">{palette.name}</div>
-                      <div className="mt-0.5 text-xs leading-4 text-muted-foreground">{palette.mood}</div>
-                    </div>
-                  </div>
-                  <div className="flex gap-1.5">
-                    {palette.colors.map((color) => (
-                      <div
-                        key={color}
-                        className="h-10 flex-1 rounded-xl border border-border"
-                        style={{ backgroundColor: color }}
-                      />
-                    ))}
-                  </div>
-                </PageSection>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === "discover" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-            <PageSection className="overflow-hidden p-2.5">
-              <div className="mb-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                <Camera className="h-5 w-5" />
-              </div>
-              <h2 className="text-sm font-medium">Find tones from a photo</h2>
-              <Button variant="outline" className="mt-1.5 h-8 w-full rounded-xl border-border bg-card text-foreground shadow-none">
-                <Droplet className="h-4 w-4" />
-                Upload photo
-              </Button>
-            </PageSection>
-
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                ["Undertone", "Warm-neutral"],
-                ["Contrast", "Medium-high"],
-                ["Metals", "Gold"],
-                ["Focus", "Soft tailoring"],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-[14px] border border-border bg-card p-2 shadow-sm">
-                  <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-                  <div className="mt-1 text-sm font-medium leading-5">{value}</div>
-                </div>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === "recommendations" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-            <PageSection className="p-2">
-              <div className="mb-1.5 flex items-start justify-between gap-2">
-                <div>
-                  <div className="text-sm font-medium">Style filters</div>
-                </div>
-                <div className="rounded-full bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                  {selectedPreferences.size} selected
-                </div>
-              </div>
-
-              <div className="mb-2 flex flex-wrap gap-1">
-                {preferences.map((pref) => (
+        <div className="px-4 pt-3">
+          <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-card">
+            <div className="flex">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
                   <button
-                    key={pref.id}
-                    onClick={() => togglePreference(pref.id)}
-                    className={`flex min-h-[30px] items-center gap-1 rounded-full border px-2 py-1 text-sm transition-colors ${
-                      selectedPreferences.has(pref.id)
-                        ? "border-foreground bg-foreground text-background"
-                        : "border-border bg-background"
+                    key={tab.id}
+                    onClick={() => handleTabClick(tab.id)}
+                    className={`flex flex-1 items-center justify-center py-3 transition-colors ${
+                      activeTab === tab.id ? "text-foreground" : "text-muted-foreground"
                     }`}
                   >
-                    <span>{pref.icon}</span>
-                    {pref.label}
-                    {selectedPreferences.has(pref.id) && <Check className="h-3.5 w-3.5" />}
+                    <Icon className="w-5 h-5" />
                   </button>
-                ))}
-              </div>
+                );
+              })}
+            </div>
+          </div>
+        </div>
 
-              <motion.div whileTap={{ scale: 0.98 }}>
+        <div
+          ref={panelRef}
+          className="flex-1 min-h-0 snap-x snap-mandatory overflow-x-auto hide-scrollbar"
+          style={{ scrollBehavior: "smooth" }}
+        >
+          <div className="flex">
+            <div className="flex w-full shrink-0 snap-start flex-col px-4 pb-4">
+              <div className="flex flex-col h-full">
+                <div className="flex-1 overflow-y-auto space-y-2">
+                  {chatMessages.map((msg) => (
+                    <div key={msg.id} className={`flex ${msg.role === "user" ? "justify-end" : "justify-start"}`}>
+                      <div
+                        className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
+                          msg.role === "user"
+                            ? "bg-foreground text-background"
+                            : "border border-border bg-card text-foreground"
+                        }`}
+                      >
+                        {msg.text}
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </div>
+                <div className="flex items-center gap-2 pt-2 shrink-0 border-t border-border">
+                  <input
+                    type="text"
+                    value={chatInput}
+                    onChange={(e) => setChatInput(e.target.value)}
+                    onKeyDown={(e) => e.key === "Enter" && handleSendMessage()}
+                    placeholder="Ask your AI stylist..."
+                    className="flex-1 rounded-full border border-border bg-card px-4 py-2.5 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-foreground/20"
+                  />
+                  <button
+                    onClick={handleSendMessage}
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-foreground text-background"
+                  >
+                    <Send className="h-4 w-4" />
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex w-full shrink-0 snap-start flex-col px-4 pb-4">
+              <div className="flex-1 overflow-y-auto space-y-4">
+                <div className="flex flex-wrap gap-1.5">
+                  {preferences.map((pref) => (
+                    <button
+                      key={pref.id}
+                      onClick={() => togglePreference(pref.id)}
+                      className={`flex min-h-[30px] items-center gap-1 rounded-full border px-2.5 py-1 text-sm transition-colors ${
+                        selectedPreferences.has(pref.id)
+                          ? "border-foreground bg-foreground text-background"
+                          : "border-border bg-card text-muted-foreground"
+                      }`}
+                    >
+                      <span>{pref.icon}</span>
+                      {pref.label}
+                      {selectedPreferences.has(pref.id) && <Check className="h-3.5 w-3.5" />}
+                    </button>
+                  ))}
+                </div>
                 <Button
                   onClick={generateOutfits}
                   disabled={generating}
                   variant="outline"
-                  className="h-8 w-full rounded-xl border-border bg-card text-foreground shadow-none"
+                  className="w-full rounded-2xl border-border bg-card text-foreground shadow-none"
                 >
                   <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
-                  {generating ? "Generating..." : "Refresh"}
+                  {generating ? "Generating..." : "Refresh outfits"}
                 </Button>
-              </motion.div>
-            </PageSection>
-
-            <div className="space-y-1.5">
-              {recommendations.map((rec) => (
-                <motion.article
-                  key={rec.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="app-surface overflow-hidden p-2"
-                >
-                  <div className="mb-1.5 flex items-start justify-between gap-2">
-                    <div className="min-w-0">
-                      <div className="mb-1 inline-flex rounded-full bg-muted px-2 py-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                        {rec.occasion}
-                      </div>
-                      <div className="text-sm font-medium">{rec.style}</div>
-                    </div>
-                    <div className="flex items-center gap-1.5">
-                      <span className="rounded-full bg-muted px-2 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                        {rec.confidence}% match
-                      </span>
+                <div className="space-y-1">
+                  {recommendations.map((rec) => (
+                    <div key={rec.id} className="flex items-center gap-3 rounded-2xl border border-border bg-card px-3 py-2">
                       <button
                         onClick={() => toggleLike(rec.id)}
-                        className="flex min-h-[32px] min-w-[32px] items-center justify-center rounded-full border border-border bg-card text-foreground transition active:scale-95"
-                        aria-label={likedOutfits.has(rec.id) ? "Unlike outfit" : "Like outfit"}
+                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border bg-card text-foreground"
                       >
-                        <Heart className={`h-4 w-4 ${likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`} />
+                        <Heart
+                          className={`h-4 w-4 ${
+                            likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"
+                          }`}
+                        />
                       </button>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 rounded-[12px] bg-muted/50 p-1.5">
-                    {[
-                      { label: "Top", item: rec.outfit.top, emoji: "👕" },
-                      { label: "Bottom", item: rec.outfit.bottom, emoji: "👖" },
-                      { label: "Shoes", item: rec.outfit.shoes, emoji: "👞" },
-                    ].map(({ label, item, emoji }) => (
-                      <div key={label} className="flex items-center gap-2 rounded-[10px] bg-background px-2 py-1.5">
-                        <div className="flex h-6 w-6 items-center justify-center rounded-md bg-muted text-xs">
-                          {emoji}
+                      <div className="min-w-0 flex-1">
+                        <div className="text-sm font-medium">{rec.style}</div>
+                        <div className="text-xs text-muted-foreground truncate">
+                          {rec.outfit.top} · {rec.outfit.bottom} · {rec.outfit.shoes}
                         </div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">{rec.confidence}%</div>
+                        <div className="flex items-center justify-end gap-0.5">
+                          {rec.weather === "sunny" && <Sun className="h-3 w-3 text-muted-foreground" />}
+                          {rec.weather === "cloudy" && <Cloud className="h-3 w-3 text-muted-foreground" />}
+                          {rec.weather === "rainy" && <Droplet className="h-3 w-3 text-muted-foreground" />}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+
+            <div className="flex w-full shrink-0 snap-start flex-col px-4 pb-4">
+              <div className="flex-1 overflow-y-auto space-y-4">
+                <div>
+                  <p className="mb-2 text-sm font-medium">Colour analysis</p>
+                  <div className="space-y-1.5">
+                    {skinTones.map((tone) => (
+                      <button
+                        key={tone.id}
+                        onClick={() => setSelectedSkinTone(selectedSkinTone === tone.id ? null : tone.id)}
+                        className={`flex w-full items-center justify-between rounded-xl border px-3 py-2 text-sm transition-colors ${
+                          selectedSkinTone === tone.id
+                            ? "border-foreground bg-foreground text-background"
+                            : "border-border bg-card text-foreground"
+                        }`}
+                      >
+                        <span>{tone.label}</span>
+                        {selectedSkinTone === tone.id && <Check className="h-4 w-4" />}
+                      </button>
+                    ))}
+                  </div>
+                  {selectedSkinTone && (
+                    <div className="mt-2 rounded-xl border border-border bg-card p-3">
+                      <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground mb-1">Recommended</div>
+                      <div className="text-sm">{skinTones.find((t) => t.id === selectedSkinTone)?.recommended}</div>
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-medium">Find by colour</p>
+                  <div className="mb-2 flex flex-wrap gap-1.5">
+                    {colorPalettes.map((palette) => (
+                      <button
+                        key={palette.name}
+                        className="flex items-center gap-1.5 rounded-full border border-border bg-card px-2.5 py-1 text-sm"
+                      >
+                        <div className="flex gap-0.5">
+                          {palette.colors.slice(0, 2).map((c) => (
+                            <div key={c} className="h-3 w-3 rounded-full" style={{ backgroundColor: c }} />
+                          ))}
+                        </div>
+                        {palette.name}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="space-y-1">
+                    {wardrobeItems.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2">
+                        <div className="h-6 w-6 rounded-md border border-border" style={{ backgroundColor: item.color }} />
                         <div className="min-w-0 flex-1">
-                          <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">{label}</div>
-                          <div className="truncate text-sm">{item}</div>
+                          <div className="text-sm">{item.name}</div>
+                          <div className="text-xs text-muted-foreground">{item.category}</div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 text-sm font-medium">Your wardrobe</p>
+                  <Button
+                    variant="outline"
+                    className="mb-2 w-full rounded-2xl border-border bg-card text-foreground shadow-none"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Add items
+                  </Button>
+                  <div className="space-y-1">
+                    {wardrobeItems.map((item) => (
+                      <div key={item.id} className="flex items-center gap-3 rounded-xl border border-border bg-card px-3 py-2">
+                        <div className="h-8 w-8 rounded-lg border border-border" style={{ backgroundColor: item.color }} />
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm">{item.name}</div>
+                          <div className="text-xs text-muted-foreground">{item.category}</div>
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  <div className="mt-1 flex items-center justify-end text-sm">
-                    <Button variant="ghost" className="h-7 rounded-full px-2.5 text-foreground">
-                      Details
-                    </Button>
-                  </div>
-                </motion.article>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {activeTab === "wardrobe" && (
-          <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} className="space-y-2">
-            <PageSection className="border-dashed p-2.5 text-center">
-              <div className="mx-auto mb-1.5 flex h-8 w-8 items-center justify-center rounded-lg bg-muted">
-                <Shirt className="h-6 w-6 text-muted-foreground" />
-              </div>
-              <h2 className="text-sm font-medium">Build your wardrobe</h2>
-              <Button variant="outline" className="mt-1.5 h-8 rounded-xl border-border bg-card px-3 text-foreground shadow-none">
-                <Plus className="h-4 w-4" />
-                Add items
-              </Button>
-            </PageSection>
-
-            <div className="grid grid-cols-2 gap-2">
-              {[
-                ["Outerwear", "0 pieces"],
-                ["Tops", "0 pieces"],
-                ["Bottoms", "0 pieces"],
-                ["Shoes", "0 pieces"],
-              ].map(([label, value]) => (
-                <div key={label} className="rounded-[14px] border border-border bg-card p-2 shadow-sm">
-                  <div className="text-sm font-medium">{label}</div>
-                  <div className="mt-1 text-sm text-muted-foreground">{value}</div>
                 </div>
-              ))}
+              </div>
             </div>
-          </motion.div>
-        )}
+          </div>
+        </div>
       </div>
     </PageShell>
   );

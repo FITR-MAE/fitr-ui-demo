@@ -81,9 +81,8 @@ export function NotificationsPage() {
             >
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <MessageCircle className="w-4 h-4 text-muted-foreground" />
                   <Heart className="w-4 h-4 text-muted-foreground" />
-                  <Send className="w-4 h-4 text-muted-foreground" />
+                  <span className="text-sm font-medium">Interactions</span>
                 </div>
                 <div className=" flex items-center justify-between gap-3">
                   <span className="text-xs">{activityItem.user} and 71 others liked your post</span>

@@ -1,208 +1,257 @@
-import { motion } from "motion/react";
-import { Image, Tag, MapPin, Users, X } from "lucide-react";
+import { motion, AnimatePresence } from "motion/react";
+import { Camera, ImagePlus, X, Tag, MapPin, Users, Loader2, ChevronLeft } from "lucide-react";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 
-import { PageHeader, PageSection, PageShell } from "../components/Page";
-import { Button } from "../components/ui/button";
+import { PageSection, PageShell } from "../components/Page";
 
-const glassInputClassName =
-  "rounded-xl border border-border bg-background px-3 text-foreground outline-none transition focus:ring-2 focus:ring-ring";
+type Step = "media" | "edit" | "details";
 
-const utilityRowClassName =
-  "flex min-h-[44px] w-full items-center gap-2.5 rounded-xl px-2 py-1 text-left transition-colors hover:bg-muted/60";
+const steps: Step[] = ["media", "edit", "details"];
 
-const profileButtonClassName =
-  "rounded-xl border border-border bg-card text-foreground shadow-none hover:bg-muted/60";
+const mockImages = [
+  "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  "https://images.unsplash.com/photo-1651742532544-346cc809adb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+  "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
+];
+
+const tagSuggestions = [
+  "streetwear",
+  "ootd",
+  "fashion",
+  "style",
+  "outfitoftheday",
+  "fashionblogger",
+  "instafashion",
+  "styleinspo",
+];
+
+const stepLabels: Record<Step, string> = {
+  media: "New Post",
+  edit: "Edit",
+  details: "Details",
+};
 
 export function Post() {
+  const navigate = useNavigate();
+  const [currentStep, setCurrentStep] = useState<Step>("media");
+  const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [currentTag, setCurrentTag] = useState("");
-  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const [isPosting, setIsPosting] = useState(false);
 
-  const addTag = () => {
-    if (currentTag.trim() && !tags.includes(currentTag.trim())) {
-      setTags([...tags, currentTag.trim()]);
-      setCurrentTag("");
+  const currentStepIndex = steps.indexOf(currentStep);
+
+  const handleNext = () => {
+    if (currentStepIndex < steps.length - 1) {
+      setCurrentStep(steps[currentStepIndex + 1]);
     }
   };
 
-  const removeTag = (tagToRemove: string) => {
-    setTags(tags.filter((tag) => tag !== tagToRemove));
+  const handleBack = () => {
+    if (currentStepIndex > 0) {
+      setCurrentStep(steps[currentStepIndex - 1]);
+    } else {
+      navigate(-1);
+    }
   };
 
-  const handleImageSelect = () => {
-    const mockImage =
-      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080";
-    setSelectedImage(mockImage);
+  const handlePost = () => {
+    setIsPosting(true);
+    setTimeout(() => {
+      setIsPosting(false);
+      navigate("/");
+    }, 1500);
+  };
+
+  const toggleTag = (tag: string) => {
+    if (tags.includes(tag)) {
+      setTags(tags.filter((t) => t !== tag));
+    } else if (tags.length < 10) {
+      setTags([...tags, tag]);
+    }
   };
 
   return (
-    <PageShell contentClassName="pb-24">
-      <PageHeader
-        title="New Post"
-        trailing={
-          <Button
-            variant="outline"
-            className="h-9 rounded-full border-border bg-card px-4 text-xs font-semibold text-foreground hover:bg-muted/60"
-          >
-            Share
-          </Button>
-        }
-      />
-
-      <div className="mx-auto w-full max-w-lg px-4 pt-4 pb-6">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+    <PageShell>
+      <div className="flex items-center justify-between px-4 py-3">
+        <button
+          onClick={handleBack}
+          className="flex h-11 w-11 items-center justify-center rounded-full bg-card border border-border transition-colors hover:bg-muted/60 active:scale-95"
+          aria-label="Go back"
         >
-          <div className="space-y-2.5">
-            <PageSection className="p-3">
-              <div className="mb-2.5 flex items-center justify-between gap-3">
-                <h2 className="text-sm font-medium">Photo</h2>
-                <span className="text-xs text-muted-foreground">Required</span>
-              </div>
-              {selectedImage ? (
-                <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  className="relative aspect-[10/12] overflow-hidden rounded-xl"
-                >
-                  <img
-                    src={selectedImage}
-                    alt="Selected outfit"
-                    className="h-full w-full object-cover"
-                  />
-                  <button
-                    onClick={() => setSelectedImage(null)}
-                    className="absolute right-2 top-2 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-sm transition hover:bg-black/60"
-                    aria-label="Remove selected image"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </motion.div>
-              ) : (
-                <motion.button
-                  whileHover={{ scale: 1.01 }}
-                  whileTap={{ scale: 0.99 }}
-                  onClick={handleImageSelect}
-                  className="flex aspect-[10/12] w-full flex-col items-center justify-center rounded-xl border border-dashed border-border bg-muted/30 px-5 text-center transition-colors hover:border-foreground/40"
-                >
-                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-background">
-                    <Image className="h-6 w-6" />
-                  </div>
-                  <div className="mt-2.5 space-y-0.5">
-                    <div className="font-medium">Add Photo or Video</div>
-                    <div className="text-sm text-muted-foreground">Tap to upload</div>
-                  </div>
-                </motion.button>
-              )}
-            </PageSection>
+          <ChevronLeft className="w-5 h-5 text-foreground" />
+        </button>
+        <span className="text-base font-semibold text-foreground">{stepLabels[currentStep]}</span>
+        <button
+          onClick={currentStep === "details" ? handlePost : handleNext}
+          disabled={isPosting}
+          className="flex h-10 items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-all hover:bg-foreground/90 active:scale-95 disabled:opacity-40"
+        >
+          {isPosting ? <Loader2 className="w-4 h-4 animate-spin" /> : currentStep === "details" ? "Share" : "Next"}
+        </button>
+      </div>
 
-            <PageSection className="p-3">
-              <div className="mb-2.5 flex items-center justify-between gap-3">
-                <h2 className="text-sm font-medium">Caption</h2>
-                <span className="text-xs text-muted-foreground">Optional</span>
+      <div className="app-page-content">
+        <AnimatePresence mode="wait">
+          {currentStep === "media" && (
+            <motion.div
+              key="media"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4 px-4 pb-4"
+            >
+              <div className="mb-3">
+                <span className="app-chip">Media</span>
               </div>
-              <textarea
-                value={caption}
-                onChange={(e) => setCaption(e.target.value)}
-                placeholder="Share details about your outfit..."
-                className={`h-24 w-full resize-none py-2.5 ${glassInputClassName}`}
-              />
-            </PageSection>
 
-            <PageSection className="p-3">
-              <label className="mb-2.5 flex items-center gap-2 text-sm font-medium">
-                <Tag className="h-4 w-4" />
-                Tags
-              </label>
-              <div className="mb-2.5 flex gap-2">
-                <input
-                  type="text"
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      addTag();
-                    }
+              <div className="space-y-3">
+                <button
+                  onClick={() => {
+                    setSelectedIndex(0);
+                    setCurrentStep("edit");
                   }}
-                  placeholder="Add a tag..."
-                  className={`h-10 flex-1 ${glassInputClassName}`}
-                />
-                <Button
-                  onClick={addTag}
-                  variant="outline"
-                  className={`h-10 px-3.5 text-sm ${profileButtonClassName}`}
+                  className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/60 active:scale-[0.98]"
                 >
-                  Add
-                </Button>
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
+                    <Camera className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <div className="text-sm font-medium text-foreground">Take Photo</div>
+                    <div className="text-xs text-muted-foreground">Use your camera</div>
+                  </div>
+                </button>
+
+                <button
+                  onClick={() => {
+                    setSelectedIndex(1);
+                    setCurrentStep("edit");
+                  }}
+                  className="flex w-full items-center gap-4 rounded-2xl border border-border bg-card p-4 transition-colors hover:bg-muted/60 active:scale-[0.98]"
+                >
+                  <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
+                    <ImagePlus className="h-5 w-5 text-white" />
+                  </div>
+                  <div className="min-w-0 text-left">
+                    <div className="text-sm font-medium text-foreground">Choose from Gallery</div>
+                    <div className="text-xs text-muted-foreground">Pick from your phone</div>
+                  </div>
+                </button>
               </div>
-              {tags.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {tags.map((tag) => (
-                    <motion.span
-                      key={tag}
-                      initial={{ scale: 0 }}
-                      animate={{ scale: 1 }}
-                      className="flex items-center gap-1.5 rounded-full bg-foreground px-2.5 py-1 text-xs text-background"
-                    >
-                      #{tag}
-                      <button
-                        onClick={() => removeTag(tag)}
-                        className="transition hover:opacity-70"
-                        aria-label={`Remove ${tag} tag`}
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </motion.span>
-                  ))}
+            </motion.div>
+          )}
+
+          {currentStep === "edit" && (
+            <motion.div
+              key="edit"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4 px-4 pb-4"
+            >
+              {selectedIndex !== null && (
+                <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl">
+                  <img src={mockImages[selectedIndex]} alt="Selected" className="h-full w-full object-cover" />
+                  <button
+                    onClick={() => {
+                      setSelectedIndex(null);
+                      setCurrentStep("media");
+                    }}
+                    className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-black/50 text-white backdrop-blur-md transition-all hover:bg-black/70 active:scale-95"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
                 </div>
               )}
-            </PageSection>
 
-            <PageSection className="p-3">
-              <div className="mb-2.5">
-                <h2 className="text-sm font-medium">Details</h2>
+              <PageSection className="p-4">
+                <textarea
+                  value={caption}
+                  onChange={(e) => setCaption(e.target.value)}
+                  placeholder="Write a caption..."
+                  maxLength={2200}
+                  className="h-20 w-full resize-none rounded-xl border border-border bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:ring-2 focus:ring-foreground/20"
+                />
+                <div className="mt-2 flex justify-end">
+                  <span className="text-xs text-muted-foreground">{caption.length}/2,200</span>
+                </div>
+              </PageSection>
+            </motion.div>
+          )}
+
+          {currentStep === "details" && (
+            <motion.div
+              key="details"
+              initial={{ opacity: 0, x: 30 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: -30 }}
+              transition={{ duration: 0.2 }}
+              className="space-y-4 px-4 pb-4"
+            >
+              <div className="relative aspect-[4/5] w-full max-w-xs overflow-hidden rounded-2xl shadow-md">
+                <img src={mockImages[selectedIndex ?? 0]} alt="Selected" className="h-full w-full object-cover" />
               </div>
+
+              <div className="space-y-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <Tag className="w-4 h-4 text-muted-foreground" />
+                    <span className="text-sm font-medium text-foreground">Tags</span>
+                  </div>
+                  <span className="text-xs text-muted-foreground">{tags.length}/10</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {tagSuggestions.map((tag) => (
+                    <button
+                      key={tag}
+                      onClick={() => toggleTag(tag)}
+                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95 ${
+                        tags.includes(tag)
+                          ? "bg-gradient-to-br from-purple-400 to-pink-400 text-white"
+                          : "border border-border bg-card text-muted-foreground hover:bg-muted/60"
+                      }`}
+                    >
+                      #{tag}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               <div className="space-y-1">
-                <button className={utilityRowClassName}>
-                  <MapPin className="h-5 w-5" />
-                  <span className="flex-1">Add Location</span>
-                  <span className="text-xs text-muted-foreground">Soon</span>
-                </button>
-
-                <button className={utilityRowClassName}>
-                  <Users className="h-5 w-5" />
-                  <span className="flex-1">Tag People</span>
-                  <span className="text-xs text-muted-foreground">Soon</span>
-                </button>
-
-                <button className={utilityRowClassName}>
-                  <Tag className="h-5 w-5" />
-                  <span className="flex-1">Tag Items</span>
-                  <span className="text-xs text-muted-foreground">Soon</span>
-                </button>
+                <div className="px-1">
+                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">More</span>
+                </div>
+                <div className="overflow-hidden rounded-2xl border border-border bg-card">
+                  <button className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/60">
+                    <MapPin className="w-4 h-4 text-muted-foreground" />
+                    <span className="flex-1 text-sm text-foreground">Add Location</span>
+                    <span className="text-xs text-muted-foreground">Soon</span>
+                  </button>
+                  <div className="h-px bg-border" />
+                  <button className="flex w-full items-center gap-3 px-4 py-3.5 text-left transition-colors hover:bg-muted/60">
+                    <Users className="w-4 h-4 text-muted-foreground" />
+                    <span className="flex-1 text-sm text-foreground">Tag People</span>
+                    <span className="text-xs text-muted-foreground">Soon</span>
+                  </button>
+                </div>
               </div>
-            </PageSection>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </div>
 
-            <div>
-              <motion.div
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-              >
-                <Button
-                  variant="outline"
-                  className={`h-11 w-full text-sm font-semibold ${profileButtonClassName}`}
-                >
-                  Share to Feed
-                </Button>
-              </motion.div>
-            </div>
-          </div>
-        </motion.div>
+      <div className="flex justify-center gap-1.5 py-3 px-4 border-t border-border bg-card/80 backdrop-blur-sm">
+        {steps.map((step, index) => (
+          <div
+            key={step}
+            className={`h-1.5 rounded-full transition-all duration-200 ${
+              currentStep === step ? "w-8 bg-foreground" : index < currentStepIndex ? "w-3 bg-foreground/40" : "w-3 bg-foreground/20"
+            }`}
+          />
+        ))}
       </div>
     </PageShell>
   );
