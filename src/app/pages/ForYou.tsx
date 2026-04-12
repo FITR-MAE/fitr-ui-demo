@@ -12,6 +12,8 @@ const outfits = [
     caption: "Effortless neutrals for spring",
     likes: 2847,
     comments: 124,
+    shares: 62,
+    saves: 418,
     tags: ["casual", "neutral", "spring"],
   },
   {
@@ -22,6 +24,8 @@ const outfits = [
     caption: "Layered textures",
     likes: 1923,
     comments: 87,
+    shares: 41,
+    saves: 275,
     tags: ["layers", "urban", "minimal"],
   },
   {
@@ -32,6 +36,8 @@ const outfits = [
     caption: "Classic coat moment",
     likes: 3204,
     comments: 156,
+    shares: 88,
+    saves: 534,
     tags: ["outerwear", "classic", "elegant"],
   },
   {
@@ -42,6 +48,8 @@ const outfits = [
     caption: "Summer whites",
     likes: 4156,
     comments: 203,
+    shares: 104,
+    saves: 612,
     tags: ["summer", "white", "chic"],
   },
   {
@@ -52,6 +60,8 @@ const outfits = [
     caption: "Bold silhouettes",
     likes: 2617,
     comments: 91,
+    shares: 57,
+    saves: 369,
     tags: ["avant-garde", "statement", "bold"],
   },
   {
@@ -62,16 +72,22 @@ const outfits = [
     caption: "Vibrant energy",
     likes: 3891,
     comments: 178,
+    shares: 96,
+    saves: 581,
     tags: ["color", "vibrant", "bold"],
   },
 ];
 
 const friendsOnlyOutfits = outfits.slice(0, 3);
+const followingOutfits = outfits.slice(2, 6);
 
 const feedModes = [
   { id: "for-you", label: "For You" },
   { id: "friends", label: "Friends" },
+  { id: "following", label: "Following" },
 ] as const;
+
+const formatCount = (count: number) => (count > 999 ? `${Math.floor(count / 1000)}k` : count);
 
 export function ForYou() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
@@ -83,7 +99,12 @@ export function ForYou() {
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const shouldAnimate = !useReducedMotion();
-  const visibleOutfits = feedMode === "friends" ? friendsOnlyOutfits : outfits;
+  const visibleOutfits =
+    feedMode === "friends"
+      ? friendsOnlyOutfits
+      : feedMode === "following"
+        ? followingOutfits
+        : outfits;
 
   const feedPaddingBottom = "calc(6rem + env(safe-area-inset-bottom))";
 
@@ -271,9 +292,7 @@ export function ForYou() {
                   />
                 </motion.div>
                 <span className="text-xs text-white drop-shadow-lg">
-                  {outfit.likes + (liked.has(outfit.id) ? 1 : 0) > 999
-                    ? `${Math.floor((outfit.likes + (liked.has(outfit.id) ? 1 : 0)) / 1000)}k`
-                    : outfit.likes + (liked.has(outfit.id) ? 1 : 0)}
+                  {formatCount(outfit.likes + (liked.has(outfit.id) ? 1 : 0))}
                 </span>
               </motion.button>
 
@@ -300,6 +319,7 @@ export function ForYou() {
                 <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                   <Share2 className="h-5 w-5 text-white" />
                 </div>
+                <span className="text-xs text-white drop-shadow-lg">{formatCount(outfit.shares)}</span>
               </motion.button>
 
               <motion.button
@@ -317,6 +337,9 @@ export function ForYou() {
                     }`}
                   />
                 </div>
+                <span className="text-xs text-white drop-shadow-lg">
+                  {formatCount(outfit.saves + (saved.has(outfit.id) ? 1 : 0))}
+                </span>
               </motion.button>
             </div>
 
