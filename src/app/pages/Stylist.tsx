@@ -1,4 +1,4 @@
-import { Check, ChevronRight, Cloud, Droplet, Heart, Plus, RefreshCw, Send, Sun } from "lucide-react";
+import { Check, ChevronRight, Cloud, Droplet, Heart, Plus, RefreshCw, Send, Sparkles, Sun } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
@@ -6,7 +6,7 @@ import { PageHeader, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 
 type WeatherKind = "sunny" | "cloudy" | "rainy";
-type TabId = "ai" | "outfits" | "colour";
+type TabId = "ai" | "outfits" | "colour" | "inspirations";
 
 type OutfitRecommendation = {
   id: number;
@@ -30,10 +30,19 @@ type PaletteCard = {
   colors: string[];
 };
 
+type InspirationProfile = {
+  id: number;
+  name: string;
+  handle: string;
+  note: string;
+  wardrobe: string[];
+};
+
 const tabs = [
   { id: "ai", label: "Chat" },
   { id: "outfits", label: "Looks" },
   { id: "colour", label: "Colour" },
+  { id: "inspirations", label: "Inspiration" },
 ] as const;
 
 const weather = {
@@ -84,6 +93,30 @@ const wardrobeItems = [
   { id: 4, name: "Khaki Chinos", category: "Bottoms", color: "#C3B091" },
   { id: 5, name: "Camel Blazer", category: "Outerwear", color: "#A0522D" },
   { id: 6, name: "Black Tailored Pants", category: "Bottoms", color: "#1A1A1A" },
+];
+
+const inspirationProfiles: InspirationProfile[] = [
+  {
+    id: 1,
+    name: "Lena Hart",
+    handle: "@lenalooks",
+    note: "Soft tailoring, warm neutrals, and easy layering with a clean finish.",
+    wardrobe: ["Boxy oat blazer", "Cream rib tank", "Wide-leg stone trousers"],
+  },
+  {
+    id: 2,
+    name: "Marcus Vale",
+    handle: "@marcusmode",
+    note: "Sharp casual outfits built from polos, structured outerwear, and darker trousers.",
+    wardrobe: ["Navy knit polo", "Camel overshirt", "Pleated black trousers"],
+  },
+  {
+    id: 3,
+    name: "Nina Sloane",
+    handle: "@ninasloane",
+    note: "Minimal wardrobe staples with tonal colour stories and cleaner sneakers.",
+    wardrobe: ["Sand poplin shirt", "Taupe drawstring trousers", "White leather trainers"],
+  },
 ];
 
 const interactivePillClass = "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95";
@@ -577,6 +610,71 @@ export function Stylist() {
                         </div>
                       ))}
                     </div>
+                  </div>
+                </div>
+              </motion.div>
+            )}
+
+            {activeTab === "inspirations" && (
+              <motion.div
+                key="inspirations"
+                layout={shouldAnimate}
+                transition={{ duration: 0.22, ease: "easeOut" }}
+                className="h-full min-h-0 space-y-4 overflow-y-auto overscroll-contain pr-1"
+                {...tabPanelMotionProps}
+              >
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Similar style profiles</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      People whose wardrobes line up with your current styling direction.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-2.5">
+                    {inspirationProfiles.map((profile) => (
+                      <div key={profile.id} className={compactListRowClass}>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-sm font-semibold text-foreground">
+                          {profile.name.charAt(0)}
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center gap-2">
+                            <div className="text-sm font-medium text-foreground">{profile.name}</div>
+                            <div className="text-xs text-muted-foreground">{profile.handle}</div>
+                          </div>
+                          <div className="mt-1 text-xs text-muted-foreground">{profile.note}</div>
+                        </div>
+                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-base font-semibold text-foreground">Wardrobe inspiration</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        Key pieces showing up across similar profiles right now.
+                      </p>
+                    </div>
+                    <Sparkles className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  </div>
+
+                  <div className="mt-4 space-y-2.5">
+                    {inspirationProfiles.flatMap((profile) =>
+                      profile.wardrobe.map((item) => (
+                        <div key={`${profile.id}-${item}`} className={compactListRowClass}>
+                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border">
+                            <Sparkles className="h-4 w-4 text-muted-foreground" />
+                          </div>
+                          <div className="min-w-0 flex-1">
+                            <div className="text-sm font-medium text-foreground">{item}</div>
+                            <div className="text-xs text-muted-foreground">Seen in {profile.name}&apos;s wardrobe</div>
+                          </div>
+                        </div>
+                      )),
+                    )}
                   </div>
                 </div>
               </motion.div>
