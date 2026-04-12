@@ -100,13 +100,9 @@ export function ForYou() {
   const navigate = useNavigate();
   const shouldAnimate = !useReducedMotion();
   const visibleOutfits =
-    feedMode === "friends"
-      ? friendsOnlyOutfits
-      : feedMode === "following"
-        ? followingOutfits
-        : outfits;
+    feedMode === "friends" ? friendsOnlyOutfits : feedMode === "following" ? followingOutfits : outfits;
 
-  const feedPaddingBottom = "calc(6rem + env(safe-area-inset-bottom))";
+  const feedPaddingBottom = "max(1.25rem, env(safe-area-inset-bottom))";
 
   const triggerLikeAnim = (id: number) => {
     if (!liked.has(id)) {
@@ -197,10 +193,10 @@ export function ForYou() {
   }, [feedMode]);
 
   return (
-    <div className="relative h-[100dvh] bg-black">
+    <div className="relative h-full bg-black">
       <div
         className="pointer-events-none absolute left-0 right-0 z-20 px-4"
-        style={{ top: `calc(0.75rem + env(safe-area-inset-top))` }}
+        style={{ top: "0.75rem" }}
       >
         <div className="pointer-events-auto flex flex-col items-center gap-2">
           <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
@@ -210,9 +206,7 @@ export function ForYou() {
                 type="button"
                 onClick={() => setFeedMode(mode.id)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  feedMode === mode.id
-                    ? "bg-white text-black"
-                    : "text-white/75 hover:bg-white/10 hover:text-white"
+                  feedMode === mode.id ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"
                 }`}
               >
                 {mode.label}
@@ -248,12 +242,12 @@ export function ForYou() {
       <div
         id="feed-container"
         ref={feedContainerRef}
-        className="hide-scrollbar h-[100dvh] overflow-y-auto overscroll-y-contain snap-y snap-mandatory touch-pan-y bg-black"
+        className="hide-scrollbar h-full overflow-y-auto overscroll-y-contain snap-y snap-mandatory touch-pan-y bg-black"
       >
         {visibleOutfits.map((outfit) => (
           <div
             key={outfit.id}
-            className="relative flex h-[100dvh] w-full snap-start items-center justify-center bg-black"
+            className="relative flex h-full min-h-full w-full snap-start items-center justify-center bg-black"
           >
             <img
               src={outfit.image}
@@ -352,7 +346,12 @@ export function ForYou() {
                   <p className="truncate text-sm font-medium text-white">{outfit.user}</p>
                   <ChevronRight className="h-3.5 w-3.5 shrink-0 text-white/60" />
                 </div>
-                <p className="text-sm font-normal leading-[1.5] text-white/90">{outfit.caption}</p>
+                <p className="text-sm font-normal leading-[1.5] text-white/90">
+                  {outfit.caption}{" "}
+                  {/* {outfit.tags.map((tag) => (
+                    <span key={tag}>#{tag} </span>
+                  ))} */}
+                </p>
                 <div className="flex flex-wrap gap-1.5">
                   {outfit.tags.map((tag) => (
                     <span

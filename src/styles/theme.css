@@ -213,7 +213,7 @@
 
 @layer components {
   .app-page {
-    @apply min-h-screen bg-background text-foreground pb-20;
+    @apply min-h-full bg-background text-foreground;
   }
 
   .app-page-content {
