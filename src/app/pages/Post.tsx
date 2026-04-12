@@ -136,28 +136,6 @@ export function Post() {
 
   return (
     <PageShell>
-      <header className="app-page-header">
-        <div className="app-page-header-inner">
-          <div className="grid w-full grid-cols-[44px_1fr_auto] items-center gap-3">
-            <button
-              onClick={handleBack}
-              className="flex h-11 w-11 items-center justify-center rounded-full border border-border bg-card transition-colors hover:bg-muted/60 active:scale-95"
-              aria-label="Go back"
-            >
-              <ChevronLeft className="h-5 w-5 text-foreground" />
-            </button>
-            <h1 className="app-page-title truncate text-center">{stepLabels[currentStep]}</h1>
-            <button
-              onClick={currentStep === "details" ? handlePost : handleNext}
-              disabled={isHeaderActionDisabled}
-              className="flex h-10 min-w-[72px] items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-all hover:bg-foreground/90 active:scale-95 disabled:opacity-40"
-            >
-              {isPosting ? <Loader2 className="h-4 w-4 animate-spin" /> : headerActionLabel}
-            </button>
-          </div>
-        </div>
-      </header>
-
       <div className="app-page-content space-y-4 pb-24">
         <PageSection className="p-4">
           <div className="flex items-start justify-between gap-3">
@@ -199,7 +177,9 @@ export function Post() {
                       </div>
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-foreground">Start with a strong first image</p>
-                        <p className="text-xs text-muted-foreground">Choose a recent photo or jump straight in from camera.</p>
+                        <p className="text-xs text-muted-foreground">
+                          Choose a recent photo or jump straight in from camera.
+                        </p>
                       </div>
                     </div>
                   )}
@@ -256,7 +236,9 @@ export function Post() {
                         key={image}
                         onClick={() => handleSelectImage(index)}
                         className={`relative overflow-hidden rounded-2xl bg-muted text-left transition-transform active:scale-[0.98] ${
-                          isSelected ? "ring-2 ring-foreground ring-offset-2 ring-offset-background" : "hover:opacity-90"
+                          isSelected
+                            ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
+                            : "hover:opacity-90"
                         }`}
                         aria-label={`Select image ${index + 1}`}
                       >
@@ -274,7 +256,9 @@ export function Post() {
             <motion.div key="edit" {...frameMotionProps} className="space-y-4">
               <PageSection className="overflow-hidden p-0">
                 <div className="relative aspect-[4/5] w-full bg-muted">
-                  {selectedImage ? <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" /> : null}
+                  {selectedImage ? (
+                    <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
+                  ) : null}
                   <button
                     onClick={() => {
                       setSelectedIndex(null);
@@ -329,7 +313,9 @@ export function Post() {
             <motion.div key="details" {...frameMotionProps} className="space-y-4">
               <PageSection className="overflow-hidden p-0">
                 <div className="relative aspect-[4/5] w-full bg-muted">
-                  {selectedImage ? <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" /> : null}
+                  {selectedImage ? (
+                    <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
+                  ) : null}
                   {caption ? (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
                       <p className="text-sm text-white">{caption}</p>

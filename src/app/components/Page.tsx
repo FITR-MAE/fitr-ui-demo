@@ -26,19 +26,14 @@ export function PageShell({ children, contentClassName }: PageShellProps) {
 }
 
 export function PageHeader({ title, leading, trailing }: PageHeaderProps) {
-  return (
-    <header className="app-page-header">
-      <div className="app-page-header-inner">
-        {leading ? <div className="shrink-0">{leading}</div> : null}
-        <div className={cx("min-w-0", leading || trailing ? "flex-1 text-center" : undefined)}>
-          <h1 className="app-page-title">{title}</h1>
-        </div>
-        {trailing ? <div className="shrink-0">{trailing}</div> : null}
-      </div>
-    </header>
-  );
+  return <header className="app-page-header"></header>;
 }
 
 export function PageSection({ children, className }: PageSectionProps) {
-  return <section className={cx("app-surface", className)}>{children}</section>;
+  return (
+    <div>
+      {children}
+      {/* <section className={cx("app-surface", className)}></section>; */}
+    </div>
+  );
 }

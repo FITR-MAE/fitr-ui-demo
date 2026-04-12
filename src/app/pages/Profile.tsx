@@ -1,7 +1,6 @@
-import { Grid, Bookmark, Heart, Settings, Shirt } from "lucide-react";
-import { Link } from "react-router";
-import { useEffect, useRef, useState } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { Grid, Bookmark, Heart, Settings, Shirt, type LucideIcon } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
 
 import { PageHeader, PageSection, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
@@ -125,72 +124,44 @@ const tabs = [
   { id: "saved", label: "Saved", icon: Bookmark },
   { id: "wardrobe", label: "Wardrobe", icon: Shirt },
   { id: "liked", label: "Liked", icon: Heart },
+] as const;
+
+type TabId = (typeof tabs)[number]["id"];
+
+const profileStats = [
+  { label: "Posts", value: "42" },
+  { label: "Followers", value: "12.5k" },
+  { label: "Following", value: "847" },
 ];
 
+const formatLikes = (n: number) => (n > 999 ? `${Math.floor(n / 1000)}k` : `${n}`);
+
 export function Profile() {
-  const [activeTab, setActiveTab] = useState("posts");
-  const scrollRef = useRef<HTMLDivElement>(null);
-  const activeTabRef = useRef(activeTab);
+  const [activeTab, setActiveTab] = useState<TabId>("posts");
   const shouldAnimate = !useReducedMotion();
 
-  useEffect(() => {
-    activeTabRef.current = activeTab;
-  }, [activeTab]);
+  const staggerVariants = {
+    hidden: {},
+    visible: { transition: { staggerChildren: 0.08 } },
+  };
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
+  const fadeUpVariants: Variants = {
+    hidden: shouldAnimate ? { opacity: 0, y: 8 } : {},
+    visible: shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } } : {},
+  };
 
-    const handleScroll = () => {
-      const tabWidth = el.clientWidth;
-      if (tabWidth === 0) return;
+  const scaleInVariants: Variants = {
+    hidden: shouldAnimate ? { opacity: 0, scale: 0.95 } : {},
+    visible: shouldAnimate ? { opacity: 1, scale: 1, transition: { duration: 0.25, ease: "easeOut" } } : {},
+  };
 
-      const scrollLeft = el.scrollLeft;
-      const newIndex = Math.round(scrollLeft / tabWidth);
-
-      if (newIndex >= 0 && newIndex < tabs.length && tabs[newIndex].id !== activeTabRef.current) {
-        setActiveTab(tabs[newIndex].id);
+  const panelMotion = shouldAnimate
+    ? {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" as const } },
+        exit: { opacity: 0, y: -8 },
       }
-    };
-
-    el.addEventListener("scroll", handleScroll, { passive: true });
-    return () => el.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const handleTabClick = (tabId: string) => {
-    setActiveTab(tabId);
-    const index = tabs.findIndex((t) => t.id === tabId);
-    if (scrollRef.current) {
-      scrollRef.current.scrollTo({
-        left: index * scrollRef.current.clientWidth,
-        behavior: "smooth",
-      });
-    }
-  };
-
-  const headerVariants = {
-    hidden: {},
-    visible: {
-      transition: { staggerChildren: 0.08 },
-    },
-  };
-
-  const itemVariants = {
-    hidden: shouldAnimate ? { opacity: 0, y: 8 } : false,
-    visible: shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } } : false,
-  };
-
-  const postVariants = {
-    hidden: {},
-    visible: {
-      transition: { staggerChildren: 0.08 },
-    },
-  };
-
-  const postItemVariants = {
-    hidden: shouldAnimate ? { opacity: 0, scale: 0.95 } : false,
-    visible: shouldAnimate ? { opacity: 1, scale: 1, transition: { duration: 0.25, ease: "easeOut" } } : false,
-  };
+    : {};
 
   return (
     <PageShell>
@@ -207,16 +178,17 @@ export function Profile() {
 
       <div className="app-page-content space-y-4">
         <PageSection className="p-4 sm:p-6">
-          <motion.div className="space-y-4" variants={headerVariants} initial="hidden" animate="visible">
-            <motion.div className="flex items-start gap-4" variants={itemVariants}>
+          <motion.div className="space-y-4" variants={staggerVariants} initial="hidden" animate="visible">
+            <motion.div className="flex items-start gap-4" variants={fadeUpVariants}>
               <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-sm ring-1 ring-white/15">
                 <span className="text-3xl text-white">S</span>
               </div>
 
               <div className="min-w-0 flex-1">
-                <div className="mb-2">
+                {/* <div className="mb-2">
                   <span className="app-chip">Style profile</span>
-                </div>
+                </div> */}
+                <p className="text-base font-semibold">Sarah Connor</p>
                 <p className="text-sm text-muted-foreground">
                   Fashion enthusiast | Personal stylist | Minimal aesthetic
                 </p>
@@ -224,19 +196,13 @@ export function Profile() {
               </div>
             </motion.div>
 
-            <motion.div className="grid grid-cols-3 gap-2" variants={itemVariants}>
-              <div className="rounded-2xl border border-border bg-card p-3 text-center">
-                <div className="text-lg font-semibold">42</div>
-                <div className="text-xs text-muted-foreground">Posts</div>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-3 text-center">
-                <div className="text-lg font-semibold">12.5k</div>
-                <div className="text-xs text-muted-foreground">Followers</div>
-              </div>
-              <div className="rounded-2xl border border-border bg-card p-3 text-center">
-                <div className="text-lg font-semibold">847</div>
-                <div className="text-xs text-muted-foreground">Following</div>
-              </div>
+            <motion.div className="grid grid-cols-3 gap-2" variants={fadeUpVariants}>
+              {profileStats.map((stat) => (
+                <div key={stat.label} className="rounded-2xl border border-border bg-card p-3 text-center">
+                  <div className="text-lg font-semibold">{stat.value}</div>
+                  <div className="text-xs text-muted-foreground">{stat.label}</div>
+                </div>
+              ))}
             </motion.div>
           </motion.div>
         </PageSection>
@@ -245,17 +211,16 @@ export function Profile() {
           <div className="grid grid-cols-4 gap-1">
             {tabs.map((tab) => {
               const Icon = tab.icon;
+              const isActive = activeTab === tab.id;
               return (
                 <motion.button
                   key={tab.id}
                   type="button"
-                  onClick={() => handleTabClick(tab.id)}
+                  onClick={() => setActiveTab(tab.id)}
                   whileTap={{ scale: 0.96 }}
                   transition={{ duration: 0.15, ease: "easeOut" }}
                   className={`flex min-h-[56px] flex-col items-center justify-center rounded-2xl px-2 py-2 text-center transition-colors ${
-                    activeTab === tab.id
-                      ? "bg-accent/40 text-foreground"
-                      : "text-muted-foreground hover:bg-muted/60"
+                    isActive ? "bg-accent/40 text-foreground" : "text-muted-foreground hover:bg-muted/60"
                   }`}
                 >
                   <Icon className="w-5 h-5" />
@@ -266,128 +231,92 @@ export function Profile() {
           </div>
         </PageSection>
 
-        <div
-          ref={scrollRef}
-          className="overflow-x-auto snap-x snap-mandatory hide-scrollbar"
-          style={{ scrollBehavior: "smooth" }}
-        >
-          <div className="flex">
-            <AnimatePresence mode="wait">
-              {activeTab === "posts" && (
+        <AnimatePresence mode="wait">
+          {activeTab === "posts" && (
+            <motion.div
+              key="posts"
+              className="grid grid-cols-3 gap-1"
+              variants={staggerVariants}
+              initial="hidden"
+              animate="visible"
+              exit="hidden"
+            >
+              {userPosts.map((post) => (
                 <motion.div
-                  key="posts"
-                  className="grid w-full shrink-0 snap-start grid-cols-3 gap-1"
-                  variants={postVariants}
-                  initial="hidden"
-                  animate="visible"
-                  exit="hidden"
+                  key={post.id}
+                  variants={scaleInVariants}
+                  whileTap={{ scale: 0.97 }}
+                  transition={{ duration: 0.15, ease: "easeOut" }}
+                  className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-muted"
                 >
-                  {userPosts.map((post) => (
-                    <motion.div
-                      key={post.id}
-                      variants={postItemVariants}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-muted"
-                    >
-                      <img src={post.image} alt={`Post ${post.id}`} className="w-full h-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-white backdrop-blur-sm">
-                        <Heart className="h-3.5 w-3.5 fill-white" />
-                        <span className="text-[11px] font-medium">
-                          {post.likes > 999 ? `${Math.floor(post.likes / 1000)}k` : post.likes}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <AnimatePresence mode="wait">
-              {activeTab === "saved" && (
-                <motion.div
-                  key="saved"
-                  className="w-full shrink-0 snap-start py-12 text-center"
-                  initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-                  animate={shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } } : false}
-                  exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
-                >
-                  <div className="mx-auto flex w-full max-w-xs flex-col items-center rounded-2xl border border-border bg-card px-4 py-6">
-                    <Bookmark className="mb-3 h-12 w-12 text-muted-foreground" />
-                    <p className="text-sm font-medium">No saved posts yet</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Save looks from the feed to build a private collection.</p>
+                  <img src={post.image} alt={`Post ${post.id}`} className="w-full h-full object-cover" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-white backdrop-blur-sm">
+                    <Heart className="h-3.5 w-3.5 fill-white" />
+                    <span className="text-[11px] font-medium">{formatLikes(post.likes)}</span>
                   </div>
                 </motion.div>
-              )}
-            </AnimatePresence>
+              ))}
+            </motion.div>
+          )}
 
-            <AnimatePresence mode="wait">
-              {activeTab === "wardrobe" && (
-                <motion.div
-                  key="wardrobe"
-                  className="w-full shrink-0 snap-start px-4"
-                  initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-                  animate={shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } } : false}
-                  exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
-                >
-                  <div className="mb-3 flex items-center justify-between">
-                    <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-                      Your Wardrobe
-                    </span>
-                    <span className="text-xs text-muted-foreground">24 items</span>
-                  </div>
-                  <div className="grid grid-cols-3 gap-2">
-                    {wardrobeItems.map((item) => (
-                      <motion.div
-                        key={item.id}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
-                        className="group relative aspect-square overflow-hidden rounded-xl bg-muted"
-                      >
-                        <img src={item.image} alt={item.category} className="w-full h-full object-cover" />
-                        <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
-                          <span className="text-xs text-white">{item.category}</span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </div>
+          {activeTab === "saved" && (
+            <motion.div key="saved" className="py-12 text-center" {...panelMotion}>
+              <EmptyState
+                icon={Bookmark}
+                title="No saved posts yet"
+                body="Save looks from the feed to build a private collection."
+              />
+            </motion.div>
+          )}
+
+          {activeTab === "wardrobe" && (
+            <motion.div key="wardrobe" className="px-4" {...panelMotion}>
+              <div className="mb-3 flex items-center justify-between">
+                <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
+                  Your Wardrobe
+                </span>
+                <span className="text-xs text-muted-foreground">24 items</span>
+              </div>
+              <div className="grid grid-cols-3 gap-2">
+                {wardrobeItems.map((item) => (
                   <motion.div
-                    whileTap={{ scale: 0.97 }}
+                    key={item.id}
+                    whileTap={{ scale: 0.95 }}
                     transition={{ duration: 0.15, ease: "easeOut" }}
-                    className="mt-4"
+                    className="group relative aspect-square overflow-hidden rounded-xl bg-muted"
                   >
-                    <Link
-                      to="/wardrobe"
-                      className="block w-full rounded-full border border-border py-2.5 text-center text-sm font-medium transition-colors hover:bg-muted"
-                    >
-                      View all
-                    </Link>
+                    <img src={item.image} alt={item.category} className="w-full h-full object-cover" />
+                    <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
+                      <span className="text-xs text-white">{item.category}</span>
+                    </div>
                   </motion.div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                ))}
+              </div>
+            </motion.div>
+          )}
 
-            <AnimatePresence mode="wait">
-              {activeTab === "liked" && (
-                <motion.div
-                  key="liked"
-                  className="w-full shrink-0 snap-start py-12 text-center"
-                  initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-                  animate={shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" } } : false}
-                  exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
-                >
-                  <div className="mx-auto flex w-full max-w-xs flex-col items-center rounded-2xl border border-border bg-card px-4 py-6">
-                    <Heart className="mb-3 h-12 w-12 text-muted-foreground" />
-                    <p className="text-sm font-medium">No liked posts yet</p>
-                    <p className="mt-1 text-xs text-muted-foreground">Tap the heart on posts you want to come back to later.</p>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
-        </div>
+          {activeTab === "liked" && (
+            <motion.div key="liked" className="py-12 text-center" {...panelMotion}>
+              <EmptyState
+                icon={Heart}
+                title="No liked posts yet"
+                body="Tap the heart on posts you want to come back to later."
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
     </PageShell>
+  );
+}
+
+function EmptyState({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
+  return (
+    <div className="mx-auto flex w-full max-w-xs flex-col items-center rounded-2xl border border-border bg-card px-4 py-6">
+      <Icon className="mb-3 h-12 w-12 text-muted-foreground" />
+      <p className="text-sm font-medium">{title}</p>
+      <p className="mt-1 text-xs text-muted-foreground">{body}</p>
+    </div>
   );
 }
