@@ -66,14 +66,24 @@ const outfits = [
   },
 ];
 
+const friendsOnlyOutfits = outfits.slice(0, 3);
+
+const feedModes = [
+  { id: "for-you", label: "For You" },
+  { id: "friends", label: "Friends" },
+] as const;
+
 export function ForYou() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [saved, setSaved] = useState<Set<number>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likeAnim, setLikeAnim] = useState<Set<number>>(new Set());
+  const [feedMode, setFeedMode] = useState<(typeof feedModes)[number]["id"]>("for-you");
   const likeTimerRef = useRef(new Map<number, ReturnType<typeof setTimeout>>());
+  const feedContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
   const shouldAnimate = !useReducedMotion();
+  const visibleOutfits = feedMode === "friends" ? friendsOnlyOutfits : outfits;
 
   const feedPaddingBottom = "calc(6rem + env(safe-area-inset-bottom))";
 
@@ -146,19 +156,24 @@ export function ForYou() {
   };
 
   useEffect(() => {
-    const container = document.getElementById("feed-container");
+    const container = feedContainerRef.current;
     if (!container) return;
 
     const handleScroll = () => {
       const scrollTop = container.scrollTop;
       const itemHeight = container.clientHeight || window.innerHeight;
-      const index = Math.min(outfits.length - 1, Math.max(0, Math.round(scrollTop / itemHeight)));
+      const index = Math.min(visibleOutfits.length - 1, Math.max(0, Math.round(scrollTop / itemHeight)));
       setCurrentIndex(index);
     };
 
     container.addEventListener("scroll", handleScroll);
     return () => container.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [visibleOutfits.length]);
+
+  useEffect(() => {
+    setCurrentIndex(0);
+    feedContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [feedMode]);
 
   return (
     <div className="relative h-[100dvh] bg-black">
@@ -166,9 +181,26 @@ export function ForYou() {
         className="pointer-events-none absolute left-0 right-0 z-20 px-4"
         style={{ top: `calc(0.75rem + env(safe-area-inset-top))` }}
       >
-        <div className="pointer-events-auto flex justify-center">
+        <div className="pointer-events-auto flex flex-col items-center gap-2">
+          <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
+            {feedModes.map((mode) => (
+              <button
+                key={mode.id}
+                type="button"
+                onClick={() => setFeedMode(mode.id)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  feedMode === mode.id
+                    ? "bg-white text-black"
+                    : "text-white/75 hover:bg-white/10 hover:text-white"
+                }`}
+              >
+                {mode.label}
+              </button>
+            ))}
+          </div>
+
           <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1 backdrop-blur-md">
-            {outfits.map((_, i) => (
+            {visibleOutfits.map((_, i) => (
               <div
                 key={i}
                 className={`rounded-full transition-all duration-200 ${
@@ -177,7 +209,7 @@ export function ForYou() {
               />
             ))}
             <span className="ml-1 text-[11px] leading-none text-white/70">
-              {currentIndex + 1}/{outfits.length}
+              {currentIndex + 1}/{visibleOutfits.length}
             </span>
           </div>
         </div>
@@ -194,9 +226,10 @@ export function ForYou() {
 
       <div
         id="feed-container"
+        ref={feedContainerRef}
         className="hide-scrollbar h-[100dvh] overflow-y-auto overscroll-y-contain snap-y snap-mandatory touch-pan-y bg-black"
       >
-        {outfits.map((outfit) => (
+        {visibleOutfits.map((outfit) => (
           <div
             key={outfit.id}
             className="relative flex h-[100dvh] w-full snap-start items-center justify-center bg-black"
