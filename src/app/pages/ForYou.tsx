@@ -163,10 +163,10 @@ export function ForYou() {
   return (
     <div className="relative h-[100dvh] bg-black">
       <div
-        className="pointer-events-none absolute left-0 right-0 z-20 flex items-center justify-between px-4"
+        className="pointer-events-none absolute left-0 right-0 z-20 px-4"
         style={{ top: `calc(0.75rem + env(safe-area-inset-top))` }}
       >
-        <div className="pointer-events-auto flex items-center gap-1.5">
+        <div className="pointer-events-auto flex justify-center">
           <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1 backdrop-blur-md">
             {outfits.map((_, i) => (
               <div
@@ -185,7 +185,7 @@ export function ForYou() {
         <button
           type="button"
           onClick={() => navigate("/search")}
-          className="pointer-events-auto flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/10 p-2.5 backdrop-blur-md transition-colors hover:bg-white/20 active:bg-white/5"
+          className="pointer-events-auto absolute right-4 top-0 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/10 p-2.5 backdrop-blur-md transition-colors hover:bg-white/20 active:bg-white/5"
           aria-label="Open search"
         >
           <Search className="h-[18px] w-[18px] text-white" />
