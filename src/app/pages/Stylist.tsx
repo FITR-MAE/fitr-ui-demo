@@ -5,18 +5,15 @@ import {
   Cloud,
   Droplet,
   Heart,
-  Palette,
   Plus,
   RefreshCw,
   Send,
-  Shirt,
-  Sparkles,
   Sun,
 } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-import { PageHeader, PageSection, PageShell } from "../components/Page";
+import { PageHeader, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 
 type WeatherKind = "sunny" | "cloudy" | "rainy";
@@ -45,9 +42,9 @@ type PaletteCard = {
 };
 
 const tabs = [
-  { id: "ai", label: "AI chat", chip: "Stylist chat", icon: Sparkles },
-  { id: "outfits", label: "Outfits", chip: "Daily looks", icon: Shirt },
-  { id: "colour", label: "Colour", chip: "Colour edit", icon: Palette },
+  { id: "ai", label: "Chat" },
+  { id: "outfits", label: "Looks" },
+  { id: "colour", label: "Colour" },
 ] as const;
 
 const weather = {
@@ -110,7 +107,7 @@ const interactivePillClass =
 const compactListRowClass =
   "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card px-3.5 py-3 transition-colors hover:bg-muted/60 active:scale-[0.98]";
 
-const sectionSurfaceClass = "rounded-2xl border border-border bg-card p-4 shadow-sm";
+const sectionSurfaceClass = "rounded-2xl border border-border bg-card p-4";
 
 const recommendations: OutfitRecommendation[] = [
   {
@@ -176,6 +173,13 @@ export function Stylist() {
   const currentWeather = weather.sunny;
   const WeatherIcon = currentWeather.icon;
   const activePalette = colorPalettes.find((palette) => palette.name === selectedPalette) ?? colorPalettes[0];
+  const tabPanelMotionProps = shouldAnimate
+    ? {
+        initial: { opacity: 0, y: 8 },
+        animate: { opacity: 1, y: 0 },
+        exit: { opacity: 0, y: -8 },
+      }
+    : {};
 
   useEffect(() => {
     return () => {
@@ -257,18 +261,16 @@ export function Stylist() {
         className="app-page-content space-y-4"
       >
         <div className={sectionSurfaceClass}>
-          <div className="flex items-start gap-3">
+          <div className="flex items-start justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <p className="text-base font-semibold text-foreground">Today&apos;s brief</p>
+              <p className="mt-1 text-sm text-muted-foreground">
+                {currentWeather.hint} Built for quick, direct outfit decisions.
+              </p>
+            </div>
             <div className="flex shrink-0 items-center gap-2 rounded-2xl border border-border bg-muted px-3 py-2">
               <WeatherIcon className="h-4 w-4 text-foreground" />
               <span className="text-xl font-semibold">{currentWeather.label}</span>
-            </div>
-            <div className="min-w-0 flex-1">
-              <div className="mb-1">
-                <span className="app-chip">Daily brief</span>
-              </div>
-              <p className="text-sm text-muted-foreground">
-                {currentWeather.hint} Built for quick, thumb-friendly styling decisions.
-              </p>
             </div>
           </div>
         </div>
@@ -297,45 +299,15 @@ export function Stylist() {
             <motion.div
               key="ai"
               layout={shouldAnimate}
-              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-              exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="space-y-4"
+              {...tabPanelMotionProps}
             >
-              <div className={sectionSurfaceClass}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <span className="app-chip">Stylist chat</span>
-                    <h2 className="mt-3 text-base font-semibold text-foreground">Quick start</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Ask for a full outfit, a sharper version of something casual, or a colour correction.
-                    </p>
-                  </div>
-                  <div className="shrink-0 rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    Live
-                  </div>
-                </div>
-
-                <div className="mt-4 flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
-                  {quickPrompts.map((prompt) => (
-                    <button
-                      key={prompt}
-                      type="button"
-                      onClick={() => handleSendMessage(prompt)}
-                      className={`${interactivePillClass} shrink-0 border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground`}
-                    >
-                      {prompt}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
               <div className={sectionSurfaceClass}>
                 <div className="flex items-center justify-between gap-3">
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">Conversation</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">Fast styling help that stays focused on what you already own.</p>
+                    <h2 className="text-base font-semibold text-foreground">Stylist chat</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">Ask for a look, a sharper version, or help styling something you own.</p>
                   </div>
                   {isChatScrolledUp && (
                     <button
@@ -349,6 +321,19 @@ export function Stylist() {
                       </span>
                     </button>
                   )}
+                </div>
+
+                <div className="mt-4 flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
+                  {quickPrompts.map((prompt) => (
+                    <button
+                      key={prompt}
+                      type="button"
+                      onClick={() => handleSendMessage(prompt)}
+                      className={`${interactivePillClass} shrink-0 border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground`}
+                    >
+                      {prompt}
+                    </button>
+                  ))}
                 </div>
 
                 <div
@@ -398,24 +383,28 @@ export function Stylist() {
             <motion.div
               key="outfits"
               layout={shouldAnimate}
-              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-              exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="space-y-4"
+              {...tabPanelMotionProps}
             >
               <div className={sectionSurfaceClass}>
                 <div className="flex items-start justify-between gap-3">
                   <div>
-                    <span className="app-chip">Daily looks</span>
-                    <h2 className="mt-3 text-base font-semibold text-foreground">Style preferences</h2>
+                    <h2 className="text-base font-semibold text-foreground">Style preferences</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      Clean proportions, lighter layers, and one polished finish point.
+                      Keep the brief focused so the look suggestions stay cleaner.
                     </p>
                   </div>
-                  <div className="shrink-0 rounded-full border border-border bg-muted px-2.5 py-1 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                    Today
-                  </div>
+                  <Button
+                    onClick={generateOutfits}
+                    disabled={generating}
+                    size="sm"
+                    variant="outline"
+                    className="rounded-full border-border bg-card text-foreground"
+                  >
+                    <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+                    {generating ? "Refreshing" : "Refresh"}
+                  </Button>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
@@ -442,22 +431,12 @@ export function Stylist() {
                   })}
                 </div>
 
-                <Button
-                  onClick={generateOutfits}
-                  disabled={generating}
-                  size="sm"
-                  variant="outline"
-                  className="mt-4 w-full rounded-full border-border bg-card text-foreground shadow-none"
-                >
-                  <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
-                  {generating ? "Refreshing picks" : "Refresh outfits"}
-                </Button>
               </div>
 
               <div className={sectionSurfaceClass}>
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Recommended outfits</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">A tighter edit that matches today’s brief and your selected preferences.</p>
+                  <h2 className="text-base font-semibold text-foreground">Recommended looks</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">A direct edit based on the current brief and selected preferences.</p>
                 </div>
 
                 <div className="mt-4 space-y-3">
@@ -490,7 +469,7 @@ export function Stylist() {
                           <p className="mt-2 text-sm text-foreground">
                             {rec.outfit.top} with {rec.outfit.bottom} and {rec.outfit.shoes}
                           </p>
-                          <p className="mt-2 text-xs text-muted-foreground">{rec.note}</p>
+                          <p className="mt-1.5 text-xs text-muted-foreground">{rec.note}</p>
                         </div>
                       </div>
                     </div>
@@ -504,28 +483,14 @@ export function Stylist() {
             <motion.div
               key="colour"
               layout={shouldAnimate}
-              initial={shouldAnimate ? { opacity: 0, y: 8 } : false}
-              animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-              exit={shouldAnimate ? { opacity: 0, y: -8 } : false}
               transition={{ duration: 0.22, ease: "easeOut" }}
               className="space-y-4"
+              {...tabPanelMotionProps}
             >
               <div className={sectionSurfaceClass}>
-                <span className="app-chip">Colour edit</span>
-                <h2 className="mt-3 text-base font-semibold text-foreground">Palette focus</h2>
-                <p className="mt-1 text-sm text-muted-foreground">{activePalette.note}</p>
-
-                <div className="mt-4 flex gap-2">
-                  {activePalette.colors.map((color) => (
-                    <div key={color} className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: color }} />
-                  ))}
-                </div>
-              </div>
-
-              <div className={sectionSurfaceClass}>
                 <div>
-                  <h2 className="text-base font-semibold text-foreground">Skin tone guide</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Choose the closest tone to tune colour direction and matching pieces.</p>
+                  <h2 className="text-base font-semibold text-foreground">Colour direction</h2>
+                  <p className="mt-1 text-sm text-muted-foreground">Pick a tone and palette, then use the wardrobe matches below.</p>
                 </div>
 
                 <div className="mt-4 space-y-2">
@@ -555,13 +520,6 @@ export function Stylist() {
                   <div className="text-sm text-foreground">
                     {skinTones.find((tone) => tone.id === selectedSkinTone)?.recommended}
                   </div>
-                </div>
-              </div>
-
-              <div className={sectionSurfaceClass}>
-                <div>
-                  <h2 className="text-base font-semibold text-foreground">Matching wardrobe items</h2>
-                  <p className="mt-1 text-sm text-muted-foreground">Filter your wardrobe by colour family and surface the pieces that fit the current palette best.</p>
                 </div>
 
                 <div className="mt-4 flex flex-wrap gap-1.5">
@@ -596,6 +554,27 @@ export function Stylist() {
                   })}
                 </div>
 
+                <div className="mt-4 flex gap-2">
+                  {activePalette.colors.map((color) => (
+                    <div key={color} className="h-8 w-8 rounded-full border border-border" style={{ backgroundColor: color }} />
+                  ))}
+                </div>
+
+                <p className="mt-3 text-sm text-muted-foreground">{activePalette.note}</p>
+              </div>
+
+              <div className={sectionSurfaceClass}>
+                <div className="flex items-start justify-between gap-3">
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Wardrobe matches</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">The current colour direction first, then the full wardrobe below.</p>
+                  </div>
+                  <Button size="sm" variant="outline" className="rounded-full border-border bg-card text-foreground">
+                    <Plus className="h-4 w-4" />
+                    Add items
+                  </Button>
+                </div>
+
                 <div className="mt-4 space-y-2.5">
                   {wardrobeItems.map((item) => (
                     <div key={item.id} className={compactListRowClass}>
@@ -610,32 +589,22 @@ export function Stylist() {
                     </div>
                   ))}
                 </div>
-              </div>
 
-              <div className={sectionSurfaceClass}>
-                <div className="flex items-start justify-between gap-3">
-                  <div>
-                    <h2 className="text-base font-semibold text-foreground">Your wardrobe</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">Keep your core pieces organised so the stylist can keep suggestions grounded.</p>
+                <div className="mt-4 border-t border-border pt-4">
+                  <div className="mb-3 text-xs font-medium text-muted-foreground">All wardrobe items</div>
+                  <div className="space-y-2.5">
+                    {wardrobeItems.map((item) => (
+                      <div key={item.id} className={compactListRowClass}>
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted">
+                          <div className="h-6 w-6 rounded-lg border border-border" style={{ backgroundColor: item.color }} />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="text-sm font-medium text-foreground">{item.name}</div>
+                          <div className="text-xs text-muted-foreground">{item.category}</div>
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                  <Button size="sm" variant="outline" className="rounded-full border-border bg-card text-foreground shadow-none">
-                    <Plus className="h-4 w-4" />
-                    Add items
-                  </Button>
-                </div>
-
-                <div className="mt-4 space-y-2.5">
-                  {wardrobeItems.map((item) => (
-                    <div key={item.id} className={compactListRowClass}>
-                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border bg-muted">
-                        <div className="h-6 w-6 rounded-lg border border-border" style={{ backgroundColor: item.color }} />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <div className="text-sm font-medium text-foreground">{item.name}</div>
-                        <div className="text-xs text-muted-foreground">{item.category}</div>
-                      </div>
-                    </div>
-                  ))}
                 </div>
               </div>
             </motion.div>

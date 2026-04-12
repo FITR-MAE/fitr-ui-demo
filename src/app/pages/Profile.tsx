@@ -250,10 +250,10 @@ export function Profile() {
                   className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-muted"
                 >
                   <img src={post.image} alt={`Post ${post.id}`} className="w-full h-full object-cover" />
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                  <div className="absolute bottom-2 left-2 flex items-center gap-1.5 rounded-full bg-black/55 px-2 py-1 text-white backdrop-blur-sm">
-                    <Heart className="h-3.5 w-3.5 fill-white" />
-                    <span className="text-[11px] font-medium">{formatLikes(post.likes)}</span>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                  <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/35 px-1.5 py-0.75 text-white/85 backdrop-blur-sm">
+                    <Heart className="h-3 w-3 text-white/70" />
+                    <span className="text-[10px] font-medium text-white/75">{formatLikes(post.likes)}</span>
                   </div>
                 </motion.div>
               ))}
@@ -314,7 +314,9 @@ export function Profile() {
 function EmptyState({ icon: Icon, title, body }: { icon: LucideIcon; title: string; body: string }) {
   return (
     <div className="mx-auto flex w-full max-w-xs flex-col items-center rounded-2xl border border-border bg-card px-4 py-6">
-      <Icon className="mb-3 h-12 w-12 text-muted-foreground" />
+      <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
+        <Icon className="h-4 w-4" />
+      </div>
       <p className="text-sm font-medium">{title}</p>
       <p className="mt-1 text-xs text-muted-foreground">{body}</p>
     </div>

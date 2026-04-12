@@ -116,11 +116,35 @@ export function SearchPage() {
         animate: { opacity: 1, transform: "translateY(0px) scale(1)" },
         exit: { opacity: 0, transform: "translateY(-8px) scale(0.985)" },
       }
-    : {
-        initial: false,
-        animate: false,
-        exit: false,
-      };
+    : {};
+  const filterPanelMotionProps = shouldAnimate
+    ? {
+        initial: { opacity: 0, y: -10, scale: 0.97 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: -12, scale: 0.96 },
+      }
+    : {};
+  const dropdownMotionProps = shouldAnimate
+    ? {
+        initial: { opacity: 0, y: 6, scale: 0.97 },
+        animate: { opacity: 1, y: 0, scale: 1 },
+        exit: { opacity: 0, y: 4, scale: 0.97 },
+      }
+    : {};
+  const getFilterItemMotionProps = (index: number) =>
+    shouldAnimate
+      ? {
+          initial: { opacity: 0, y: 6 },
+          animate: { opacity: 1, y: 0 },
+          transition: { duration: 0.18, delay: index * 0.04, ease: "easeOut" as const },
+        }
+      : {};
+  const emptyStateMotionProps = shouldAnimate
+    ? {
+        initial: { opacity: 0, transform: "translateY(4px)" },
+        animate: { opacity: 1, transform: "translateY(0px)" },
+      }
+    : {};
 
   useEffect(() => {
     if (!hasFilters) {
@@ -206,22 +230,14 @@ export function SearchPage() {
             <motion.div
               key={activeTab}
               layout={shouldAnimate}
-              initial={shouldAnimate ? { opacity: 0, y: -10, scale: 0.97 } : false}
-              animate={shouldAnimate ? { opacity: 1, y: 0, scale: 1 } : false}
-              exit={shouldAnimate ? { opacity: 0, y: -12, scale: 0.96 } : false}
               transition={{ duration: 0.24, ease: "easeOut" }}
               className="overflow-visible rounded-2xl"
+              {...filterPanelMotionProps}
             >
               {activeTabFilters.length > 0 ? (
                 <div className="flex flex-wrap gap-2">
                   {activeTabFilters.map((filter, index) => (
-                    <motion.div
-                      key={filter.id}
-                      initial={shouldAnimate ? { opacity: 0, y: 6 } : false}
-                      animate={shouldAnimate ? { opacity: 1, y: 0 } : false}
-                      transition={{ duration: 0.18, delay: shouldAnimate ? index * 0.04 : 0, ease: "easeOut" }}
-                      className="relative"
-                    >
+                    <motion.div key={filter.id} className="relative" {...getFilterItemMotionProps(index)}>
                       {filter.type === "select" ? (
                         <>
                           <button
@@ -249,11 +265,9 @@ export function SearchPage() {
                           <AnimatePresence>
                             {openFilterMenu === filter.id && (
                               <motion.div
-                                initial={shouldAnimate ? { opacity: 0, y: 6, scale: 0.97 } : false}
-                                animate={shouldAnimate ? { opacity: 1, y: 0, scale: 1 } : false}
-                                exit={shouldAnimate ? { opacity: 0, y: 4, scale: 0.97 } : false}
                                 transition={{ duration: 0.18, ease: "easeOut" }}
-                                className="absolute left-0 top-full z-20 mt-2 min-w-[11rem] rounded-2xl border border-border bg-card p-1 shadow-lg"
+                                className="absolute left-0 top-full z-20 mt-2 min-w-[11rem] rounded-2xl border border-border bg-card p-1"
+                                {...dropdownMotionProps}
                               >
                                 {filter.options.map((option) => {
                                   const selected =
@@ -313,10 +327,9 @@ export function SearchPage() {
                 </div>
               ) : (
                 <motion.p
-                  initial={shouldAnimate ? { opacity: 0, transform: "translateY(4px)" } : false}
-                  animate={shouldAnimate ? { opacity: 1, transform: "translateY(0px)" } : false}
                   transition={{ duration: 0.18, ease: "easeOut" }}
                   className="text-sm text-muted-foreground"
+                  {...emptyStateMotionProps}
                 >
                   No filters available for users yet.
                 </motion.p>
@@ -339,12 +352,10 @@ export function SearchPage() {
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-semibold text-white">
                         {user.name.charAt(0)}
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="flex items-center gap-2">
-                          <span className="truncate text-sm font-medium text-foreground">{user.name}</span>
-                          <span className="truncate text-xs text-muted-foreground">{user.handle}</span>
-                        </p>
-                        <p className="truncate text-xs text-muted-foreground">{user.detail}</p>
+                      <div className="min-w-0 flex-1 space-y-0.5">
+                        <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
+                        <p className="truncate text-xs text-muted-foreground">{user.handle}</p>
+                        <p className="truncate text-xs text-muted-foreground/90">{user.detail}</p>
                       </div>
                     </div>
                   ))}
