@@ -37,8 +37,7 @@ export function ActivityDetailPage() {
                 "Love this outfit. The structure and colours work really well together."
               </p>
               <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
-                <Clock3 className="h-4 w-4" />
-                4 minutes ago
+                <Clock3 className="h-4 w-4" />4 minutes ago
               </div>
             </div>
           </div>

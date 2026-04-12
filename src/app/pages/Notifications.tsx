@@ -1,4 +1,4 @@
-import { BadgeCent, ChevronRight, Heart, MessageCircle, Send, Share, Share2, Store } from "lucide-react";
+import { BadgeCent, ChevronRight, Heart, Store } from "lucide-react";
 
 import { Link } from "react-router";
 
@@ -72,7 +72,7 @@ export function NotificationsPage() {
       <div className="app-page-content space-y-4">
         <PageSection className="p-4">
           <div className="mb-3">
-            <span className="app-chip">Activity</span>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Activity</span>
           </div>
           <div className="space-y-1">
             <Link
@@ -84,13 +84,13 @@ export function NotificationsPage() {
                   <Heart className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Interactions</span>
                 </div>
-                <div className=" flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-xs">{activityItem.user} and 71 others liked your post</span>
                 </div>
               </div>
-              <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
-                <span className="text-xs text-muted-foreground">{activityItem.time}</span>
-                <ChevronRight className="mt-1 w-4 h-4 shrink-0 text-muted-foreground" />
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="text-xs text-muted-foreground">4m</span>
+                <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
               </div>
             </Link>
             <Link
@@ -102,13 +102,13 @@ export function NotificationsPage() {
                   <BadgeCent className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Upcoming sales</span>
                 </div>
-                <div className=" flex items-center justify-between gap-3">
+                <div className="flex items-center justify-between gap-3">
                   <span className="text-xs">Maison Margiela and 3 other brands you follow have upcoming sales</span>
                 </div>
               </div>
-              <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
-                <span className="text-xs text-muted-foreground">{activityItem.time}</span>
-                <ChevronRight className="mt-1 w-4 h-4 shrink-0 text-muted-foreground" />
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="text-xs text-muted-foreground">2h</span>
+                <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
               </div>
             </Link>
             <Link
@@ -120,13 +120,13 @@ export function NotificationsPage() {
                   <Store className="w-4 h-4 text-muted-foreground" />
                   <span className="text-sm font-medium">Near you</span>
                 </div>
-                <div className=" flex items-center justify-between gap-3">
-                  <span className="text-xs">you have 3 fashion stores in a walking distance</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="text-xs">You have 3 fashion stores within walking distance</span>
                 </div>
               </div>
-              <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
-                <span className="text-xs text-muted-foreground">{activityItem.time}</span>
-                <ChevronRight className="mt-1 w-4 h-4 shrink-0 text-muted-foreground" />
+              <div className="flex shrink-0 items-center gap-1">
+                <span className="text-xs text-muted-foreground">1d</span>
+                <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
               </div>
             </Link>
           </div>
@@ -134,7 +134,7 @@ export function NotificationsPage() {
 
         <PageSection className="p-4">
           <div className="mb-3">
-            <span className="app-chip">Messages</span>
+            <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Messages</span>
           </div>
           <div className="space-y-1">
             {messages.map((item) => (
@@ -155,7 +155,7 @@ export function NotificationsPage() {
                     {item.message}
                   </p>
                 </div>
-                <div className="flex shrink-0 flex-row items-center justify-center gap-1 ">
+                <div className="flex shrink-0 items-center gap-1">
                   {item.unread && <div className="w-2 h-2 rounded-full bg-blue-500" />}
                   <span className="text-xs text-muted-foreground">{item.time}</span>
                 </div>
