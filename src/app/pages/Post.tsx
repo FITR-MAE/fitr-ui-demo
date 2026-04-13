@@ -10,9 +10,9 @@ type Step = "media" | "edit" | "details";
 const steps: Step[] = ["media", "edit", "details"];
 
 const mockImages = [
-  "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=1080",
-  "https://images.unsplash.com/photo-1651742532544-346cc809adb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=1080",
-  "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=1080",
+  "https://images.unsplash.com/photo-1651742532474-ea4401a34a10",
+  "https://images.unsplash.com/photo-1651742532544-346cc809adb3",
+  "https://images.unsplash.com/photo-1651744258699-d322dff9632c",
 ];
 
 const tagSuggestions = [
@@ -355,7 +355,6 @@ export function Post() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium text-foreground">Add Location</div>
-                      <div className="text-xs text-muted-foreground">Share where the look came together</div>
                     </div>
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>
@@ -363,7 +362,6 @@ export function Post() {
                     <Users className="h-4 w-4 text-muted-foreground" />
                     <div className="min-w-0 flex-1">
                       <div className="text-sm font-medium text-foreground">Tag People</div>
-                      <div className="text-xs text-muted-foreground">Credit the people in your post</div>
                     </div>
                     <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </button>

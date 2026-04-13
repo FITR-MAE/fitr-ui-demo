@@ -6,85 +6,90 @@ import { useNavigate } from "react-router";
 const outfits = [
   {
     id: 1,
-    image:
-      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "StyleIcon",
-    caption: "Effortless neutrals for spring",
+    image: "https://images.unsplash.com/photo-1528120369764-0423708119ae",
+    user: "NinaCastellano",
+    caption: "Found this coat at the back of my closet and now I look like a whole movie character",
     likes: 2847,
     comments: 124,
     shares: 62,
     saves: 418,
-    tags: ["casual", "neutral", "spring"],
+    tags: ["oversized", "blazer", "boss"],
   },
   {
     id: 2,
-    image:
-      "https://images.unsplash.com/photo-1651742532544-346cc809adb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "UrbanChic",
-    caption: "Layered textures",
+    image: "https://images.unsplash.com/photo-1774413768903-057eb084133b",
+    user: "DevonBrooks",
+    caption: "This jacket said 'let's go to the store for snacks' and I said bet",
     likes: 1923,
     comments: 87,
     shares: 41,
     saves: 275,
-    tags: ["layers", "urban", "minimal"],
+    tags: ["streetwear", "bomber", "casual"],
   },
   {
     id: 3,
-    image:
-      "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "ModernMuse",
-    caption: "Classic coat moment",
+    image: "https://images.unsplash.com/photo-1659899505079-dbc449c4f9d1",
+    user: "KeishaMorgan",
+    caption: "The sea breeze did my hair and honestly I'm not complaining",
     likes: 3204,
     comments: 156,
     shares: 88,
     saves: 534,
-    tags: ["outerwear", "classic", "elegant"],
+    tags: ["coastal", "chic", "effortless"],
   },
   {
     id: 4,
-    image:
-      "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "SunsetStyle",
-    caption: "Summer whites",
+    image: "https://images.unsplash.com/photo-1708024587407-73445142b5a8",
+    user: "ArjunMehta",
+    caption: "The turtleneck was on sale and so was my productivity for the week",
     likes: 4156,
     comments: 203,
     shares: 104,
     saves: 612,
-    tags: ["summer", "white", "chic"],
+    tags: ["turtleneck", "smart", "minimal"],
   },
   {
     id: 5,
-    image:
-      "https://images.unsplash.com/photo-1651744258329-9868b90f456c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "AvantGarde",
-    caption: "Bold silhouettes",
+    image: "https://images.unsplash.com/photo-1658431410012-69515380f5d4",
+    user: "ChloeLaurent",
+    caption: "Got dressed and felt so powerful the streetlights literally bounced off me",
     likes: 2617,
     comments: 91,
     shares: 57,
     saves: 369,
-    tags: ["avant-garde", "statement", "bold"],
+    tags: ["iridescent", "showstopper", "bold"],
   },
   {
     id: 6,
-    image:
-      "https://images.unsplash.com/photo-1651828854976-4fa163b636ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw2fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080",
-    user: "ColorTheory",
-    caption: "Vibrant energy",
+    image: "https://images.unsplash.com/photo-1771828539833-d5325e819197",
+    user: "PriyaSharma",
+    caption: "Every time I wear this my dad says I look like a queen and honestly he's right",
     likes: 3891,
     comments: 178,
     shares: 96,
     saves: 581,
-    tags: ["color", "vibrant", "bold"],
+    tags: ["ethnic", "silk", "heritage"],
+  },
+  {
+    id: 7,
+    image: "https://images.unsplash.com/photo-1771919336237-4b11b12e0793",
+    user: "MarcusCole",
+    caption: "Main character energy loaded and the graphics on this fit are unmatched",
+    likes: 2100,
+    comments: 95,
+    shares: 48,
+    saves: 310,
+    tags: ["streetwear", "graphic", "fits"],
   },
 ];
 
-const friendsOnlyOutfits = outfits.slice(0, 3);
-const followingOutfits = outfits.slice(2, 6);
+const friendsOnlyOutfits = outfits.slice(0, 4);
+const followingOutfits = outfits.slice(3, 8);
 
 const feedModes = [
-  { id: "for-you", label: "For You" },
-  { id: "friends", label: "Friends" },
-  { id: "following", label: "Following" },
+  { id: "for-you", label: "Your Lineup" },
+  { id: "friends", label: "Your Circle" },
+  { id: "following", label: "Following " },
 ] as const;
 
 const formatCount = (count: number) => (count > 999 ? `${Math.floor(count / 1000)}k` : count);
@@ -194,10 +199,7 @@ export function ForYou() {
 
   return (
     <div className="relative h-full bg-black">
-      <div
-        className="pointer-events-none absolute left-0 right-0 z-20 px-4"
-        style={{ top: "0.75rem" }}
-      >
+      <div className="pointer-events-none absolute left-0 right-0 z-20 px-4" style={{ top: "0.75rem" }}>
         <div className="pointer-events-auto flex flex-col items-center gap-2">
           <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
             {feedModes.map((mode) => (
@@ -214,7 +216,7 @@ export function ForYou() {
             ))}
           </div>
 
-          <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1 backdrop-blur-md">
+          {/* <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1 backdrop-blur-md">
             {visibleOutfits.map((_, i) => (
               <div
                 key={i}
@@ -226,7 +228,7 @@ export function ForYou() {
             <span className="ml-1 text-[11px] leading-none text-white/70">
               {currentIndex + 1}/{visibleOutfits.length}
             </span>
-          </div>
+          </div> */}
         </div>
 
         <button

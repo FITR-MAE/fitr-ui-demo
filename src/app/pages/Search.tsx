@@ -42,34 +42,100 @@ const defaultFilterState = {
   stores: { distance: "5 mi", openNow: false, category: "All" },
 } as const;
 
-const userResults = [
-  { id: 1, name: "Sarah Connor", handle: "@sarahfits", detail: "Minimal tailoring and clean neutrals" },
-  { id: 2, name: "Lena Hart", handle: "@lenalooks", detail: "Vintage streetwear with soft layers" },
-  { id: 3, name: "Marcus Vale", handle: "@marcusmode", detail: "Sharp menswear and elevated basics" },
+const userPhotos = [
+  "https://plus.unsplash.com/premium_photo-1758726036543-a5294a86066e",
+  "https://images.unsplash.com/photo-1774128089578-62b9454c0697",
+  "https://images.unsplash.com/photo-1674504176007-d2f55cd47ad4",
+  "https://images.unsplash.com/photo-1773932547658-cb3eb244aad3",
+  "https://plus.unsplash.com/premium_photo-1728657016169-a425d4b5f813",
+  "https://images.unsplash.com/photo-1773240307047-8412fcf1d866",
+  "https://images.unsplash.com/photo-1773146916297-c9f61093c308",
+  "https://images.unsplash.com/photo-1772442088907-463f166cf1f2",
+  "https://images.unsplash.com/photo-1773698403328-e6891737b7dd",
 ];
 
-const postResults = [
+const userResults = [
   {
     id: 1,
-    title: "Monochrome layering",
-    meta: "2.8k likes",
-    image:
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=600",
+    name: "Emma Laurent",
+    handle: "@emmalooks",
+    detail: "Minimal tailoring and elevated basics",
+    photo: userPhotos[0],
   },
   {
     id: 2,
-    title: "Weekend denim edit",
-    meta: "1.9k likes",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw4fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=600",
+    name: "James Wilson",
+    handle: "@jamesfits",
+    detail: "Classic menswear with modern touches",
+    photo: userPhotos[1],
   },
   {
     id: 3,
-    title: "Structured coat styling",
-    meta: "3.2k likes",
-    image:
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMXxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=600",
+    name: "Sofia Chen",
+    handle: "@sofiastyle",
+    detail: "Effortless neutrals and relaxed silhouettes",
+    photo: userPhotos[2],
   },
+  {
+    id: 4,
+    name: "Marcus Cole",
+    handle: "@marcusstyle",
+    detail: "Refined streetwear and layered looks",
+    photo: userPhotos[3],
+  },
+  {
+    id: 5,
+    name: "Maya Rivera",
+    handle: "@mayalooks",
+    detail: "Bold colors and vintage-inspired pieces",
+    photo: userPhotos[4],
+  },
+  {
+    id: 6,
+    name: "Daniel Kim",
+    handle: "@danielk",
+    detail: "Tailored essentials and clean aesthetics",
+    photo: userPhotos[5],
+  },
+  {
+    id: 7,
+    name: "Ava Thompson",
+    handle: "@avawears",
+    detail: "Clean lines and timeless essentials",
+    photo: userPhotos[6],
+  },
+  {
+    id: 8,
+    name: "Ryan Brooks",
+    handle: "@ryanstyle",
+    detail: "Urban fashion with minimalist accents",
+    photo: userPhotos[7],
+  },
+  {
+    id: 9,
+    name: "Luna Park",
+    handle: "@lunastyle",
+    detail: "Modern streetwear with an artistic edge",
+    photo: userPhotos[8],
+  },
+];
+
+const postPhotos = [
+  "https://images.unsplash.com/photo-1773853430943-5826d01813ae",
+  "https://images.unsplash.com/photo-1775831726875-e3ca6f3ed2f8",
+  "https://images.unsplash.com/photo-1683740912929-8920082c4659",
+  "https://images.unsplash.com/photo-1775592230963-fe488fd06dd7",
+  "https://images.unsplash.com/photo-1775036760841-6c1854634646",
+  "https://images.unsplash.com/photo-1774748564101-739b1487e47f",
+];
+
+const postResults = [
+  { id: 1, title: "Monochrome layering", meta: "2.8k likes", image: postPhotos[0] },
+  { id: 2, title: "Weekend denim edit", meta: "1.9k likes", image: postPhotos[1] },
+  { id: 3, title: "Structured coat styling", meta: "3.2k likes", image: postPhotos[2] },
+  { id: 4, title: "Summer basics", meta: "2.1k likes", image: postPhotos[3] },
+  { id: 5, title: "Streetwear edit", meta: "1.5k likes", image: postPhotos[4] },
+  { id: 6, title: "Evening looks", meta: "4.2k likes", image: postPhotos[5] },
 ];
 
 const clothesResults = [
@@ -349,8 +415,8 @@ export function SearchPage() {
                 <div className="mt-3 space-y-2">
                   {userResults.map((user) => (
                     <div key={user.id} className={compactResultCardClass}>
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-sm font-semibold text-white">
-                        {user.name.charAt(0)}
+                      <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                        <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
@@ -368,10 +434,9 @@ export function SearchPage() {
                   {postResults.map((post) => (
                     <div key={post.id} className="group relative aspect-square overflow-hidden rounded-2xl bg-muted">
                       <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
-                      <div className="absolute inset-x-0 bottom-0 p-3 text-white">
-                        <p className="text-sm font-medium">{post.title}</p>
-                        <p className="mt-1 text-xs text-white/80">{post.meta}</p>
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+                      <div className="absolute bottom-2 left-2">
+                        <p className="text-xs font-medium text-white">{post.meta}</p>
                       </div>
                     </div>
                   ))}
@@ -442,19 +507,21 @@ export function SearchPage() {
                         type="button"
                         onClick={() => setSelectedStoreId(store.id)}
                         className={`${compactResultCardClass} w-full text-left transition-colors ${
-                          selectedStoreId === store.id
-                            ? "border-zinc-800 bg-zinc-800 text-white"
-                            : "hover:bg-muted/60"
+                          selectedStoreId === store.id ? "border-zinc-800 bg-zinc-800 text-white" : "hover:bg-muted/60"
                         }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                           <Store className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
-                          <p className={`truncate text-sm font-medium ${selectedStoreId === store.id ? "text-white" : "text-foreground"}`}>
+                          <p
+                            className={`truncate text-sm font-medium ${selectedStoreId === store.id ? "text-white" : "text-foreground"}`}
+                          >
                             {store.name}
                           </p>
-                          <p className={`truncate text-xs ${selectedStoreId === store.id ? "text-white/75" : "text-muted-foreground"}`}>
+                          <p
+                            className={`truncate text-xs ${selectedStoreId === store.id ? "text-white/75" : "text-muted-foreground"}`}
+                          >
                             {store.meta}
                           </p>
                         </div>

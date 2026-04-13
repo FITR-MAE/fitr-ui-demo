@@ -1,7 +1,23 @@
 import { Check, ChevronRight, Cloud, Droplet, Heart, Plus, RefreshCw, Send, Sparkles, Sun } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
-import { GraphCanvas, lightTheme, type GraphEdge, type GraphNode } from "reagraph";
+import { useEffect, useMemo, useRef, useState } from "react";
+import {
+  ReactFlow,
+  Background,
+  BaseEdge,
+  Handle,
+  Position,
+  applyNodeChanges,
+  getStraightPath,
+  useInternalNode,
+  type Edge,
+  type EdgeProps,
+  type Node,
+  type NodeChange,
+  type NodeProps,
+} from "@xyflow/react";
+// @ts-expect-error vite handles css side-effect imports
+import "@xyflow/react/dist/style.css";
 
 import { PageHeader, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
@@ -51,6 +67,55 @@ type InspirationOutfit = {
   reason: string;
   matchingItems: string[];
 };
+
+type CircleNodeData = {
+  label: string;
+  avatar?: string;
+  selected?: boolean;
+  isUser?: boolean;
+};
+
+const CircleNode: React.FC<NodeProps<Node<CircleNodeData>>> = ({ data }) => {
+  const { label, avatar, selected, isUser } = data;
+  const size = isUser ? 64 : 56;
+  const handleStyle = { opacity: 0, width: 1, height: 1, background: "transparent", border: "none" } as const;
+  return (
+    <div className="flex flex-col items-center">
+      <Handle type="target" position={Position.Top} style={handleStyle} isConnectable={false} />
+      <Handle type="source" position={Position.Bottom} style={handleStyle} isConnectable={false} />
+      <div
+        className="overflow-hidden rounded-full border bg-background transition-shadow"
+        style={{
+          width: size,
+          height: size,
+          borderColor: selected || isUser ? "#030213" : "rgba(0,0,0,0.15)",
+          borderWidth: selected || isUser ? 2 : 1,
+          boxShadow: selected ? "0 0 0 4px rgba(3,2,19,0.08)" : "none",
+          background: isUser ? "#030213" : "#ffffff",
+        }}
+      >
+        {avatar ? <img src={avatar} alt={label} className="h-full w-full object-cover" /> : null}
+      </div>
+    </div>
+  );
+};
+
+const nodeTypes = { circle: CircleNode };
+
+const FloatingEdge: React.FC<EdgeProps> = ({ id, source, target, style }) => {
+  const sourceNode = useInternalNode(source);
+  const targetNode = useInternalNode(target);
+  if (!sourceNode || !targetNode) return null;
+  const halfFor = (nodeId: string) => (nodeId === "you" ? 32 : 28);
+  const sx = sourceNode.internals.positionAbsolute.x + halfFor(source);
+  const sy = sourceNode.internals.positionAbsolute.y + halfFor(source);
+  const tx = targetNode.internals.positionAbsolute.x + halfFor(target);
+  const ty = targetNode.internals.positionAbsolute.y + halfFor(target);
+  const [path] = getStraightPath({ sourceX: sx, sourceY: sy, targetX: tx, targetY: ty });
+  return <BaseEdge id={id} path={path} style={style} />;
+};
+
+const edgeTypes = { floating: FloatingEdge };
 
 const tabs = [
   { id: "ai", label: "Chat" },
@@ -116,7 +181,7 @@ const inspirationProfiles: InspirationProfile[] = [
     name: "Lena Hart",
     handle: "@lenalooks",
     avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
     note: "Soft tailoring, warm neutrals, and easy layering with a clean finish.",
     wardrobe: ["Boxy oat blazer", "Cream rib tank", "Wide-leg stone trousers"],
     similarity: 94,
@@ -127,7 +192,7 @@ const inspirationProfiles: InspirationProfile[] = [
     name: "Marcus Vale",
     handle: "@marcusmode",
     avatar:
-      "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
     note: "Sharp casual outfits built from polos, structured outerwear, and darker trousers.",
     wardrobe: ["Navy knit polo", "Camel overshirt", "Pleated black trousers"],
     similarity: 91,
@@ -138,7 +203,7 @@ const inspirationProfiles: InspirationProfile[] = [
     name: "Nina Sloane",
     handle: "@ninasloane",
     avatar:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1061&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956",
     note: "Minimal wardrobe staples with tonal colour stories and cleaner sneakers.",
     wardrobe: ["Sand poplin shirt", "Taupe drawstring trousers", "White leather trainers"],
     similarity: 88,
@@ -149,10 +214,30 @@ const inspirationProfiles: InspirationProfile[] = [
     name: "Ava Moreau",
     handle: "@avamoreau",
     avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1064&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
     note: "Elevated basics with cleaner contrasts, soft suiting, and polished off-duty layers.",
     wardrobe: ["Black funnel-neck top", "Ivory straight trousers", "Structured leather tote"],
     similarity: 86,
+  },
+  {
+    id: 5,
+    nodeId: "celine",
+    name: "Celine Tran",
+    handle: "@celinefits",
+    avatar: "https://images.unsplash.com/photo-1681958758197-0a37ed2e72b2",
+    note: "Oversized silhouettes, bold colour blocking, and textured layers with streetwear edge.",
+    wardrobe: ["Oversized washed denim jacket", "Graphic tee", "Cargo trousers"],
+    similarity: 83,
+  },
+  {
+    id: 6,
+    nodeId: "rafi",
+    name: "Rafi Osei",
+    handle: "@rafiosei",
+    avatar: "https://images.unsplash.com/photo-1680474166817-d1c2539c0a61",
+    note: "Relaxed modern cuts, earthy tones, and mixing high and low pieces effortlessly.",
+    wardrobe: ["Linen chore jacket", "Ribbed henley", "Washed black jeans"],
+    similarity: 79,
   },
 ];
 
@@ -160,7 +245,7 @@ const userProfile = {
   id: "you",
   name: "You",
   avatar:
-    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    "https://images.unsplash.com/photo-1517841905240-472988babdf9",
   note: "Your current direction is clean, tailored, and wardrobe-led.",
 };
 
@@ -170,7 +255,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "lena",
     title: "Soft neutral tailoring",
     image:
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
     popularity: "4.1k saves",
     reason: "Works because it overlaps with your linen shirt, beige trousers, and lighter layering pieces.",
     matchingItems: ["White linen shirt", "Beige wide-leg trousers", "Camel blazer"],
@@ -180,7 +265,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "lena",
     title: "Easy gallery-day look",
     image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw4fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
     popularity: "3.4k likes",
     reason: "A softer version of what you already wear, with the same relaxed tailoring and neutral balance.",
     matchingItems: ["White linen shirt", "Khaki chinos"],
@@ -190,7 +275,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "marcus",
     title: "Sharp off-duty layers",
     image:
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMXxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
     popularity: "5.2k saves",
     reason: "This lands because your navy polo and black trousers already set up the same sharper silhouette.",
     matchingItems: ["Navy polo", "Black tailored pants", "Camel blazer"],
@@ -200,7 +285,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "marcus",
     title: "Minimal city uniform",
     image:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae",
     popularity: "2.9k likes",
     reason: "The clean dark base maps closely to pieces you already own, just with a slightly more structured finish.",
     matchingItems: ["Black tailored pants", "White sneakers"],
@@ -210,7 +295,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "nina",
     title: "Tone-on-tone essentials",
     image:
-      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxM3xmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105",
     popularity: "4.8k saves",
     reason: "It stays in your lane: quiet tones, cleaner sneakers, and easy separation between top and bottom.",
     matchingItems: ["White linen shirt", "Khaki chinos", "White sneakers"],
@@ -220,7 +305,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "nina",
     title: "Clean weekend edit",
     image:
-      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10",
     popularity: "2.5k likes",
     reason: "The proportions and palette line up with the pieces already sitting in your wardrobe rotation.",
     matchingItems: ["Beige wide-leg trousers", "Camel blazer"],
@@ -230,7 +315,7 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "ava",
     title: "Polished contrast dressing",
     image:
-      "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1651744258699-d322dff9632c",
     popularity: "3.8k saves",
     reason: "A more elevated branch of your current wardrobe, using the same clean separates with stronger contrast.",
     matchingItems: ["Black tailored pants", "White linen shirt"],
@@ -240,10 +325,50 @@ const inspirationOutfits: InspirationOutfit[] = [
     profileNodeId: "ava",
     title: "Structured evening casual",
     image:
-      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949",
     popularity: "2.2k likes",
     reason: "It borrows your sharper pieces and pushes them one step further without needing a full wardrobe change.",
     matchingItems: ["Camel blazer", "Black tailored pants"],
+  },
+  {
+    id: 9,
+    profileNodeId: "celine",
+    title: "Oversized denim moment",
+    image:
+      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+    popularity: "5.1k saves",
+    reason: "Uses the same oversized proportions you're drawn to, with added texture from the washed denim.",
+    matchingItems: ["Oversized denim jacket", "Graphic tee", "Cargo trousers"],
+  },
+  {
+    id: 10,
+    profileNodeId: "celine",
+    title: "Bold colour block edit",
+    image:
+      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
+    popularity: "3.9k likes",
+    reason: "Matches your vibe if you're going for something louder without leaving your comfort zone.",
+    matchingItems: ["Washed bomber", "Black graphic tee", "Slim cargo pants"],
+  },
+  {
+    id: 11,
+    profileNodeId: "rafi",
+    title: "Earthy weekend layers",
+    image:
+      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
+    popularity: "4.3k saves",
+    reason: "Earth tones and relaxed tailoring align with what you already reach for on weekends.",
+    matchingItems: ["Linen chore jacket", "Ribbed henley", "Washed black jeans"],
+  },
+  {
+    id: 12,
+    profileNodeId: "rafi",
+    title: "Smart casual refresh",
+    image:
+      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+    popularity: "2.8k likes",
+    reason: "Pulls from your existing wardrobe but reframes it with smarter proportions and tonal cohesion.",
+    matchingItems: ["Cream knit polo", "Tan chinos", "White sneakers"],
   },
 ];
 
@@ -252,8 +377,8 @@ const interactivePillClass = "rounded-full border px-3 py-1.5 text-xs font-mediu
 const compactListRowClass =
   "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border px-3.5 py-3 transition-colors hover:bg-muted/40 active:scale-[0.98]";
 
-const sectionSurfaceClass = "rounded-[26px] p-4";
-const briefSectionClass = "rounded-[28px] px-4 py-3";
+const sectionSurfaceClass = "rounded-2xl p-3";
+const briefSectionClass = "rounded-2xl px-3 py-2.5";
 
 const recommendations: OutfitRecommendation[] = [
   {
@@ -322,28 +447,120 @@ export function Stylist() {
   const selectedInspirationOutfits = inspirationOutfits.filter(
     (outfit) => outfit.profileNodeId === selectedInspiration.nodeId,
   );
-  const inspirationGraphNodes: GraphNode[] = [
+  const RADIUS = 170;
+  const initialPositions = useMemo(() => {
+    const map: Record<string, { x: number; y: number }> = {
+      [userProfile.id]: { x: -32, y: -32 },
+    };
+    inspirationProfiles.forEach((profile, index) => {
+      const angle = (index / inspirationProfiles.length) * Math.PI * 2 - Math.PI / 2;
+      map[profile.nodeId] = { x: Math.cos(angle) * RADIUS - 28, y: Math.sin(angle) * RADIUS - 28 };
+    });
+    return map;
+  }, []);
+  const targetPositionsRef = useRef<Record<string, { x: number; y: number }>>({ ...initialPositions });
+
+  const [graphNodes, setGraphNodes] = useState<Node<CircleNodeData>[]>(() => [
     {
       id: userProfile.id,
-      label: userProfile.name,
-      icon: userProfile.avatar,
-      labelVisible: true,
-      fill: "#030213",
+      type: "circle",
+      position: initialPositions[userProfile.id],
+      data: { label: userProfile.name, avatar: userProfile.avatar, isUser: true },
     },
     ...inspirationProfiles.map((profile) => ({
       id: profile.nodeId,
-      label: profile.name,
-      icon: profile.avatar,
-      labelVisible: true,
-      fill: "#ffffff",
-      data: { similarity: profile.similarity },
+      type: "circle" as const,
+      position: initialPositions[profile.nodeId],
+      data: {
+        label: profile.name,
+        avatar: profile.avatar,
+        selected: profile.nodeId === inspirationProfiles[0].nodeId,
+      },
     })),
-  ];
-  const inspirationGraphEdges: GraphEdge[] = inspirationProfiles.map((profile) => ({
+  ]);
+
+  const springFramesRef = useRef<Map<string, number>>(new Map());
+
+  useEffect(() => {
+    setGraphNodes((nodes) =>
+      nodes.map((n) => ({ ...n, data: { ...n.data, selected: n.id === selectedInspirationNodeId } })),
+    );
+  }, [selectedInspirationNodeId]);
+
+  useEffect(() => {
+    const frames = springFramesRef.current;
+    return () => {
+      frames.forEach((id) => cancelAnimationFrame(id));
+      frames.clear();
+    };
+  }, []);
+
+  const handleNodesChange = (changes: NodeChange<Node<CircleNodeData>>[]) => {
+    setGraphNodes((nodes) => applyNodeChanges(changes, nodes));
+  };
+
+  const springBackToOrigin = (nodeId: string) => {
+    const current = graphNodes.find((n) => n.id === nodeId);
+    if (!current) return;
+    let origin: { x: number; y: number };
+    if (nodeId === userProfile.id) {
+      origin = initialPositions[userProfile.id];
+    } else {
+      const half = 28;
+      const cx = current.position.x + half;
+      const cy = current.position.y + half;
+      const angle = Math.atan2(cy, cx);
+      origin = {
+        x: Math.cos(angle) * RADIUS - half,
+        y: Math.sin(angle) * RADIUS - half,
+      };
+    }
+    targetPositionsRef.current[nodeId] = origin;
+    const frames = springFramesRef.current;
+    const existing = frames.get(nodeId);
+    if (existing) cancelAnimationFrame(existing);
+
+    const stiffness = 0.12;
+    const damping = 0.72;
+    let vx = 0;
+    let vy = 0;
+
+    const step = () => {
+      let done = false;
+      setGraphNodes((nodes) =>
+        nodes.map((n) => {
+          if (n.id !== nodeId) return n;
+          const dx = origin.x - n.position.x;
+          const dy = origin.y - n.position.y;
+          vx = (vx + dx * stiffness) * damping;
+          vy = (vy + dy * stiffness) * damping;
+          const nx = n.position.x + vx;
+          const ny = n.position.y + vy;
+          if (Math.abs(dx) < 0.3 && Math.abs(dy) < 0.3 && Math.abs(vx) < 0.3 && Math.abs(vy) < 0.3) {
+            done = true;
+            return { ...n, position: { x: origin.x, y: origin.y } };
+          }
+          return { ...n, position: { x: nx, y: ny } };
+        }),
+      );
+      if (done) {
+        frames.delete(nodeId);
+      } else {
+        frames.set(nodeId, requestAnimationFrame(step));
+      }
+    };
+    frames.set(nodeId, requestAnimationFrame(step));
+  };
+
+  const inspirationGraphEdges: Edge[] = inspirationProfiles.map((profile) => ({
     id: `${userProfile.id}-${profile.nodeId}`,
     source: userProfile.id,
     target: profile.nodeId,
-    label: `${profile.similarity}%`,
+    type: "floating",
+    style: {
+      stroke: profile.nodeId === selectedInspirationNodeId ? "#030213" : "rgba(0,0,0,0.2)",
+      strokeWidth: 1,
+    },
   }));
   const tabPanelMotionProps = shouldAnimate
     ? {
@@ -410,7 +627,7 @@ export function Stylist() {
       <motion.div
         layout={shouldAnimate}
         transition={{ duration: 0.24, ease: "easeOut" }}
-        className="app-page-content flex h-full min-h-0 flex-col gap-4 overflow-hidden px-0 py-4"
+        className="app-page-content flex h-full min-h-0 flex-col gap-3 overflow-hidden px-0 pt-2 pb-2"
       >
         <div className={`${briefSectionClass} shrink-0`}>
           <div className="flex items-start justify-between gap-3">
@@ -429,7 +646,7 @@ export function Stylist() {
         <motion.div
           layout={shouldAnimate}
           transition={{ duration: 0.24, ease: "easeOut" }}
-          className="flex shrink-0 justify-center px-4"
+          className="flex shrink-0 justify-center px-3"
         >
           <div className="inline-flex flex-wrap justify-center rounded-full border border-border bg-card p-1">
             {tabs.map((tab) => (
@@ -448,7 +665,7 @@ export function Stylist() {
             ))}
           </div>
         </motion.div>
-        <div className="min-h-0 flex-1 overflow-hidden px-4">
+        <div className="min-h-0 flex-1 overflow-hidden px-3">
           <AnimatePresence mode="wait">
             {activeTab === "ai" && (
               <motion.div
@@ -460,8 +677,8 @@ export function Stylist() {
               >
                 <div className="flex h-full min-h-0 flex-col overflow-hidden">
                   <div className="min-h-0 flex-1 overflow-hidden">
-                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-[26px]">
-                      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-3 py-3 pr-2">
+                    <div className="flex h-full min-h-0 flex-col overflow-hidden rounded-2xl">
+                      <div className="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain px-2.5 py-2.5 pr-2">
                         {chatMessages.map((message) => (
                           <div
                             key={message.id}
@@ -469,9 +686,7 @@ export function Stylist() {
                           >
                             <div
                               className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                                message.role === "user"
-                                  ? "bg-foreground text-background"
-                                  : "text-foreground"
+                                message.role === "user" ? "bg-foreground text-background" : "text-foreground"
                               }`}
                             >
                               {message.text}
@@ -479,7 +694,7 @@ export function Stylist() {
                           </div>
                         ))}
                       </div>
-                      <div className="shrink-0 px-3 py-3">
+                      <div className="shrink-0 px-2.5 py-2.5">
                         <div className="flex gap-2 overflow-x-auto pb-1 hide-scrollbar">
                           {quickPrompts.map((prompt) => (
                             <button
@@ -558,7 +773,7 @@ export function Stylist() {
                             selected
                               ? "border-zinc-800 bg-zinc-800 text-white"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                           }`}
+                          }`}
                         >
                           <span className="inline-flex items-center gap-1">
                             {label}
@@ -650,11 +865,11 @@ export function Stylist() {
                           key={tone.id}
                           type="button"
                           onClick={() => setSelectedSkinTone(tone.id)}
-                           className={`flex min-h-[52px] w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm transition-colors active:scale-[0.98] ${
-                             selected
-                               ? "bg-zinc-800 text-white"
-                               : "border border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                           }`}
+                          className={`flex min-h-[52px] w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm transition-colors active:scale-[0.98] ${
+                            selected
+                              ? "bg-zinc-800 text-white"
+                              : "border border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                          }`}
                         >
                           <span className="font-medium">{tone.label}</span>
                           {selected && <Check className="h-4 w-4" />}
@@ -706,11 +921,7 @@ export function Stylist() {
 
                   <div className="mt-4 flex gap-2">
                     {activePalette.colors.map((color) => (
-                      <div
-                        key={color}
-                        className="h-8 w-8 rounded-full"
-                        style={{ backgroundColor: color }}
-                      />
+                      <div key={color} className="h-8 w-8 rounded-full" style={{ backgroundColor: color }} />
                     ))}
                   </div>
 
@@ -725,7 +936,11 @@ export function Stylist() {
                         The current colour direction first, then the full wardrobe below.
                       </p>
                     </div>
-                    <Button size="sm" variant="outline" className="rounded-full border-border bg-transparent text-foreground">
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="rounded-full border-border bg-transparent text-foreground"
+                    >
                       <Plus className="h-4 w-4" />
                       Add items
                     </Button>
@@ -793,67 +1008,37 @@ export function Stylist() {
 
                   <div className="mt-4 overflow-hidden rounded-2xl border border-border">
                     <div className="relative h-72 w-full overflow-hidden">
-                      <div className="absolute inset-0 z-0">
-                        <GraphCanvas
-                          nodes={inspirationGraphNodes}
-                          edges={inspirationGraphEdges}
-                          layoutType="forceDirected2d"
-                          labelType="all"
-                          draggable={true}
-                          defaultNodeSize={20}
-                          maxDistance={2600}
-                          minDistance={700}
-                          actives={[userProfile.id, selectedInspiration.nodeId]}
-                          selections={[selectedInspiration.nodeId]}
-                          onNodeClick={(node) => {
-                            if (node.id !== userProfile.id) {
-                              setSelectedInspirationNodeId(node.id);
-                            }
-                          }}
-                          theme={{
-                            ...lightTheme,
-                            canvas: { ...lightTheme.canvas, background: "#ffffff" },
-                            lasso: { border: "#030213", background: "rgba(3,2,19,0.08)" },
-                            node: {
-                              ...lightTheme.node,
-                              activeFill: "#030213",
-                              opacity: 1,
-                              selectedOpacity: 1,
-                              inactiveOpacity: 0.5,
-                              label: {
-                                ...lightTheme.node.label,
-                                color: "#030213",
-                                stroke: "transparent",
-                                activeColor: "#030213",
-                              },
-                            },
-                            ring: {
-                              ...lightTheme.ring,
-                              fill: "rgba(0,0,0,0.12)",
-                              activeFill: "rgba(0,0,0,0.28)",
-                            },
-                            edge: {
-                              ...lightTheme.edge,
-                              fill: "rgba(0,0,0,0.12)",
-                              activeFill: "rgba(0,0,0,0.28)",
-                              opacity: 1,
-                              selectedOpacity: 1,
-                              inactiveOpacity: 0.25,
-                              label: {
-                                ...lightTheme.edge.label,
-                                color: "#717182",
-                                stroke: "transparent",
-                                activeColor: "#030213",
-                              },
-                            },
-                            arrow: {
-                              ...lightTheme.arrow,
-                              fill: "rgba(0,0,0,0.12)",
-                              activeFill: "rgba(0,0,0,0.28)",
-                            },
-                          }}
-                        />
-                      </div>
+                      <ReactFlow
+                        nodes={graphNodes}
+                        edges={inspirationGraphEdges}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        onNodesChange={handleNodesChange}
+                        onNodeDragStop={(_, node) => springBackToOrigin(node.id)}
+                        fitView
+                        fitViewOptions={{ padding: 0.25 }}
+                        translateExtent={[
+                          [-500, -400],
+                          [500, 400],
+                        ]}
+                        minZoom={0.6}
+                        maxZoom={2}
+                        panOnDrag
+                        zoomOnScroll
+                        zoomOnPinch
+                        zoomOnDoubleClick={false}
+                        nodesConnectable={false}
+                        nodesDraggable
+                        elementsSelectable
+                        proOptions={{ hideAttribution: true }}
+                        onNodeClick={(_, node) => {
+                          if (node.id !== userProfile.id) {
+                            setSelectedInspirationNodeId(node.id);
+                          }
+                        }}
+                      >
+                        <Background color="rgba(0,0,0,0.04)" gap={20} size={1} />
+                      </ReactFlow>
                     </div>
                   </div>
 
@@ -925,7 +1110,10 @@ export function Stylist() {
                     <div className="mb-3 text-xs font-medium text-muted-foreground">Shared wardrobe signals</div>
                     <div className="flex flex-wrap gap-1.5">
                       {selectedInspiration.wardrobe.map((item) => (
-                        <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                        <span
+                          key={item}
+                          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
+                        >
                           {item}
                         </span>
                       ))}

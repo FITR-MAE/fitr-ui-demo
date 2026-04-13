@@ -12,6 +12,20 @@ const activityItem = {
   preview: "Love this outfit!",
 };
 
+const avatarPhotos = [
+  "https://images.unsplash.com/photo-1654653068461-7ccc719064fa",
+  "https://images.unsplash.com/photo-1650262697292-c01496d8aeb7",
+  "https://images.unsplash.com/photo-1726276986699-eed94c47eedc",
+  "https://images.unsplash.com/photo-1690009996338-aebbf50a0b1e",
+  "https://images.unsplash.com/photo-1708607728910-b00e0c1be0af",
+  "https://images.unsplash.com/photo-1525614686090-7a3108e3758e",
+  "https://images.unsplash.com/photo-1621784562877-e971f1f79f47",
+  "https://images.unsplash.com/photo-1621525260134-2da456e33a8d",
+  "https://images.unsplash.com/photo-1612651611644-de1c1d8640ba",
+  "https://images.unsplash.com/photo-1613477757159-7fbb73011611",
+  "https://images.unsplash.com/photo-1633988584497-12ae2f1a0c24",
+];
+
 const messages = [
   {
     id: 3,
@@ -20,6 +34,7 @@ const messages = [
     time: "7m",
     message: "Love your style! Would you be interested in a collab?",
     unread: true,
+    photo: avatarPhotos[0],
   },
   {
     id: 5,
@@ -28,6 +43,7 @@ const messages = [
     time: "15m",
     message: "Thanks for the follow! Check out my latest post.",
     unread: true,
+    photo: avatarPhotos[1],
   },
   {
     id: 8,
@@ -36,6 +52,7 @@ const messages = [
     time: "3h",
     message: "The jacket is from Zara, here is the link...",
     unread: false,
+    photo: avatarPhotos[2],
   },
   {
     id: 10,
@@ -44,6 +61,7 @@ const messages = [
     time: "5h",
     message: "Great post! The colors really pop.",
     unread: false,
+    photo: avatarPhotos[3],
   },
   {
     id: 11,
@@ -52,8 +70,9 @@ const messages = [
     time: "1d",
     message: "Those boots are amazing! What brand are they?",
     unread: false,
+    photo: avatarPhotos[4],
   },
-  { id: 12, user: "AvantGarde", avatar: "A", time: "2d", message: "Hey! Love your recent posts.", unread: false },
+  { id: 12, user: "AvantGarde", avatar: "A", time: "2d", message: "Hey! Love your recent posts.", unread: false, photo: avatarPhotos[5] },
   {
     id: 13,
     user: "FashionWeek",
@@ -61,6 +80,7 @@ const messages = [
     time: "3d",
     message: "You should check out our new collection.",
     unread: false,
+    photo: avatarPhotos[6],
   },
 ];
 
@@ -142,8 +162,8 @@ export function NotificationsPage() {
                 key={item.id}
                 className={`flex items-center gap-3 rounded-2xl px-2 py-2 ${item.unread ? "bg-accent/30" : ""}`}
               >
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
-                  <span className="text-xs text-white">{item.avatar}</span>
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
+                  <img src={item.photo} alt={item.user} className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <div>

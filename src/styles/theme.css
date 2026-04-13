@@ -217,7 +217,7 @@
   }
 
   .app-page-content {
-    @apply mx-auto w-full max-w-2xl px-4 pt-6 pb-6;
+    @apply mx-auto w-full max-w-2xl px-3 pt-3 pb-3;
   }
 
   .app-page-header {
@@ -225,7 +225,7 @@
   }
 
   .app-page-header-inner {
-    @apply mx-auto flex max-w-2xl items-center justify-between gap-4 px-4 pt-4 pb-3;
+    @apply mx-auto flex max-w-2xl items-center justify-between gap-4 px-3 pt-3 pb-2;
   }
 
   .app-page-title {

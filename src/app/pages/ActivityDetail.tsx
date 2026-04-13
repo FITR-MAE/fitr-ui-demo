@@ -53,7 +53,7 @@ export function ActivityDetailPage() {
 
           <div className="overflow-hidden rounded-[1.5rem] bg-muted">
             <img
-              src="https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3RyZWV0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=1080"
+              src="https://images.unsplash.com/photo-1651742532474-ea4401a34a10"
               alt="Featured outfit"
               className="aspect-[4/5] w-full object-cover"
             />

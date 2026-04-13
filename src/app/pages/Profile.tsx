@@ -10,37 +10,37 @@ const wardrobeItems = [
     id: 1,
     category: "Tops",
     image:
-      "https://images.unsplash.com/photo-1562157873-818bc0726f68?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMXxmYXNoaW9uJTIwdG9wJTIwY2xvdGhpbmd8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1562157873-818bc0726f68",
   },
   {
     id: 2,
     category: "Bottoms",
     image:
-      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwYm90dG9tc3xlbnwxfHx8fDE3NzU2NjI3ODZ8MA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1624378439575-d8705ad7ae80",
   },
   {
     id: 3,
     category: "Shoes",
     image:
-      "https://images.unsplash.com/photo-1542291026-7eec264c27ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwc2hvZXN8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1542291026-7eec264c27ff",
   },
   {
     id: 4,
     category: "Accessories",
     image:
-      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwYWNjZXNzb3JpZXN8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a",
   },
   {
     id: 5,
     category: "Outerwear",
     image:
-      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmYXNoaW9uJTIwb3V0ZXJ3ZWFyfGVufDF8fHx8MTc3NTY2Mjc4Nnww&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1591047139829-d91aecb6caea",
   },
   {
     id: 6,
     category: "Dresses",
     image:
-      "https://images.unsplash.com/photo-1595777457583-95e059d581b8?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw2fHxmYXNoaW9uJTIwZHJlc3N8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1595777457583-95e059d581b8",
   },
 ];
 
@@ -48,73 +48,73 @@ const userPosts = [
   {
     id: 1,
     image:
-      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10",
     likes: 2847,
   },
   {
     id: 2,
     image:
-      "https://images.unsplash.com/photo-1651742532544-346cc809adb3?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwyfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651742532544-346cc809adb3",
     likes: 1923,
   },
   {
     id: 3,
     image:
-      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949",
     likes: 3204,
   },
   {
     id: 4,
     image:
-      "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651744258699-d322dff9632c",
     likes: 4156,
   },
   {
     id: 5,
     image:
-      "https://images.unsplash.com/photo-1651744258329-9868b90f456c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw1fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651744258329-9868b90f456c",
     likes: 2617,
   },
   {
     id: 6,
     image:
-      "https://images.unsplash.com/photo-1651828854976-4fa163b636ff?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw2fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1651828854976-4fa163b636ff",
     likes: 3891,
   },
   {
     id: 7,
     image:
-      "https://images.unsplash.com/photo-1617922001439-4a2e6562f328?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw3fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1617922001439-4a2e6562f328",
     likes: 1456,
   },
   {
     id: 8,
     image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw4fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
     likes: 5213,
   },
   {
     id: 9,
     image:
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
     likes: 3782,
   },
   {
     id: 10,
     image:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae",
     likes: 2934,
   },
   {
     id: 11,
     image:
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMXxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
     likes: 1678,
   },
   {
     id: 12,
     image:
-      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxM3xmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=400",
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105",
     likes: 4456,
   },
 ];
@@ -137,6 +137,7 @@ const profileStats = [
 const formatLikes = (n: number) => (n > 999 ? `${Math.floor(n / 1000)}k` : `${n}`);
 
 export function Profile() {
+  const profileAvatarPhoto = "https://images.unsplash.com/photo-1690009996338-aebbf50a0b1e";
   const [activeTab, setActiveTab] = useState<TabId>("posts");
   const shouldAnimate = !useReducedMotion();
 
@@ -180,8 +181,8 @@ export function Profile() {
         <PageSection className="p-4 sm:p-6">
           <motion.div className="space-y-4" variants={staggerVariants} initial="hidden" animate="visible">
             <motion.div className="flex items-start gap-4" variants={fadeUpVariants}>
-              <div className="flex h-20 w-20 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 shadow-sm ring-1 ring-white/15">
-                <span className="text-3xl text-white">S</span>
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-white/15">
+                <img src={profileAvatarPhoto} alt="Sarah Connor" className="h-full w-full object-cover" />
               </div>
 
               <div className="min-w-0 flex-1">
