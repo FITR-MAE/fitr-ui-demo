@@ -35,6 +35,17 @@ type OutfitRecommendation = {
   note: string;
 };
 
+type PastFit = OutfitRecommendation & {
+  date: string;
+  source: string;
+};
+
+type DnaPracticeLook = {
+  id: number;
+  title: string;
+  description: string;
+};
+
 type ChatMessage = {
   id: number;
   role: "user" | "ai";
@@ -56,6 +67,17 @@ type InspirationProfile = {
   note: string;
   wardrobe: string[];
   similarity: number;
+  whyInOrbit: string;
+  topOverlap: string;
+  bestBorrowedMove: string;
+  soenNote: string;
+  nextMove: string;
+  sharedSignals: {
+    palette: string[];
+    silhouette: string[];
+    wardrobe: string[];
+    energy: string[];
+  };
 };
 
 type InspirationOutfit = {
@@ -65,6 +87,8 @@ type InspirationOutfit = {
   image: string;
   popularity: string;
   reason: string;
+  signal: string;
+  translatesAs: string;
   matchingItems: string[];
 };
 
@@ -118,10 +142,10 @@ const FloatingEdge: React.FC<EdgeProps> = ({ id, source, target, style }) => {
 const edgeTypes = { floating: FloatingEdge };
 
 const tabs = [
-  { id: "ai", label: "Chat" },
-  { id: "outfits", label: "Looks" },
-  { id: "colour", label: "Colour" },
-  { id: "inspirations", label: "Inspiration" },
+  { id: "ai", label: "SŌEN" },
+  { id: "outfits", label: "Fits" },
+  { id: "colour", label: "Style DNA" },
+  { id: "inspirations", label: "Orbit" },
 ] as const;
 
 const weather = {
@@ -130,7 +154,11 @@ const weather = {
   rainy: { icon: Droplet, label: "14°", hint: "Lean into practical textures and water-safe shoes." },
 } as const;
 
-const quickPrompts = ["Build me a coffee run look", "What works with white trousers?", "Make this feel sharper"];
+const quickPrompts = [
+  "Build me a sharp coffee run fit",
+  "Style my white trousers for today",
+  "What should I wear if I want quiet confidence?",
+];
 
 const preferences = ["Casual", "Tailored", "Minimal", "Soft colour", "Smart layers", "Clean sneakers"];
 
@@ -180,44 +208,84 @@ const inspirationProfiles: InspirationProfile[] = [
     nodeId: "lena",
     name: "Lena Hart",
     handle: "@lenalooks",
-    avatar:
-      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
+    avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
     note: "Soft tailoring, warm neutrals, and easy layering with a clean finish.",
     wardrobe: ["Boxy oat blazer", "Cream rib tank", "Wide-leg stone trousers"],
     similarity: 94,
+    whyInOrbit: "Lena sits close because her softer tailoring still follows your preference for clean lines and restrained palettes.",
+    topOverlap: "Warm neutrals, easy tailoring, and wardrobe-led layering.",
+    bestBorrowedMove: "Soften your sharper fits with one lighter tailored layer.",
+    soenNote: "Lena is useful when you want to stay polished but relax the energy slightly.",
+    nextMove: "Try your camel blazer over a lighter base and keep the trousers fluid.",
+    sharedSignals: {
+      palette: ["Warm neutrals", "Low contrast"],
+      silhouette: ["Soft tailoring", "Long trouser line"],
+      wardrobe: ["Light blazer", "Relaxed separates"],
+      energy: ["Calm", "Polished"],
+    },
   },
   {
     id: 2,
     nodeId: "marcus",
     name: "Marcus Vale",
     handle: "@marcusmode",
-    avatar:
-      "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
+    avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
     note: "Sharp casual outfits built from polos, structured outerwear, and darker trousers.",
     wardrobe: ["Navy knit polo", "Camel overshirt", "Pleated black trousers"],
     similarity: 91,
+    whyInOrbit: "Marcus matches because his wardrobe logic is nearly identical to yours, just pushed a little more structured.",
+    topOverlap: "Polos, sharper outerwear, and darker tailored trousers.",
+    bestBorrowedMove: "Increase contrast in evening fits without changing the base pieces.",
+    soenNote: "Marcus is a strong reference when you want more presence from the same silhouette language.",
+    nextMove: "Pair the navy polo with black tailored pants and let the outer layer do the sharpening.",
+    sharedSignals: {
+      palette: ["Dark anchors", "Controlled contrast"],
+      silhouette: ["Structured top layer", "Straight trouser"],
+      wardrobe: ["Polo", "Tailored pants"],
+      energy: ["Sharp", "Off-duty control"],
+    },
   },
   {
     id: 3,
     nodeId: "nina",
     name: "Nina Sloane",
     handle: "@ninasloane",
-    avatar:
-      "https://images.unsplash.com/photo-1580489944761-15a19d654956",
+    avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956",
     note: "Minimal wardrobe staples with tonal colour stories and cleaner sneakers.",
     wardrobe: ["Sand poplin shirt", "Taupe drawstring trousers", "White leather trainers"],
     similarity: 88,
+    whyInOrbit: "Nina overlaps with your quieter side: tonal dressing, cleaner trainers, and low-noise styling choices.",
+    topOverlap: "Tone-on-tone dressing with cleaner casual finishes.",
+    bestBorrowedMove: "Let one tonal story carry the full fit instead of relying on contrast.",
+    soenNote: "Nina is most useful when you want your fits to feel lighter and less deliberate without losing control.",
+    nextMove: "Run the white linen shirt with khaki chinos and keep the accessories nearly invisible.",
+    sharedSignals: {
+      palette: ["Quiet tones", "Soft neutrals"],
+      silhouette: ["Easy proportions", "Clean break"],
+      wardrobe: ["Light shirting", "Sneakers"],
+      energy: ["Easy", "Understated"],
+    },
   },
   {
     id: 4,
     nodeId: "ava",
     name: "Ava Moreau",
     handle: "@avamoreau",
-    avatar:
-      "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
+    avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
     note: "Elevated basics with cleaner contrasts, soft suiting, and polished off-duty layers.",
     wardrobe: ["Black funnel-neck top", "Ivory straight trousers", "Structured leather tote"],
     similarity: 86,
+    whyInOrbit: "Ava sits in orbit because she uses the same clean base as you, but pushes it into a more elevated contrast story.",
+    topOverlap: "Cleaner separates, stronger contrast, and polished day-to-night styling.",
+    bestBorrowedMove: "Push one fit each week into a slightly more dressed evening direction.",
+    soenNote: "Ava is your stretch match for sharper polish without abandoning your existing wardrobe logic.",
+    nextMove: "Use the black tailored pants as your anchor and brighten the upper half of the fit.",
+    sharedSignals: {
+      palette: ["Black and ivory", "Sharper contrast"],
+      silhouette: ["Clean column", "Refined structure"],
+      wardrobe: ["Tailored trousers", "Structured layer"],
+      energy: ["Elevated", "Controlled"],
+    },
   },
   {
     id: 5,
@@ -228,6 +296,17 @@ const inspirationProfiles: InspirationProfile[] = [
     note: "Oversized silhouettes, bold colour blocking, and textured layers with streetwear edge.",
     wardrobe: ["Oversized washed denim jacket", "Graphic tee", "Cargo trousers"],
     similarity: 83,
+    whyInOrbit: "Celine is a stretch orbit profile. The overlap is more about confidence and layering than exact wardrobe matches.",
+    topOverlap: "Texture, statement layering, and stronger visual tension.",
+    bestBorrowedMove: "Introduce one louder layer while keeping the rest of your fit disciplined.",
+    soenNote: "Celine shows where your style could expand if you want more texture and attitude without losing control.",
+    nextMove: "Keep the base clean and try one oversized jacket or louder outer layer on top.",
+    sharedSignals: {
+      palette: ["Dark anchors", "Bolder contrast"],
+      silhouette: ["Oversized outer layer", "Relaxed base"],
+      wardrobe: ["Layering piece", "Graphic accent"],
+      energy: ["Expressive", "Confident"],
+    },
   },
   {
     id: 6,
@@ -238,14 +317,24 @@ const inspirationProfiles: InspirationProfile[] = [
     note: "Relaxed modern cuts, earthy tones, and mixing high and low pieces effortlessly.",
     wardrobe: ["Linen chore jacket", "Ribbed henley", "Washed black jeans"],
     similarity: 79,
+    whyInOrbit: "Rafi is in orbit because his relaxed shapes and earthy tones mirror your casual wardrobe instincts.",
+    topOverlap: "Earth tones, relaxed tailoring, and practical layering.",
+    bestBorrowedMove: "Loosen one weekend fit without losing the cleaner line underneath.",
+    soenNote: "Rafi is useful when you want the fit to feel more lived-in while keeping the palette intentional.",
+    nextMove: "Take your usual smart-casual base and soften it with a chore jacket or ribbed layer.",
+    sharedSignals: {
+      palette: ["Earth tones", "Washed neutrals"],
+      silhouette: ["Relaxed top layer", "Straight leg"],
+      wardrobe: ["Chore jacket", "Textured knit"],
+      energy: ["Grounded", "Easy"],
+    },
   },
 ];
 
 const userProfile = {
   id: "you",
   name: "You",
-  avatar:
-    "https://images.unsplash.com/photo-1517841905240-472988babdf9",
+  avatar: "https://images.unsplash.com/photo-1517841905240-472988babdf9",
   note: "Your current direction is clean, tailored, and wardrobe-led.",
 };
 
@@ -254,120 +343,132 @@ const inspirationOutfits: InspirationOutfit[] = [
     id: 1,
     profileNodeId: "lena",
     title: "Soft neutral tailoring",
-    image:
-      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
+    image: "https://images.unsplash.com/photo-1529139574466-a303027c1d8b",
     popularity: "4.1k saves",
     reason: "Works because it overlaps with your linen shirt, beige trousers, and lighter layering pieces.",
+    signal: "Soft tailoring with warm neutrals",
+    translatesAs: "Use your lighter wardrobe pieces to soften the fit without losing structure.",
     matchingItems: ["White linen shirt", "Beige wide-leg trousers", "Camel blazer"],
   },
   {
     id: 2,
     profileNodeId: "lena",
     title: "Easy gallery-day look",
-    image:
-      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
+    image: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f",
     popularity: "3.4k likes",
     reason: "A softer version of what you already wear, with the same relaxed tailoring and neutral balance.",
+    signal: "Relaxed tailoring for daytime",
+    translatesAs: "Keep the palette nearly tonal and let the proportions do the work.",
     matchingItems: ["White linen shirt", "Khaki chinos"],
   },
   {
     id: 3,
     profileNodeId: "marcus",
     title: "Sharp off-duty layers",
-    image:
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
+    image: "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
     popularity: "5.2k saves",
     reason: "This lands because your navy polo and black trousers already set up the same sharper silhouette.",
+    signal: "Sharp off-duty contrast",
+    translatesAs: "Lean into your darker anchors and let one clean top layer increase presence.",
     matchingItems: ["Navy polo", "Black tailored pants", "Camel blazer"],
   },
   {
     id: 4,
     profileNodeId: "marcus",
     title: "Minimal city uniform",
-    image:
-      "https://images.unsplash.com/photo-1509631179647-0177331693ae",
+    image: "https://images.unsplash.com/photo-1509631179647-0177331693ae",
     popularity: "2.9k likes",
     reason: "The clean dark base maps closely to pieces you already own, just with a slightly more structured finish.",
+    signal: "Minimal city uniform",
+    translatesAs: "Keep the fit narrow, darker, and uninterrupted through the leg.",
     matchingItems: ["Black tailored pants", "White sneakers"],
   },
   {
     id: 5,
     profileNodeId: "nina",
     title: "Tone-on-tone essentials",
-    image:
-      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105",
+    image: "https://images.unsplash.com/photo-1434389677669-e08b4cac3105",
     popularity: "4.8k saves",
     reason: "It stays in your lane: quiet tones, cleaner sneakers, and easy separation between top and bottom.",
+    signal: "Tone-on-tone essentials",
+    translatesAs: "Let quieter neutrals carry the fit when you want low effort and high control.",
     matchingItems: ["White linen shirt", "Khaki chinos", "White sneakers"],
   },
   {
     id: 6,
     profileNodeId: "nina",
     title: "Clean weekend edit",
-    image:
-      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10",
+    image: "https://images.unsplash.com/photo-1651742532474-ea4401a34a10",
     popularity: "2.5k likes",
     reason: "The proportions and palette line up with the pieces already sitting in your wardrobe rotation.",
+    signal: "Weekend tonal ease",
+    translatesAs: "Keep contrast low and let one tailored layer sharpen the weekend base.",
     matchingItems: ["Beige wide-leg trousers", "Camel blazer"],
   },
   {
     id: 7,
     profileNodeId: "ava",
     title: "Polished contrast dressing",
-    image:
-      "https://images.unsplash.com/photo-1651744258699-d322dff9632c",
+    image: "https://images.unsplash.com/photo-1651744258699-d322dff9632c",
     popularity: "3.8k saves",
     reason: "A more elevated branch of your current wardrobe, using the same clean separates with stronger contrast.",
+    signal: "Polished contrast dressing",
+    translatesAs: "Build from your cleanest separates and push the contrast one step further for evening energy.",
     matchingItems: ["Black tailored pants", "White linen shirt"],
   },
   {
     id: 8,
     profileNodeId: "ava",
     title: "Structured evening casual",
-    image:
-      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949",
+    image: "https://images.unsplash.com/photo-1651744258886-7987b4d3e949",
     popularity: "2.2k likes",
     reason: "It borrows your sharper pieces and pushes them one step further without needing a full wardrobe change.",
+    signal: "Structured evening casual",
+    translatesAs: "Use the same wardrobe logic you already trust, just with a cleaner, more dressed finish.",
     matchingItems: ["Camel blazer", "Black tailored pants"],
   },
   {
     id: 9,
     profileNodeId: "celine",
     title: "Oversized denim moment",
-    image:
-      "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
+    image: "https://images.unsplash.com/photo-1490481651871-ab68de25d43d",
     popularity: "5.1k saves",
     reason: "Uses the same oversized proportions you're drawn to, with added texture from the washed denim.",
+    signal: "Oversized texture play",
+    translatesAs: "Borrow the attitude of the outer layer while keeping your base sharper and quieter.",
     matchingItems: ["Oversized denim jacket", "Graphic tee", "Cargo trousers"],
   },
   {
     id: 10,
     profileNodeId: "celine",
     title: "Bold colour block edit",
-    image:
-      "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
+    image: "https://images.unsplash.com/photo-1512436991641-6745cdb1723f",
     popularity: "3.9k likes",
     reason: "Matches your vibe if you're going for something louder without leaving your comfort zone.",
+    signal: "Bold colour blocking",
+    translatesAs: "Keep one louder piece, then neutralize the rest of the fit so it still feels like you.",
     matchingItems: ["Washed bomber", "Black graphic tee", "Slim cargo pants"],
   },
   {
     id: 11,
     profileNodeId: "rafi",
     title: "Earthy weekend layers",
-    image:
-      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
+    image: "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2",
     popularity: "4.3k saves",
     reason: "Earth tones and relaxed tailoring align with what you already reach for on weekends.",
+    signal: "Earthy relaxed layers",
+    translatesAs: "Relax the top half of the fit while keeping the line of the trouser clean.",
     matchingItems: ["Linen chore jacket", "Ribbed henley", "Washed black jeans"],
   },
   {
     id: 12,
     profileNodeId: "rafi",
     title: "Smart casual refresh",
-    image:
-      "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
+    image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d",
     popularity: "2.8k likes",
     reason: "Pulls from your existing wardrobe but reframes it with smarter proportions and tonal cohesion.",
+    signal: "Smart casual refresh",
+    translatesAs: "Use one textured layer to make your usual smart-casual base feel more considered.",
     matchingItems: ["Cream knit polo", "Tan chinos", "White sneakers"],
   },
 ];
@@ -410,6 +511,97 @@ const recommendations: OutfitRecommendation[] = [
   },
 ];
 
+const pastFits: PastFit[] = [
+  {
+    id: 101,
+    outfit: { top: "Camel Blazer", bottom: "Khaki Chinos", shoes: "White Sneakers" },
+    occasion: "Client lunch",
+    style: "Easy tailored",
+    confidence: 89,
+    weather: "sunny",
+    note: "You landed on a sharper daytime balance here, and it is worth repeating when you want polish without stiffness.",
+    date: "Last Thursday",
+    source: "Worn",
+  },
+  {
+    id: 102,
+    outfit: { top: "White Linen Shirt", bottom: "Black Tailored Pants", shoes: "Chelsea Boots" },
+    occasion: "Dinner plans",
+    style: "Clean contrast",
+    confidence: 92,
+    weather: "cloudy",
+    note: "This fit worked because the contrast stayed clean and the silhouette stayed controlled from top to bottom.",
+    date: "6 days ago",
+    source: "Saved",
+  },
+];
+
+const dnaSignals = [
+  "Clean contrast",
+  "Tailored base",
+  "Quiet confidence",
+  "Controlled silhouette",
+  "Low-noise palette",
+];
+
+const silhouetteNotes = [
+  "Straighter trouser lines give your fits the cleanest finish.",
+  "A sharper top layer works best when the rest of the look stays calm.",
+  "Controlled volume beats oversized shapes when you want presence without noise.",
+];
+
+const wardrobeGaps = [
+  "Dark leather loafer",
+  "Structured transitional jacket",
+  "Cool-toned knit layer",
+  "Sharper evening trouser",
+];
+
+const dnaPracticeLooks: DnaPracticeLook[] = [
+  {
+    id: 1,
+    title: "Quiet office control",
+    description:
+      "A restrained palette, cleaner break at the trouser, and one sharper layer keeps the fit confident without looking overworked.",
+  },
+  {
+    id: 2,
+    title: "Off-duty precision",
+    description:
+      "Even the relaxed version of your style works best when the lines stay neat and the palette stays disciplined.",
+  },
+];
+
+const fitReasons = [
+  {
+    label: "Silhouette",
+    text: "A cleaner top line and straighter trouser shape keep the fit controlled from the first read.",
+  },
+  {
+    label: "Palette",
+    text: "Warm neutrals and darker anchors keep the composition calm without flattening it.",
+  },
+  {
+    label: "Context",
+    text: "It is polished enough for a full day out, but still relaxed enough to feel natural on you.",
+  },
+  {
+    label: "Why it feels like you",
+    text: "The fit follows your DNA: tailored base, low-noise colour, and one piece carrying the tension.",
+  },
+];
+
+const buildAroundItem = {
+  title: "Build around your white linen shirt",
+  description:
+    "Keep the shirt open at the neck, add the black tailored pants, and finish with loafers or clean sneakers depending on how sharp you want the day to feel.",
+  supporting: [
+    "Adds contrast without heaviness",
+    "Already aligned with your strongest palette",
+    "Easy to shift from day to evening",
+  ],
+};
+
 function weatherIcon(kind: WeatherKind) {
   if (kind === "sunny") return <Sun className="h-3 w-3 text-muted-foreground" />;
   if (kind === "cloudy") return <Cloud className="h-3 w-3 text-muted-foreground" />;
@@ -431,7 +623,7 @@ export function Stylist() {
     {
       id: 1,
       role: "ai",
-      text: "Tell me the occasion, the vibe, or one item you want to wear. I’ll give you a clean outfit direction that works with what you already own.",
+      text: "I’m SŌEN. Give me the occasion, the weather, or one piece you want to wear, and I’ll turn it into a fit direction that feels like you.",
     },
   ]);
   const shouldAnimate = !useReducedMotion();
@@ -442,11 +634,14 @@ export function Stylist() {
   const currentWeather = weather.sunny;
   const WeatherIcon = currentWeather.icon;
   const activePalette = colorPalettes.find((palette) => palette.name === selectedPalette) ?? colorPalettes[0];
+  const featuredRecommendation = recommendations[0];
+  const alternativeRecommendations = recommendations.slice(1);
   const selectedInspiration =
     inspirationProfiles.find((profile) => profile.nodeId === selectedInspirationNodeId) ?? inspirationProfiles[0];
   const selectedInspirationOutfits = inspirationOutfits.filter(
     (outfit) => outfit.profileNodeId === selectedInspiration.nodeId,
   );
+  const borrowedOrbitFit = selectedInspirationOutfits[0];
   const RADIUS = 170;
   const initialPositions = useMemo(() => {
     const map: Record<string, { x: number; y: number }> = {
@@ -615,7 +810,7 @@ export function Stylist() {
         {
           id: Date.now() + 1,
           role: "ai",
-          text: "Start with a clean base, then add one sharper piece. Your linen shirt or navy polo works well with tailored trousers or chinos, and you can finish with the camel blazer if you want a more polished edge.",
+          text: "Start with a clean base, then anchor it with one sharper signal. Your linen shirt or navy polo already gives you that control, so I would pair one with tailored trousers or chinos and bring in the camel blazer only if you want more presence.",
         },
       ]);
     }, 900);
@@ -623,7 +818,7 @@ export function Stylist() {
 
   return (
     <PageShell contentClassName="h-full min-h-0 overflow-hidden bg-background pb-0">
-      <PageHeader title="Stylist" />
+      <PageHeader title="Studio" />
       <motion.div
         layout={shouldAnimate}
         transition={{ duration: 0.24, ease: "easeOut" }}
@@ -632,9 +827,9 @@ export function Stylist() {
         <div className={`${briefSectionClass} shrink-0`}>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
-              <p className="text-base font-semibold text-foreground">Today&apos;s brief</p>
+              <p className="text-base font-semibold text-foreground">Today&apos;s direction</p>
               <p className="mt-1 text-sm text-muted-foreground">
-                {currentWeather.hint} Built for quick, direct outfit decisions.
+                {currentWeather.hint} Built around what feels right today, not just what fills the rail.
               </p>
             </div>
             <div className="flex shrink-0 items-center gap-2 rounded-2xl px-3 py-2">
@@ -713,7 +908,7 @@ export function Stylist() {
                             value={chatInput}
                             onChange={(event) => setChatInput(event.target.value)}
                             onKeyDown={(event) => event.key === "Enter" && handleSendMessage()}
-                            placeholder="Ask your stylist..."
+                            placeholder="Ask SŌEN..."
                             className="h-12 flex-1 rounded-full border border-border bg-transparent px-4 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
                           />
                           <button
@@ -743,9 +938,9 @@ export function Stylist() {
                 <div className={sectionSurfaceClass}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-base font-semibold text-foreground">Style preferences</h2>
+                      <h2 className="text-base font-semibold text-foreground">Your signals</h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        Keep the brief focused so the look suggestions stay cleaner.
+                        Keep your fit signals tight so today&apos;s recommendations stay aligned.
                       </p>
                     </div>
                     <Button
@@ -787,14 +982,66 @@ export function Stylist() {
 
                 <div className={sectionSurfaceClass}>
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">Recommended looks</h2>
+                    <h2 className="text-base font-semibold text-foreground">What to wear today</h2>
                     <p className="mt-1 text-sm text-muted-foreground">
-                      A direct edit based on the current brief and selected preferences.
+                      Start with the strongest fit for today, shaped by your wardrobe, your signals, and the pace of the
+                      day.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-border px-4 py-4">
+                    <div className="flex items-start gap-3">
+                      <button
+                        type="button"
+                        aria-label={
+                          likedOutfits.has(featuredRecommendation.id)
+                            ? `Unlike ${featuredRecommendation.style}`
+                            : `Like ${featuredRecommendation.style}`
+                        }
+                        onClick={() => toggleLike(featuredRecommendation.id)}
+                        className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border transition-transform active:scale-95"
+                      >
+                        <Heart
+                          className={`h-4 w-4 ${likedOutfits.has(featuredRecommendation.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`}
+                        />
+                      </button>
+
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <p className="text-sm font-medium text-foreground">{featuredRecommendation.style}</p>
+                            <p className="text-xs text-muted-foreground">{featuredRecommendation.occasion}</p>
+                          </div>
+                          <div className="shrink-0 text-right">
+                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                              {featuredRecommendation.confidence}%
+                            </div>
+                            <div className="mt-1 flex items-center justify-end gap-1">
+                              {weatherIcon(featuredRecommendation.weather)}
+                            </div>
+                          </div>
+                        </div>
+
+                        <p className="mt-3 text-sm text-foreground">
+                          {featuredRecommendation.outfit.top} with {featuredRecommendation.outfit.bottom} and{" "}
+                          {featuredRecommendation.outfit.shoes}
+                        </p>
+                        <p className="mt-2 text-xs text-muted-foreground">{featuredRecommendation.note}</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Alternatives</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Two nearby directions when you want to go sharper or easier without leaving your lane.
                     </p>
                   </div>
 
                   <div className="mt-4 space-y-3">
-                    {recommendations.map((rec) => (
+                    {alternativeRecommendations.map((rec) => (
                       <div
                         key={rec.id}
                         className="rounded-2xl border border-border px-3.5 py-3 transition-colors hover:bg-muted/40 active:scale-[0.98]"
@@ -837,6 +1084,94 @@ export function Stylist() {
                     ))}
                   </div>
                 </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Why this works</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      The logic behind today&apos;s fit, grounded in your style DNA.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-2.5">
+                    {fitReasons.map((reason) => (
+                      <div key={reason.label} className="rounded-2xl border border-border px-3.5 py-3">
+                        <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                          {reason.label}
+                        </div>
+                        <p className="mt-1.5 text-sm text-foreground">{reason.text}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Build around</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Start from one piece you already own and let the rest of the fit follow.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-border px-3.5 py-3">
+                    <p className="text-sm font-medium text-foreground">{buildAroundItem.title}</p>
+                    <p className="mt-2 text-sm text-muted-foreground">{buildAroundItem.description}</p>
+                    <div className="mt-3 flex flex-wrap gap-1.5">
+                      {buildAroundItem.supporting.map((item) => (
+                        <span
+                          key={item}
+                          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
+                        >
+                          {item}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Past fits</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Recent directions worth revisiting when you want something proven.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {pastFits.map((fit) => (
+                      <div key={fit.id} className="rounded-2xl border border-border px-3.5 py-3">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 flex-1">
+                            <div className="flex items-start justify-between gap-3">
+                              <div>
+                                <p className="text-sm font-medium text-foreground">{fit.style}</p>
+                                <p className="text-xs text-muted-foreground">{fit.occasion}</p>
+                              </div>
+                              <div className="shrink-0 text-right">
+                                <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  {fit.confidence}%
+                                </div>
+                                <div className="mt-1 flex items-center justify-end gap-1">
+                                  {weatherIcon(fit.weather)}
+                                </div>
+                              </div>
+                            </div>
+
+                            <p className="mt-2 text-sm text-foreground">
+                              {fit.outfit.top} with {fit.outfit.bottom} and {fit.outfit.shoes}
+                            </p>
+                            <p className="mt-1.5 text-xs text-muted-foreground">{fit.note}</p>
+                            <div className="mt-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                              <span>{fit.date}</span>
+                              <span className="h-1 w-1 rounded-full bg-border" />
+                              <span>{fit.source}</span>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </motion.div>
             )}
 
@@ -850,10 +1185,47 @@ export function Stylist() {
               >
                 <div className={sectionSurfaceClass}>
                   <div>
-                    <h2 className="text-base font-semibold text-foreground">Colour direction</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      Pick a tone and palette, then use the wardrobe matches below.
+                    <h2 className="text-base font-semibold text-foreground">Identity</h2>
+                    {/* <p className="mt-1 text-sm text-muted-foreground">
+                      A read on your identity, palette, and the wardrobe signals that hold it all together.
+                    </p> */}
+                  </div>
+
+                  <div className="mt-4 rounded-2xl border border-border px-3.5 py-3">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                          Primary identity
+                        </div>
+                        <div className="mt-1 text-sm font-medium text-foreground">Tailored and Dangerous</div>
+                        <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                          Secondary trait
+                        </div>
+                        <div className="mt-1 text-sm font-medium text-foreground">Quiet confidence</div>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Stability</div>
+                        <div className="mt-1 text-sm font-medium text-foreground">92%</div>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm text-muted-foreground">
+                      Your style leans clean, controlled, and wardrobe-led. You look strongest when the silhouette is
+                      sharp, the palette stays disciplined, and one piece carries the tension.
                     </p>
+                  </div>
+
+                  <div className="mt-4">
+                    <div className="mb-2 text-xs font-medium text-muted-foreground">Core signals</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {dnaSignals.map((signal) => (
+                        <span
+                          key={signal}
+                          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
+                        >
+                          {signal}
+                        </span>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="mt-4 space-y-2">
@@ -880,7 +1252,7 @@ export function Stylist() {
 
                   <div className="mt-3 rounded-2xl border border-border px-3.5 py-3">
                     <div className="mb-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                      Recommended
+                      Palette signal
                     </div>
                     <div className="text-sm text-foreground">
                       {skinTones.find((tone) => tone.id === selectedSkinTone)?.recommended}
@@ -929,11 +1301,66 @@ export function Stylist() {
                 </div>
 
                 <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Silhouette</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      The proportions that consistently make your style read cleanest.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-2.5">
+                    {silhouetteNotes.map((note) => (
+                      <div key={note} className="rounded-2xl border border-border px-3.5 py-3 text-sm text-foreground">
+                        {note}
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">Wardrobe gaps</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      Pieces that would strengthen your DNA instead of pulling it sideways.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 flex flex-wrap gap-1.5">
+                    {wardrobeGaps.map((item) => (
+                      <span
+                        key={item}
+                        className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
+                      >
+                        {item}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
+                  <div>
+                    <h2 className="text-base font-semibold text-foreground">DNA in practice</h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      How your identity shows up when it is translated into real fits.
+                    </p>
+                  </div>
+
+                  <div className="mt-4 space-y-3">
+                    {dnaPracticeLooks.map((look) => (
+                      <div key={look.id} className="rounded-2xl border border-border px-3.5 py-3">
+                        <p className="text-sm font-medium text-foreground">{look.title}</p>
+                        <p className="mt-1.5 text-sm text-muted-foreground">{look.description}</p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                <div className={sectionSurfaceClass}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="text-base font-semibold text-foreground">Wardrobe matches</h2>
                       <p className="mt-1 text-sm text-muted-foreground">
-                        The current colour direction first, then the full wardrobe below.
+                        Pieces in your wardrobe that already support this DNA, first by palette and then in full.
                       </p>
                     </div>
                     <Button
@@ -999,9 +1426,12 @@ export function Stylist() {
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="text-base font-semibold text-foreground">Your style graph</h2>
+                      <p className="mt-1 text-sm text-muted-foreground">
+                        People whose style overlaps with your DNA, wardrobe, and fit behavior.
+                      </p>
                     </div>
                     <div className="shrink-0 text-right">
-                      <div className="text-xs text-muted-foreground">Selected</div>
+                      <div className="text-xs text-muted-foreground">In orbit</div>
                       <div className="mt-1 text-sm font-medium text-foreground">{selectedInspiration.name}</div>
                     </div>
                   </div>
@@ -1042,33 +1472,92 @@ export function Stylist() {
                     </div>
                   </div>
 
-                  <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border px-3.5 py-3">
-                    <img
-                      src={selectedInspiration.avatar}
-                      alt={selectedInspiration.name}
-                      className="h-12 w-12 rounded-full border border-white/15 object-cover"
-                    />
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-2">
-                        <div className="text-sm font-medium text-foreground">{selectedInspiration.name}</div>
-                        <div className="text-xs text-muted-foreground">{selectedInspiration.handle}</div>
+                  <div className="mt-4 rounded-2xl border border-border px-3.5 py-3">
+                    <div className="flex items-start gap-3">
+                      <img
+                        src={selectedInspiration.avatar}
+                        alt={selectedInspiration.name}
+                        className="h-12 w-12 rounded-full border border-white/15 object-cover"
+                      />
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center gap-2">
+                          <div className="text-sm font-medium text-foreground">{selectedInspiration.name}</div>
+                          <div className="text-xs text-muted-foreground">{selectedInspiration.handle}</div>
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">{selectedInspiration.note}</div>
                       </div>
-                      <div className="mt-1 text-xs text-muted-foreground">{selectedInspiration.note}</div>
+                      <div className="shrink-0 text-right">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                          {selectedInspiration.similarity}%
+                        </div>
+                        <div className="mt-1 text-xs text-muted-foreground">match</div>
+                      </div>
                     </div>
-                    <div className="shrink-0 text-right">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
-                        {selectedInspiration.similarity}%
+
+                    <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Why in orbit</div>
+                        <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.whyInOrbit}</p>
                       </div>
-                      <div className="mt-1 text-xs text-muted-foreground">match</div>
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Top overlap</div>
+                        <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.topOverlap}</p>
+                      </div>
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Best borrowed move</div>
+                        <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.bestBorrowedMove}</p>
+                      </div>
+                    </div>
+
+                    <div className="mt-3 rounded-2xl border border-border px-3 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">SŌEN note</div>
+                      <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.soenNote}</p>
                     </div>
                   </div>
                 </div>
+
+                {borrowedOrbitFit ? (
+                  <div className={sectionSurfaceClass}>
+                    <div className="flex items-start justify-between gap-3">
+                      <div>
+                        <h2 className="text-base font-semibold text-foreground">Borrowed from orbit</h2>
+                        <p className="mt-1 text-sm text-muted-foreground">
+                          One translated fit direction pulled from {selectedInspiration.name}&apos;s orbit and grounded in your wardrobe.
+                        </p>
+                      </div>
+                      <Sparkles className="h-4 w-4 shrink-0 text-muted-foreground" />
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-border overflow-hidden">
+                      <img src={borrowedOrbitFit.image} alt={borrowedOrbitFit.title} className="aspect-[4/5] w-full object-cover" />
+                      <div className="space-y-3 px-4 py-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div>
+                            <div className="text-sm font-medium text-foreground">{borrowedOrbitFit.title}</div>
+                            <div className="mt-1 text-xs text-muted-foreground">{borrowedOrbitFit.signal}</div>
+                          </div>
+                          <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                            {selectedInspiration.similarity}% match
+                          </div>
+                        </div>
+                        <p className="text-sm text-muted-foreground">{borrowedOrbitFit.translatesAs}</p>
+                        <div className="flex flex-wrap gap-1.5">
+                          {borrowedOrbitFit.matchingItems.map((item) => (
+                            <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ) : null}
 
                 <div className={sectionSurfaceClass}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
                       <h2 className="text-base font-semibold text-foreground">
-                        Popular outfits from {selectedInspiration.name}
+                        What to borrow from {selectedInspiration.name}
                       </h2>
                     </div>
                     <Sparkles className="h-4 w-4 shrink-0 text-muted-foreground" />
@@ -1090,7 +1579,15 @@ export function Stylist() {
                               className="h-10 w-10 rounded-full object-cover"
                             />
                           </div>
+                          <div className="rounded-2xl border border-border px-3 py-2">
+                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Signal</div>
+                            <div className="mt-1 text-sm text-foreground">{outfit.signal}</div>
+                          </div>
                           <p className="text-sm text-muted-foreground">{outfit.reason}</p>
+                          <div className="rounded-2xl border border-border px-3 py-2">
+                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Why it translates</div>
+                            <div className="mt-1 text-sm text-foreground">{outfit.translatesAs}</div>
+                          </div>
                           <div className="flex flex-wrap gap-1.5">
                             {outfit.matchingItems.map((item) => (
                               <span
@@ -1107,16 +1604,53 @@ export function Stylist() {
                   </div>
 
                   <div className="mt-4 border-t border-border pt-4">
-                    <div className="mb-3 text-xs font-medium text-muted-foreground">Shared wardrobe signals</div>
-                    <div className="flex flex-wrap gap-1.5">
-                      {selectedInspiration.wardrobe.map((item) => (
-                        <span
-                          key={item}
-                          className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
-                        >
-                          {item}
-                        </span>
-                      ))}
+                    <div className="mb-3 text-xs font-medium text-muted-foreground">Shared signals</div>
+                    <div className="grid gap-2.5 sm:grid-cols-2">
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Palette</div>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {selectedInspiration.sharedSignals.palette.map((item) => (
+                            <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Silhouette</div>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {selectedInspiration.sharedSignals.silhouette.map((item) => (
+                            <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Wardrobe</div>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {selectedInspiration.sharedSignals.wardrobe.map((item) => (
+                            <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="rounded-2xl border border-border px-3 py-3">
+                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Energy</div>
+                        <div className="mt-2 flex flex-wrap gap-1.5">
+                          {selectedInspiration.sharedSignals.energy.map((item) => (
+                            <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                              {item}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 rounded-2xl border border-border px-3 py-3">
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Next move</div>
+                      <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.nextMove}</p>
                     </div>
                   </div>
                 </div>

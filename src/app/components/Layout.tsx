@@ -41,8 +41,8 @@ function getRouteMeta(pathname: string): RouteMeta {
 
   if (pathname === "/stylist") {
     return {
-      title: "Stylist | fitr",
-      description: "Get direct outfit guidance, wardrobe matches, and colour direction from your stylist.",
+      title: "Studio | fitr",
+      description: "Open Studio for SŌEN, daily fits, style DNA, and orbit-based recommendations.",
       themeColor: "#ffffff",
     };
   }
