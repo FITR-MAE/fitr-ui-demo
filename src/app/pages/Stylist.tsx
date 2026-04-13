@@ -1,6 +1,7 @@
 import { Check, ChevronRight, Cloud, Droplet, Heart, Plus, RefreshCw, Send, Sparkles, Sun } from "lucide-react";
 import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { GraphCanvas, lightTheme, type GraphEdge, type GraphNode } from "reagraph";
 
 import { PageHeader, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
@@ -32,10 +33,23 @@ type PaletteCard = {
 
 type InspirationProfile = {
   id: number;
+  nodeId: string;
   name: string;
   handle: string;
+  avatar: string;
   note: string;
   wardrobe: string[];
+  similarity: number;
+};
+
+type InspirationOutfit = {
+  id: number;
+  profileNodeId: string;
+  title: string;
+  image: string;
+  popularity: string;
+  reason: string;
+  matchingItems: string[];
 };
 
 const tabs = [
@@ -98,24 +112,138 @@ const wardrobeItems = [
 const inspirationProfiles: InspirationProfile[] = [
   {
     id: 1,
+    nodeId: "lena",
     name: "Lena Hart",
     handle: "@lenalooks",
+    avatar:
+      "https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=1470&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     note: "Soft tailoring, warm neutrals, and easy layering with a clean finish.",
     wardrobe: ["Boxy oat blazer", "Cream rib tank", "Wide-leg stone trousers"],
+    similarity: 94,
   },
   {
     id: 2,
+    nodeId: "marcus",
     name: "Marcus Vale",
     handle: "@marcusmode",
+    avatar:
+      "https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     note: "Sharp casual outfits built from polos, structured outerwear, and darker trousers.",
     wardrobe: ["Navy knit polo", "Camel overshirt", "Pleated black trousers"],
+    similarity: 91,
   },
   {
     id: 3,
+    nodeId: "nina",
     name: "Nina Sloane",
     handle: "@ninasloane",
+    avatar:
+      "https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=1061&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
     note: "Minimal wardrobe staples with tonal colour stories and cleaner sneakers.",
     wardrobe: ["Sand poplin shirt", "Taupe drawstring trousers", "White leather trainers"],
+    similarity: 88,
+  },
+  {
+    id: 4,
+    nodeId: "ava",
+    name: "Ava Moreau",
+    handle: "@avamoreau",
+    avatar:
+      "https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=1064&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+    note: "Elevated basics with cleaner contrasts, soft suiting, and polished off-duty layers.",
+    wardrobe: ["Black funnel-neck top", "Ivory straight trousers", "Structured leather tote"],
+    similarity: 86,
+  },
+];
+
+const userProfile = {
+  id: "you",
+  name: "You",
+  avatar:
+    "https://images.unsplash.com/photo-1517841905240-472988babdf9?q=80&w=987&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+  note: "Your current direction is clean, tailored, and wardrobe-led.",
+};
+
+const inspirationOutfits: InspirationOutfit[] = [
+  {
+    id: 1,
+    profileNodeId: "lena",
+    title: "Soft neutral tailoring",
+    image:
+      "https://images.unsplash.com/photo-1529139574466-a303027c1d8b?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw5fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "4.1k saves",
+    reason: "Works because it overlaps with your linen shirt, beige trousers, and lighter layering pieces.",
+    matchingItems: ["White linen shirt", "Beige wide-leg trousers", "Camel blazer"],
+  },
+  {
+    id: 2,
+    profileNodeId: "lena",
+    title: "Easy gallery-day look",
+    image:
+      "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw4fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "3.4k likes",
+    reason: "A softer version of what you already wear, with the same relaxed tailoring and neutral balance.",
+    matchingItems: ["White linen shirt", "Khaki chinos"],
+  },
+  {
+    id: 3,
+    profileNodeId: "marcus",
+    title: "Sharp off-duty layers",
+    image:
+      "https://images.unsplash.com/photo-1487222477894-8943e31ef7b2?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMXxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "5.2k saves",
+    reason: "This lands because your navy polo and black trousers already set up the same sharper silhouette.",
+    matchingItems: ["Navy polo", "Black tailored pants", "Camel blazer"],
+  },
+  {
+    id: 4,
+    profileNodeId: "marcus",
+    title: "Minimal city uniform",
+    image:
+      "https://images.unsplash.com/photo-1509631179647-0177331693ae?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxMHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "2.9k likes",
+    reason: "The clean dark base maps closely to pieces you already own, just with a slightly more structured finish.",
+    matchingItems: ["Black tailored pants", "White sneakers"],
+  },
+  {
+    id: 5,
+    profileNodeId: "nina",
+    title: "Tone-on-tone essentials",
+    image:
+      "https://images.unsplash.com/photo-1434389677669-e08b4cac3105?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxM3xmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "4.8k saves",
+    reason: "It stays in your lane: quiet tones, cleaner sneakers, and easy separation between top and bottom.",
+    matchingItems: ["White linen shirt", "Khaki chinos", "White sneakers"],
+  },
+  {
+    id: 6,
+    profileNodeId: "nina",
+    title: "Clean weekend edit",
+    image:
+      "https://images.unsplash.com/photo-1651742532474-ea4401a34a10?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwxfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=900",
+    popularity: "2.5k likes",
+    reason: "The proportions and palette line up with the pieces already sitting in your wardrobe rotation.",
+    matchingItems: ["Beige wide-leg trousers", "Camel blazer"],
+  },
+  {
+    id: 7,
+    profileNodeId: "ava",
+    title: "Polished contrast dressing",
+    image:
+      "https://images.unsplash.com/photo-1651744258699-d322dff9632c?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHw0fHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.0.0&q=80&w=900",
+    popularity: "3.8k saves",
+    reason: "A more elevated branch of your current wardrobe, using the same clean separates with stronger contrast.",
+    matchingItems: ["Black tailored pants", "White linen shirt"],
+  },
+  {
+    id: 8,
+    profileNodeId: "ava",
+    title: "Structured evening casual",
+    image:
+      "https://images.unsplash.com/photo-1651744258886-7987b4d3e949?crop=entropy&cs=tinysrgb&fit=max&fm=jpg&ixid=M3w3Nzg4Nzd8MHwxfHNlYXJjaHwzfHxmYXNoaW9uJTIwb3V0Zml0JTIwc3R5bGV8ZW58MXx8fHwxNzc1NjYyNzg2fDA&ixlib=rb-4.1.0&q=80&w=900",
+    popularity: "2.2k likes",
+    reason: "It borrows your sharper pieces and pushes them one step further without needing a full wardrobe change.",
+    matchingItems: ["Camel blazer", "Black tailored pants"],
   },
 ];
 
@@ -171,6 +299,7 @@ export function Stylist() {
   const [likedOutfits, setLikedOutfits] = useState<Set<number>>(new Set());
   const [selectedSkinTone, setSelectedSkinTone] = useState<string>("medium");
   const [selectedPalette, setSelectedPalette] = useState<string>("Autumn Earth");
+  const [selectedInspirationNodeId, setSelectedInspirationNodeId] = useState<string>(inspirationProfiles[0].nodeId);
   const [generating, setGenerating] = useState(false);
   const [chatInput, setChatInput] = useState("");
   const [chatMessages, setChatMessages] = useState<ChatMessage[]>([
@@ -188,6 +317,34 @@ export function Stylist() {
   const currentWeather = weather.sunny;
   const WeatherIcon = currentWeather.icon;
   const activePalette = colorPalettes.find((palette) => palette.name === selectedPalette) ?? colorPalettes[0];
+  const selectedInspiration =
+    inspirationProfiles.find((profile) => profile.nodeId === selectedInspirationNodeId) ?? inspirationProfiles[0];
+  const selectedInspirationOutfits = inspirationOutfits.filter(
+    (outfit) => outfit.profileNodeId === selectedInspiration.nodeId,
+  );
+  const inspirationGraphNodes: GraphNode[] = [
+    {
+      id: userProfile.id,
+      label: userProfile.name,
+      icon: userProfile.avatar,
+      labelVisible: true,
+      fill: "#030213",
+    },
+    ...inspirationProfiles.map((profile) => ({
+      id: profile.nodeId,
+      label: profile.name,
+      icon: profile.avatar,
+      labelVisible: true,
+      fill: "#ffffff",
+      data: { similarity: profile.similarity },
+    })),
+  ];
+  const inspirationGraphEdges: GraphEdge[] = inspirationProfiles.map((profile) => ({
+    id: `${userProfile.id}-${profile.nodeId}`,
+    source: userProfile.id,
+    target: profile.nodeId,
+    label: `${profile.similarity}%`,
+  }));
   const tabPanelMotionProps = shouldAnimate
     ? {
         initial: { opacity: 0, y: 8 },
@@ -624,57 +781,155 @@ export function Stylist() {
                 {...tabPanelMotionProps}
               >
                 <div className={sectionSurfaceClass}>
-                  <div>
-                    <h2 className="text-base font-semibold text-foreground">Similar style profiles</h2>
-                    <p className="mt-1 text-sm text-muted-foreground">
-                      People whose wardrobes line up with your current styling direction.
-                    </p>
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <h2 className="text-base font-semibold text-foreground">Your style graph</h2>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-xs text-muted-foreground">Selected</div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{selectedInspiration.name}</div>
+                    </div>
                   </div>
 
-                  <div className="mt-4 space-y-2.5">
-                    {inspirationProfiles.map((profile) => (
-                      <div key={profile.id} className={compactListRowClass}>
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border text-sm font-semibold text-foreground">
-                          {profile.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="flex items-center gap-2">
-                            <div className="text-sm font-medium text-foreground">{profile.name}</div>
-                            <div className="text-xs text-muted-foreground">{profile.handle}</div>
-                          </div>
-                          <div className="mt-1 text-xs text-muted-foreground">{profile.note}</div>
-                        </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
+                  <div className="mt-4 overflow-hidden rounded-2xl border border-border">
+                    <div className="relative h-72 w-full overflow-hidden">
+                      <div className="absolute inset-0 z-0">
+                        <GraphCanvas
+                          nodes={inspirationGraphNodes}
+                          edges={inspirationGraphEdges}
+                          layoutType="forceDirected2d"
+                          labelType="all"
+                          draggable={true}
+                          defaultNodeSize={20}
+                          maxDistance={2600}
+                          minDistance={700}
+                          actives={[userProfile.id, selectedInspiration.nodeId]}
+                          selections={[selectedInspiration.nodeId]}
+                          onNodeClick={(node) => {
+                            if (node.id !== userProfile.id) {
+                              setSelectedInspirationNodeId(node.id);
+                            }
+                          }}
+                          theme={{
+                            ...lightTheme,
+                            canvas: { ...lightTheme.canvas, background: "#ffffff" },
+                            lasso: { border: "#030213", background: "rgba(3,2,19,0.08)" },
+                            node: {
+                              ...lightTheme.node,
+                              activeFill: "#030213",
+                              opacity: 1,
+                              selectedOpacity: 1,
+                              inactiveOpacity: 0.5,
+                              label: {
+                                ...lightTheme.node.label,
+                                color: "#030213",
+                                stroke: "transparent",
+                                activeColor: "#030213",
+                              },
+                            },
+                            ring: {
+                              ...lightTheme.ring,
+                              fill: "rgba(0,0,0,0.12)",
+                              activeFill: "rgba(0,0,0,0.28)",
+                            },
+                            edge: {
+                              ...lightTheme.edge,
+                              fill: "rgba(0,0,0,0.12)",
+                              activeFill: "rgba(0,0,0,0.28)",
+                              opacity: 1,
+                              selectedOpacity: 1,
+                              inactiveOpacity: 0.25,
+                              label: {
+                                ...lightTheme.edge.label,
+                                color: "#717182",
+                                stroke: "transparent",
+                                activeColor: "#030213",
+                              },
+                            },
+                            arrow: {
+                              ...lightTheme.arrow,
+                              fill: "rgba(0,0,0,0.12)",
+                              activeFill: "rgba(0,0,0,0.28)",
+                            },
+                          }}
+                        />
                       </div>
-                    ))}
+                    </div>
+                  </div>
+
+                  <div className="mt-4 flex items-center gap-3 rounded-2xl border border-border px-3.5 py-3">
+                    <img
+                      src={selectedInspiration.avatar}
+                      alt={selectedInspiration.name}
+                      className="h-12 w-12 rounded-full border border-white/15 object-cover"
+                    />
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-2">
+                        <div className="text-sm font-medium text-foreground">{selectedInspiration.name}</div>
+                        <div className="text-xs text-muted-foreground">{selectedInspiration.handle}</div>
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">{selectedInspiration.note}</div>
+                    </div>
+                    <div className="shrink-0 text-right">
+                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                        {selectedInspiration.similarity}%
+                      </div>
+                      <div className="mt-1 text-xs text-muted-foreground">match</div>
+                    </div>
                   </div>
                 </div>
 
                 <div className={sectionSurfaceClass}>
                   <div className="flex items-start justify-between gap-3">
                     <div>
-                      <h2 className="text-base font-semibold text-foreground">Wardrobe inspiration</h2>
-                      <p className="mt-1 text-sm text-muted-foreground">
-                        Key pieces showing up across similar profiles right now.
-                      </p>
+                      <h2 className="text-base font-semibold text-foreground">
+                        Popular outfits from {selectedInspiration.name}
+                      </h2>
                     </div>
                     <Sparkles className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </div>
 
-                  <div className="mt-4 space-y-2.5">
-                    {inspirationProfiles.flatMap((profile) =>
-                      profile.wardrobe.map((item) => (
-                        <div key={`${profile.id}-${item}`} className={compactListRowClass}>
-                          <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border">
-                            <Sparkles className="h-4 w-4 text-muted-foreground" />
+                  <div className="mt-4 space-y-4">
+                    {selectedInspirationOutfits.map((outfit) => (
+                      <div key={outfit.id} className="rounded-2xl border border-border overflow-hidden">
+                        <img src={outfit.image} alt={outfit.title} className="aspect-[4/5] w-full object-cover" />
+                        <div className="px-4 py-4 space-y-3">
+                          <div className="flex items-start justify-between gap-3">
+                            <div>
+                              <div className="text-sm font-medium text-foreground">{outfit.title}</div>
+                              <div className="mt-1 text-xs text-muted-foreground">{outfit.popularity}</div>
+                            </div>
+                            <img
+                              src={selectedInspiration.avatar}
+                              alt={selectedInspiration.name}
+                              className="h-10 w-10 rounded-full object-cover"
+                            />
                           </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="text-sm font-medium text-foreground">{item}</div>
-                            <div className="text-xs text-muted-foreground">Seen in {profile.name}&apos;s wardrobe</div>
+                          <p className="text-sm text-muted-foreground">{outfit.reason}</p>
+                          <div className="flex flex-wrap gap-1.5">
+                            {outfit.matchingItems.map((item) => (
+                              <span
+                                key={item}
+                                className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground"
+                              >
+                                {item}
+                              </span>
+                            ))}
                           </div>
                         </div>
-                      )),
-                    )}
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="mt-4 border-t border-border pt-4">
+                    <div className="mb-3 text-xs font-medium text-muted-foreground">Shared wardrobe signals</div>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedInspiration.wardrobe.map((item) => (
+                        <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
+                          {item}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 </div>
               </motion.div>
