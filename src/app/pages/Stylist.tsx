@@ -99,9 +99,20 @@ type CircleNodeData = {
   isUser?: boolean;
 };
 
+type StyleBase = {
+  base: string;
+  label: string;
+  trait: string;
+  score: number;
+  note: string;
+};
+
+const USER_NODE_SIZE = 80;
+const PROFILE_NODE_SIZE = 56;
+
 const CircleNode: React.FC<NodeProps<Node<CircleNodeData>>> = ({ data }) => {
   const { label, avatar, selected, isUser } = data;
-  const size = isUser ? 64 : 56;
+  const size = isUser ? USER_NODE_SIZE : PROFILE_NODE_SIZE;
   const handleStyle = { opacity: 0, width: 1, height: 1, background: "transparent", border: "none" } as const;
   return (
     <div className="flex flex-col items-center">
@@ -130,7 +141,7 @@ const FloatingEdge: React.FC<EdgeProps> = ({ id, source, target, style }) => {
   const sourceNode = useInternalNode(source);
   const targetNode = useInternalNode(target);
   if (!sourceNode || !targetNode) return null;
-  const halfFor = (nodeId: string) => (nodeId === "you" ? 32 : 28);
+  const halfFor = (nodeId: string) => (nodeId === "you" ? USER_NODE_SIZE / 2 : PROFILE_NODE_SIZE / 2);
   const sx = sourceNode.internals.positionAbsolute.x + halfFor(source);
   const sy = sourceNode.internals.positionAbsolute.y + halfFor(source);
   const tx = targetNode.internals.positionAbsolute.x + halfFor(target);
@@ -140,6 +151,18 @@ const FloatingEdge: React.FC<EdgeProps> = ({ id, source, target, style }) => {
 };
 
 const edgeTypes = { floating: FloatingEdge };
+
+const MIN_ORBIT_RADIUS = 120;
+const MAX_ORBIT_RADIUS = 210;
+
+const getOrbitRadius = (similarity: number) => {
+  const similarities = inspirationProfiles.map((profile) => profile.similarity);
+  const minSimilarity = Math.min(...similarities);
+  const maxSimilarity = Math.max(...similarities);
+  if (minSimilarity === maxSimilarity) return (MIN_ORBIT_RADIUS + MAX_ORBIT_RADIUS) / 2;
+  const normalized = (maxSimilarity - similarity) / (maxSimilarity - minSimilarity);
+  return MIN_ORBIT_RADIUS + normalized * (MAX_ORBIT_RADIUS - MIN_ORBIT_RADIUS);
+};
 
 const tabs = [
   { id: "ai", label: "SŌEN" },
@@ -211,7 +234,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1438761681033-6461ffad8d80",
     note: "Soft tailoring, warm neutrals, and easy layering with a clean finish.",
     wardrobe: ["Boxy oat blazer", "Cream rib tank", "Wide-leg stone trousers"],
-    similarity: 94,
+    similarity: 97,
     whyInOrbit: "Lena sits close because her softer tailoring still follows your preference for clean lines and restrained palettes.",
     topOverlap: "Warm neutrals, easy tailoring, and wardrobe-led layering.",
     bestBorrowedMove: "Soften your sharper fits with one lighter tailored layer.",
@@ -232,7 +255,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1599566150163-29194dcaad36",
     note: "Sharp casual outfits built from polos, structured outerwear, and darker trousers.",
     wardrobe: ["Navy knit polo", "Camel overshirt", "Pleated black trousers"],
-    similarity: 91,
+    similarity: 92,
     whyInOrbit: "Marcus matches because his wardrobe logic is nearly identical to yours, just pushed a little more structured.",
     topOverlap: "Polos, sharper outerwear, and darker tailored trousers.",
     bestBorrowedMove: "Increase contrast in evening fits without changing the base pieces.",
@@ -253,7 +276,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1580489944761-15a19d654956",
     note: "Minimal wardrobe staples with tonal colour stories and cleaner sneakers.",
     wardrobe: ["Sand poplin shirt", "Taupe drawstring trousers", "White leather trainers"],
-    similarity: 88,
+    similarity: 85,
     whyInOrbit: "Nina overlaps with your quieter side: tonal dressing, cleaner trainers, and low-noise styling choices.",
     topOverlap: "Tone-on-tone dressing with cleaner casual finishes.",
     bestBorrowedMove: "Let one tonal story carry the full fit instead of relying on contrast.",
@@ -274,7 +297,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1534528741775-53994a69daeb",
     note: "Elevated basics with cleaner contrasts, soft suiting, and polished off-duty layers.",
     wardrobe: ["Black funnel-neck top", "Ivory straight trousers", "Structured leather tote"],
-    similarity: 86,
+    similarity: 78,
     whyInOrbit: "Ava sits in orbit because she uses the same clean base as you, but pushes it into a more elevated contrast story.",
     topOverlap: "Cleaner separates, stronger contrast, and polished day-to-night styling.",
     bestBorrowedMove: "Push one fit each week into a slightly more dressed evening direction.",
@@ -295,7 +318,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1681958758197-0a37ed2e72b2",
     note: "Oversized silhouettes, bold colour blocking, and textured layers with streetwear edge.",
     wardrobe: ["Oversized washed denim jacket", "Graphic tee", "Cargo trousers"],
-    similarity: 83,
+    similarity: 66,
     whyInOrbit: "Celine is a stretch orbit profile. The overlap is more about confidence and layering than exact wardrobe matches.",
     topOverlap: "Texture, statement layering, and stronger visual tension.",
     bestBorrowedMove: "Introduce one louder layer while keeping the rest of your fit disciplined.",
@@ -316,7 +339,7 @@ const inspirationProfiles: InspirationProfile[] = [
     avatar: "https://images.unsplash.com/photo-1680474166817-d1c2539c0a61",
     note: "Relaxed modern cuts, earthy tones, and mixing high and low pieces effortlessly.",
     wardrobe: ["Linen chore jacket", "Ribbed henley", "Washed black jeans"],
-    similarity: 79,
+    similarity: 54,
     whyInOrbit: "Rafi is in orbit because his relaxed shapes and earthy tones mirror your casual wardrobe instincts.",
     topOverlap: "Earth tones, relaxed tailoring, and practical layering.",
     bestBorrowedMove: "Loosen one weekend fit without losing the cleaner line underneath.",
@@ -544,6 +567,40 @@ const dnaSignals = [
   "Low-noise palette",
 ];
 
+const styleGenome: StyleBase[] = [
+  {
+    base: "A",
+    label: "Aesthetic",
+    trait: "Tailored",
+    score: 94,
+    note: "Your strongest read starts with cleaner structure and a composed first impression.",
+  },
+  {
+    base: "T",
+    label: "Tailoring",
+    trait: "Sharp",
+    score: 91,
+    note: "You look best when the line stays controlled through the shoulder, waist, and trouser break.",
+  },
+  {
+    base: "C",
+    label: "Colour",
+    trait: "Low-noise",
+    score: 88,
+    note: "Restrained palettes keep the fit intentional and let one contrast point do the work.",
+  },
+  {
+    base: "G",
+    label: "Grounding",
+    trait: "Quiet confidence",
+    score: 92,
+    note: "Even your stronger looks land best when they feel calm, precise, and wardrobe-native.",
+  },
+];
+
+const styleGenomeSequence = styleGenome.map((item) => item.base).join("-");
+const styleGenomeSummary = styleGenome.map((item) => item.trait).join(" / ");
+
 const silhouetteNotes = [
   "Straighter trouser lines give your fits the cleanest finish.",
   "A sharper top layer works best when the rest of the look stays calm.",
@@ -642,14 +699,14 @@ export function Stylist() {
     (outfit) => outfit.profileNodeId === selectedInspiration.nodeId,
   );
   const borrowedOrbitFit = selectedInspirationOutfits[0];
-  const RADIUS = 170;
   const initialPositions = useMemo(() => {
     const map: Record<string, { x: number; y: number }> = {
-      [userProfile.id]: { x: -32, y: -32 },
+      [userProfile.id]: { x: -(USER_NODE_SIZE / 2), y: -(USER_NODE_SIZE / 2) },
     };
     inspirationProfiles.forEach((profile, index) => {
       const angle = (index / inspirationProfiles.length) * Math.PI * 2 - Math.PI / 2;
-      map[profile.nodeId] = { x: Math.cos(angle) * RADIUS - 28, y: Math.sin(angle) * RADIUS - 28 };
+      const radius = getOrbitRadius(profile.similarity);
+      map[profile.nodeId] = { x: Math.cos(angle) * radius - 28, y: Math.sin(angle) * radius - 28 };
     });
     return map;
   }, []);
@@ -701,13 +758,16 @@ export function Stylist() {
     if (nodeId === userProfile.id) {
       origin = initialPositions[userProfile.id];
     } else {
+      const profile = inspirationProfiles.find((item) => item.nodeId === nodeId);
+      if (!profile) return;
       const half = 28;
       const cx = current.position.x + half;
       const cy = current.position.y + half;
       const angle = Math.atan2(cy, cx);
+      const radius = getOrbitRadius(profile.similarity);
       origin = {
-        x: Math.cos(angle) * RADIUS - half,
-        y: Math.sin(angle) * RADIUS - half,
+        x: Math.cos(angle) * radius - half,
+        y: Math.sin(angle) * radius - half,
       };
     }
     targetPositionsRef.current[nodeId] = origin;
@@ -1191,27 +1251,74 @@ export function Stylist() {
                     </p> */}
                   </div>
 
-                  <div className="mt-4 rounded-2xl border border-border px-3.5 py-3">
+                  <div className="mt-4">
                     <div className="flex items-start justify-between gap-3">
                       <div className="min-w-0 flex-1">
                         <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                           Primary identity
                         </div>
                         <div className="mt-1 text-sm font-medium text-foreground">Tailored and Dangerous</div>
-                        <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                          Secondary trait
-                        </div>
-                        <div className="mt-1 text-sm font-medium text-foreground">Quiet confidence</div>
                       </div>
                       <div className="shrink-0 text-right">
                         <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Stability</div>
                         <div className="mt-1 text-sm font-medium text-foreground">92%</div>
                       </div>
                     </div>
-                    <p className="mt-3 text-sm text-muted-foreground">
+
+                    <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                      Secondary trait
+                    </div>
+                    <div className="mt-1 text-sm font-medium text-foreground">Quiet confidence</div>
+
+                    <div className="mt-4 border-y border-border py-3">
+                      <div className="flex flex-wrap items-center gap-2">
+                        {styleGenome.map((item) => (
+                          <div
+                            key={item.base}
+                            className="flex h-9 w-9 items-center justify-center rounded-full border border-border text-sm font-semibold text-foreground"
+                          >
+                            {item.base}
+                          </div>
+                        ))}
+                      </div>
+                      <div className="mt-3 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
+                        Genome sequence
+                      </div>
+                      <div className="mt-1 text-sm font-medium text-foreground">{styleGenomeSequence}</div>
+                      <div className="mt-1 text-sm text-muted-foreground">{styleGenomeSummary}</div>
+                    </div>
+
+                    <p className="mt-4 text-sm text-muted-foreground">
                       Your style leans clean, controlled, and wardrobe-led. You look strongest when the silhouette is
                       sharp, the palette stays disciplined, and one piece carries the tension.
                     </p>
+
+                    <div className="mt-4 divide-y divide-border border-t border-border">
+                      {styleGenome.map((item) => (
+                        <div key={item.base} className="py-3 first:pt-3 last:pb-0">
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="flex min-w-0 items-center gap-2">
+                              <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-border text-sm font-semibold text-foreground">
+                                {item.base}
+                              </div>
+                              <div className="min-w-0">
+                                <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                  {item.label}
+                                </div>
+                                <div className="mt-1 text-sm font-medium text-foreground">{item.trait}</div>
+                              </div>
+                            </div>
+                            <div className="shrink-0 text-right">
+                              <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                Weight
+                              </div>
+                              <div className="mt-1 text-sm font-medium text-foreground">{item.score}%</div>
+                            </div>
+                          </div>
+                          <p className="mt-2 text-sm text-muted-foreground">{item.note}</p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
                   <div className="mt-4">
@@ -1228,7 +1335,7 @@ export function Stylist() {
                     </div>
                   </div>
 
-                  <div className="mt-4 space-y-2">
+                  <div className="mt-4 flex flex-wrap gap-1.5">
                     {skinTones.map((tone) => {
                       const selected = selectedSkinTone === tone.id;
 
@@ -1237,24 +1344,24 @@ export function Stylist() {
                           key={tone.id}
                           type="button"
                           onClick={() => setSelectedSkinTone(tone.id)}
-                          className={`flex min-h-[52px] w-full items-center justify-between rounded-2xl px-3 py-2.5 text-sm transition-colors active:scale-[0.98] ${
+                          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${
                             selected
-                              ? "bg-zinc-800 text-white"
-                              : "border border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
+                              ? "border-zinc-800 bg-zinc-800 text-white"
+                              : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                           }`}
                         >
-                          <span className="font-medium">{tone.label}</span>
-                          {selected && <Check className="h-4 w-4" />}
+                          <span className="inline-flex items-center gap-1.5">
+                            {tone.label}
+                            {selected ? <Check className="h-3.5 w-3.5" /> : null}
+                          </span>
                         </button>
                       );
                     })}
                   </div>
 
-                  <div className="mt-3 rounded-2xl border border-border px-3.5 py-3">
-                    <div className="mb-1 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
-                      Palette signal
-                    </div>
-                    <div className="text-sm text-foreground">
+                  <div className="mt-3 border-t border-border pt-3">
+                    <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Palette signal</div>
+                    <div className="mt-1 text-sm text-foreground">
                       {skinTones.find((tone) => tone.id === selectedSkinTone)?.recommended}
                     </div>
                   </div>
@@ -1308,9 +1415,9 @@ export function Stylist() {
                     </p>
                   </div>
 
-                  <div className="mt-4 space-y-2.5">
+                  <div className="mt-4 divide-y divide-border border-t border-border">
                     {silhouetteNotes.map((note) => (
-                      <div key={note} className="rounded-2xl border border-border px-3.5 py-3 text-sm text-foreground">
+                      <div key={note} className="py-3 text-sm text-foreground first:pt-3 last:pb-0">
                         {note}
                       </div>
                     ))}
@@ -1345,9 +1452,9 @@ export function Stylist() {
                     </p>
                   </div>
 
-                  <div className="mt-4 space-y-3">
+                  <div className="mt-4 divide-y divide-border border-t border-border">
                     {dnaPracticeLooks.map((look) => (
-                      <div key={look.id} className="rounded-2xl border border-border px-3.5 py-3">
+                      <div key={look.id} className="py-3 first:pt-3 last:pb-0">
                         <p className="text-sm font-medium text-foreground">{look.title}</p>
                         <p className="mt-1.5 text-sm text-muted-foreground">{look.description}</p>
                       </div>
