@@ -1,6 +1,9 @@
-import { useEffect } from "react";
-import { Outlet, NavLink, useLocation } from "react-router";
+import { useEffect, useRef, useState } from "react";
+import { Outlet, NavLink, useLocation, useNavigate } from "react-router";
 import { Sparkles, Home, Bell, PlusSquare, User } from "lucide-react";
+import { motion, useReducedMotion } from "motion/react";
+
+import { AccountSwitcher } from "./AccountSwitcher";
 
 type RouteMeta = {
   title: string;
@@ -86,9 +89,48 @@ function upsertMeta(name: string, content: string) {
   meta.setAttribute("content", content);
 }
 
+const LONG_PRESS_MS = 450;
+
 export function Layout() {
   const location = useLocation();
   const isFullHeightRoute = location.pathname === "/stylist";
+  const navigate = useNavigate();
+  const shouldAnimate = !useReducedMotion();
+
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+  const pressTimer = useRef<number | null>(null);
+  const didLongPress = useRef(false);
+
+  const clearPressTimer = () => {
+    if (pressTimer.current !== null) {
+      window.clearTimeout(pressTimer.current);
+      pressTimer.current = null;
+    }
+  };
+
+  const handlePointerDown = () => {
+    didLongPress.current = false;
+    pressTimer.current = window.setTimeout(() => {
+      didLongPress.current = true;
+      setSwitcherOpen(true);
+    }, LONG_PRESS_MS);
+  };
+
+  const handlePointerUp = () => {
+    clearPressTimer();
+  };
+
+  const handlePointerLeave = () => {
+    clearPressTimer();
+  };
+
+  const handleTriggerClick = () => {
+    if (didLongPress.current) {
+      didLongPress.current = false;
+      return;
+    }
+    navigate("/profile");
+  };
 
   useEffect(() => {
     const meta = getRouteMeta(location.pathname);
@@ -147,19 +189,27 @@ export function Layout() {
             >
               <Sparkles className="w-6 h-6" />
             </NavLink>
-            <NavLink
-              to="/profile"
-              className={({ isActive }) =>
-                `p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`
-              }
+            <motion.button
+              type="button"
+              onPointerDown={handlePointerDown}
+              onPointerUp={handlePointerUp}
+              onPointerLeave={handlePointerLeave}
+              onPointerCancel={handlePointerUp}
+              onClick={handleTriggerClick}
+              whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
+              transition={{ duration: 0.15, ease: "easeOut" }}
+              aria-label="Profile — press and hold to switch accounts"
+              className={`p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer ${
+                location.pathname === "/profile" ? "text-foreground" : "text-muted-foreground"
+              }`}
             >
               <User className="w-6 h-6" />
-            </NavLink>
+            </motion.button>
           </div>
         </div>
       </nav>
+
+      <AccountSwitcher open={switcherOpen} onOpenChange={setSwitcherOpen} />
     </div>
   );
 }

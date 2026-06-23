@@ -237,7 +237,7 @@
   }
 
   .app-surface {
-    @apply rounded-2xl border border-border bg-card shadow-sm;
+    @apply rounded-2xl border border-border bg-card;
   }
 
   .app-chip {

@@ -51,7 +51,7 @@ export function ActivityDetailPage() {
             </div>
           </div>
 
-          <div className="overflow-hidden rounded-[1.5rem] bg-muted">
+          <div className="overflow-hidden rounded-2xl bg-muted">
             <img
               src="https://images.unsplash.com/photo-1651742532474-ea4401a34a10"
               alt="Featured outfit"

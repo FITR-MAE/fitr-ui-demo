@@ -19,7 +19,7 @@ import {
 // @ts-expect-error vite handles css side-effect imports
 import "@xyflow/react/dist/style.css";
 
-import { PageHeader, PageShell } from "../components/Page";
+import { PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 
 type WeatherKind = "sunny" | "cloudy" | "rainy";
@@ -499,10 +499,10 @@ const inspirationOutfits: InspirationOutfit[] = [
 const interactivePillClass = "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95";
 
 const compactListRowClass =
-  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border px-3.5 py-3 transition-colors hover:bg-muted/40 active:scale-[0.98]";
+  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-muted/40 active:scale-[0.98]";
 
-const sectionSurfaceClass = "rounded-2xl p-3";
-const briefSectionClass = "rounded-2xl px-3 py-2.5";
+const sectionSurfaceClass = "app-surface p-3";
+const briefSectionClass = "app-surface px-3 py-2.5";
 
 const recommendations: OutfitRecommendation[] = [
   {
@@ -878,11 +878,10 @@ export function Stylist() {
 
   return (
     <PageShell contentClassName="h-full min-h-0 overflow-hidden bg-background pb-0">
-      <PageHeader title="Studio" />
       <motion.div
         layout={shouldAnimate}
         transition={{ duration: 0.24, ease: "easeOut" }}
-        className="app-page-content flex h-full min-h-0 flex-col gap-3 overflow-hidden px-0 pt-2 pb-2"
+        className="app-page-content flex h-full min-h-0 flex-col gap-3 overflow-hidden px-0 pb-2"
       >
         <div className={`${briefSectionClass} shrink-0`}>
           <div className="flex items-start justify-between gap-3">
@@ -1026,7 +1025,7 @@ export function Stylist() {
                           onClick={() => togglePreference(label)}
                           className={`${interactivePillClass} ${
                             selected
-                              ? "border-zinc-800 bg-zinc-800 text-white"
+                              ? "border-foreground bg-foreground text-background"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                           }`}
                         >
@@ -1246,9 +1245,6 @@ export function Stylist() {
                 <div className={sectionSurfaceClass}>
                   <div>
                     <h2 className="text-base font-semibold text-foreground">Identity</h2>
-                    {/* <p className="mt-1 text-sm text-muted-foreground">
-                      A read on your identity, palette, and the wardrobe signals that hold it all together.
-                    </p> */}
                   </div>
 
                   <div className="mt-4">
@@ -1346,7 +1342,7 @@ export function Stylist() {
                           onClick={() => setSelectedSkinTone(tone.id)}
                           className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${
                             selected
-                              ? "border-zinc-800 bg-zinc-800 text-white"
+                              ? "border-foreground bg-foreground text-background"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                           }`}
                         >
@@ -1377,7 +1373,7 @@ export function Stylist() {
                           onClick={() => setSelectedPalette(palette.name)}
                           className={`${interactivePillClass} ${
                             selected
-                              ? "border-zinc-800 bg-zinc-800 text-white"
+                              ? "border-foreground bg-foreground text-background"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
                           }`}
                         >

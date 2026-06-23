@@ -1,6 +1,6 @@
 import { motion, AnimatePresence, useReducedMotion } from "motion/react";
-import { Camera, ImagePlus, X, MapPin, Users, Loader2, ChevronLeft, ChevronRight } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { ImagePlus, X, MapPin, Users, ChevronRight } from "lucide-react";
+import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import { PageSection, PageShell } from "../components/Page";
@@ -26,23 +26,6 @@ const tagSuggestions = [
   "styleinspo",
 ];
 
-const sourceOptions = [
-  {
-    key: "camera",
-    title: "Take Photo",
-    subtitle: "Use your camera",
-    icon: Camera,
-    previewIndex: 0,
-  },
-  {
-    key: "gallery",
-    title: "Choose from Gallery",
-    subtitle: "Pick from your phone",
-    icon: ImagePlus,
-    previewIndex: 1,
-  },
-] as const;
-
 const stepLabels: Record<Step, string> = {
   media: "New Post",
   edit: "Edit",
@@ -56,19 +39,9 @@ export function Post() {
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [caption, setCaption] = useState("");
   const [tags, setTags] = useState<string[]>([]);
-  const [isPosting, setIsPosting] = useState(false);
-  const postTimeoutRef = useRef<number | null>(null);
 
   const currentStepIndex = steps.indexOf(currentStep);
   const selectedImage = selectedIndex === null ? null : mockImages[selectedIndex];
-
-  useEffect(() => {
-    return () => {
-      if (postTimeoutRef.current !== null) {
-        window.clearTimeout(postTimeoutRef.current);
-      }
-    };
-  }, []);
 
   const handleNext = () => {
     if (currentStep === "media" && selectedIndex === null) {
@@ -90,11 +63,7 @@ export function Post() {
   };
 
   const handlePost = () => {
-    setIsPosting(true);
-    postTimeoutRef.current = window.setTimeout(() => {
-      setIsPosting(false);
-      navigate("/");
-    }, 1500);
+    navigate("/");
   };
 
   const toggleTag = (tag: string) => {
@@ -125,8 +94,6 @@ export function Post() {
         transition: { duration: 0.2, ease: "easeOut" as const },
       };
 
-  const headerActionLabel = currentStep === "details" ? "Share" : "Next";
-  const isHeaderActionDisabled = isPosting || (currentStep === "media" && selectedIndex === null);
   const stepDescription =
     currentStep === "media"
       ? "Choose a photo to start your post."
@@ -134,19 +101,22 @@ export function Post() {
         ? "Shape the caption before you continue."
         : "Finish the details and publish.";
 
+  const canShare = currentStep === "details" && selectedIndex !== null;
+
   return (
     <PageShell>
-      <div className="app-page-content space-y-4 pb-24">
+      <div className="app-page-content space-y-4">
         <PageSection className="p-4">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-2">
-              <span className="app-chip">Step {currentStepIndex + 1}</span>
-              <div>
-                <p className="text-sm font-medium text-foreground">{stepLabels[currentStep]}</p>
-                <p className="text-xs text-muted-foreground">{stepDescription}</p>
-              </div>
-            </div>
-            <div className="flex items-center gap-1.5 pt-1">
+          <div className="flex items-center justify-between gap-3">
+            <button
+              type="button"
+              onClick={handleBack}
+              className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted/60 active:scale-95"
+              aria-label="Back"
+            >
+              <ChevronRight className="h-4 w-4 rotate-180" />
+            </button>
+            <div className="flex items-center gap-1.5">
               {steps.map((step, index) => (
                 <div
                   key={step}
@@ -160,6 +130,13 @@ export function Post() {
                 />
               ))}
             </div>
+            <div className="min-w-[36px] text-right">
+              <span className="app-chip">Step {currentStepIndex + 1}</span>
+            </div>
+          </div>
+          <div className="mt-3">
+            <p className="text-sm font-medium text-foreground">{stepLabels[currentStep]}</p>
+            <p className="text-xs text-muted-foreground">{stepDescription}</p>
           </div>
         </PageSection>
 
@@ -178,7 +155,7 @@ export function Post() {
                       <div className="space-y-1">
                         <p className="text-sm font-medium text-foreground">Start with a strong first image</p>
                         <p className="text-xs text-muted-foreground">
-                          Choose a recent photo or jump straight in from camera.
+                          Pick a photo from your recent library below.
                         </p>
                       </div>
                     </div>
@@ -191,34 +168,6 @@ export function Post() {
                       </span>
                     </div>
                   ) : null}
-                </div>
-              </PageSection>
-
-              <PageSection className="p-4">
-                <div className="mb-3">
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Source</span>
-                </div>
-                <div className="space-y-1">
-                  {sourceOptions.map((option) => {
-                    const Icon = option.icon;
-
-                    return (
-                      <button
-                        key={option.key}
-                        onClick={() => handleSelectImage(option.previewIndex)}
-                        className="flex w-full items-center gap-3 rounded-2xl px-1 py-1.5 text-left transition-colors hover:bg-muted/60 active:scale-[0.98]"
-                      >
-                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
-                          <Icon className="h-4 w-4 text-white" />
-                        </div>
-                        <div className="min-w-0 flex-1">
-                          <div className="text-sm font-medium text-foreground">{option.title}</div>
-                          <div className="text-xs text-muted-foreground">{option.subtitle}</div>
-                        </div>
-                        <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
-                      </button>
-                    );
-                  })}
                 </div>
               </PageSection>
 
@@ -269,6 +218,11 @@ export function Post() {
                   >
                     <X className="h-4 w-4" />
                   </button>
+                  {caption ? (
+                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
+                      <p className="text-sm text-white line-clamp-3">{caption}</p>
+                    </div>
+                  ) : null}
                 </div>
               </PageSection>
 
@@ -284,28 +238,15 @@ export function Post() {
                   maxLength={2200}
                   className="h-28 w-full resize-none rounded-2xl border border-border bg-background px-4 py-3 text-sm text-foreground placeholder:text-muted-foreground outline-none transition focus:ring-2 focus:ring-ring"
                 />
-                <div className="mt-3 flex items-center justify-between gap-3">
-                  <p className="text-xs text-muted-foreground">Keep it short, readable, and feed-friendly.</p>
-                  <button
-                    onClick={handleNext}
-                    className="flex h-9 items-center justify-center rounded-full border border-border bg-card px-4 text-xs font-medium text-foreground transition-colors hover:bg-muted/60 active:scale-95"
-                  >
-                    Continue
-                  </button>
-                </div>
               </PageSection>
 
-              <PageSection className="p-4">
-                <div className="mb-3">
-                  <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Preview</span>
-                </div>
-                <div className="rounded-2xl bg-muted/60 px-4 py-3">
-                  <p className="text-sm font-medium text-foreground">How this will feel in the feed</p>
-                  <p className="mt-1 text-xs text-muted-foreground">
-                    {caption ? caption : "Your caption will appear here once you start writing."}
-                  </p>
-                </div>
-              </PageSection>
+              <button
+                type="button"
+                onClick={handleNext}
+                className="flex h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background transition-colors hover:bg-foreground/90 active:scale-[0.98]"
+              >
+                Continue
+              </button>
             </motion.div>
           )}
 
@@ -367,6 +308,15 @@ export function Post() {
                   </button>
                 </div>
               </PageSection>
+
+              <button
+                type="button"
+                onClick={handlePost}
+                disabled={!canShare}
+                className="sticky bottom-4 flex h-11 w-full items-center justify-center rounded-full bg-foreground px-5 text-sm font-semibold text-background shadow-sm transition-colors hover:bg-foreground/90 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50"
+              >
+                Share
+              </button>
             </motion.div>
           )}
         </AnimatePresence>

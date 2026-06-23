@@ -2,6 +2,7 @@ import { motion, useReducedMotion } from "motion/react";
 import { Heart, MessageCircle, Share2, Bookmark, Search, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
 const outfits = [
   {
@@ -89,7 +90,7 @@ const followingOutfits = outfits.slice(3, 8);
 const feedModes = [
   { id: "for-you", label: "Your Lineup" },
   { id: "friends", label: "Your Circle" },
-  { id: "following", label: "Following " },
+  { id: "following", label: "Following" },
 ] as const;
 
 const formatCount = (count: number) => (count > 999 ? `${Math.floor(count / 1000)}k` : count);
@@ -199,47 +200,34 @@ export function ForYou() {
 
   return (
     <div className="relative h-full bg-black">
-      <div className="pointer-events-none absolute left-0 right-0 z-20 px-4" style={{ top: "0.75rem" }}>
-        <div className="pointer-events-auto flex flex-col items-center gap-2">
-          <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
-            {feedModes.map((mode) => (
-              <button
-                key={mode.id}
-                type="button"
-                onClick={() => setFeedMode(mode.id)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  feedMode === mode.id ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"
-                }`}
-              >
-                {mode.label}
-              </button>
-            ))}
+        <div className="pointer-events-none absolute left-0 right-0 z-20 px-4" style={{ top: "0.75rem" }}>
+          <div className="pointer-events-auto flex flex-col items-center gap-2">
+            <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
+              {feedModes.map((mode) => (
+                <button
+                  key={mode.id}
+                  type="button"
+                  onClick={() => setFeedMode(mode.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                    feedMode === mode.id ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"
+                  }`}
+                >
+                  {mode.label}
+                </button>
+              ))}
+            </div>
           </div>
-
-          {/* <div className="flex items-center gap-1 rounded-full border border-white/10 bg-white/10 px-2 py-1 backdrop-blur-md">
-            {visibleOutfits.map((_, i) => (
-              <div
-                key={i}
-                className={`rounded-full transition-all duration-200 ${
-                  i === currentIndex ? "h-1.5 w-4 bg-white" : "h-1.5 w-1.5 bg-white/40"
-                }`}
-              />
-            ))}
-            <span className="ml-1 text-[11px] leading-none text-white/70">
-              {currentIndex + 1}/{visibleOutfits.length}
-            </span>
-          </div> */}
         </div>
 
         <button
           type="button"
           onClick={() => navigate("/search")}
-          className="pointer-events-auto absolute right-4 top-0 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/10 p-2.5 backdrop-blur-md transition-colors hover:bg-white/20 active:bg-white/5"
+          className="pointer-events-auto absolute right-4 z-20 flex min-h-[44px] min-w-[44px] items-center justify-center rounded-full border border-white/10 bg-white/10 p-2.5 backdrop-blur-md transition-colors hover:bg-white/20 active:bg-white/5"
+          style={{ top: "0.75rem" }}
           aria-label="Open search"
         >
           <Search className="h-[18px] w-[18px] text-white" />
         </button>
-      </div>
 
       <div
         id="feed-container"
@@ -295,7 +283,7 @@ export function ForYou() {
               <motion.button
                 type="button"
                 whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-                onClick={() => navigate("/post")}
+                onClick={() => toast("Comments coming soon", { description: `Reply to @${outfit.user}'s look.` })}
                 className="flex flex-col items-center gap-1"
                 aria-label="Open post comments"
               >
@@ -349,10 +337,7 @@ export function ForYou() {
                   <ChevronRight className="h-3.5 w-3.5 shrink-0 text-white/60" />
                 </div>
                 <p className="text-sm font-normal leading-[1.5] text-white/90">
-                  {outfit.caption}{" "}
-                  {/* {outfit.tags.map((tag) => (
-                    <span key={tag}>#{tag} </span>
-                  ))} */}
+                  {outfit.caption}
                 </p>
                 <div className="flex flex-wrap gap-1.5">
                   {outfit.tags.map((tag) => (

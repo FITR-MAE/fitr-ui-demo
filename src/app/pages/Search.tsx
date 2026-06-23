@@ -2,7 +2,7 @@ import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronDown, MapPin, Search, Shirt, ShoppingBag, SlidersHorizontal, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 
-import { PageHeader, PageSection, PageShell } from "../components/Page";
+import { PageSection, PageShell } from "../components/Page";
 
 const searchTabs = [
   { id: "posts", label: "Posts" },
@@ -151,13 +151,13 @@ const brandResults = [
 ];
 
 const storeResults = [
-  { id: 1, name: "Atelier North", meta: "0.8 mi away", lat: 40.7411, lng: -73.9897 },
+  { id: 1, name: "Maison Margiela", meta: "0.8 mi away", lat: 40.7411, lng: -73.9897 },
   { id: 2, name: "Canvas Studio", meta: "1.4 mi away", lat: 40.7297, lng: -73.9987 },
   { id: 3, name: "Thread House", meta: "2.1 mi away", lat: 40.7223, lng: -73.9874 },
 ];
 
 const compactResultCardClass =
-  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card px-3.5 py-3";
+  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3";
 
 export function SearchPage() {
   const [activeTab, setActiveTab] = useState<(typeof searchTabs)[number]["id"]>("posts");
@@ -225,8 +225,6 @@ export function SearchPage() {
 
   return (
     <PageShell>
-      <PageHeader title="Search" />
-
       <motion.div
         layout={shouldAnimate}
         transition={{ duration: 0.24, ease: "easeOut" }}
@@ -311,11 +309,11 @@ export function SearchPage() {
                             onClick={() => setOpenFilterMenu((prev) => (prev === filter.id ? null : filter.id))}
                             className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors ${
                               openFilterMenu === filter.id
-                                ? "border-zinc-800 bg-zinc-800 text-white"
+                                ? "border-foreground bg-foreground text-background"
                                 : "border-border bg-card text-foreground hover:bg-muted/60"
                             }`}
                           >
-                            <span className={openFilterMenu === filter.id ? "text-white/75" : "text-muted-foreground"}>
+                            <span className={openFilterMenu === filter.id ? "text-background/70" : "text-muted-foreground"}>
                               {filter.label}:
                             </span>
                             <span>
@@ -356,7 +354,7 @@ export function SearchPage() {
                                         setOpenFilterMenu(null);
                                       }}
                                       className={`block w-full rounded-xl px-3 py-2 text-left text-xs font-medium transition-colors ${
-                                        selected ? "bg-zinc-800 text-white" : "text-foreground hover:bg-muted/60"
+                                        selected ? "bg-foreground text-background" : "text-foreground hover:bg-muted/60"
                                       }`}
                                     >
                                       {option}
@@ -381,7 +379,7 @@ export function SearchPage() {
                           }
                           className={`h-9 rounded-full px-3 text-xs font-medium transition-colors ${
                             filterState[activeTab][filter.id as keyof (typeof filterState)[typeof activeTab]]
-                              ? "border-zinc-800 bg-zinc-800 text-white"
+                              ? "border-foreground bg-foreground text-background"
                               : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground"
                           }`}
                         >
@@ -412,7 +410,7 @@ export function SearchPage() {
           >
             {activeTab === "users" && (
               <PageSection className="p-4">
-                <div className="mt-3 space-y-2">
+                <div className="space-y-2">
                   {userResults.map((user) => (
                     <div key={user.id} className={compactResultCardClass}>
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
@@ -430,7 +428,7 @@ export function SearchPage() {
             )}
             {activeTab === "posts" && (
               <PageSection className="p-5">
-                <div className="mt-4 grid grid-cols-2 gap-2">
+                <div className="grid grid-cols-2 gap-2">
                   {postResults.map((post) => (
                     <div key={post.id} className="group relative aspect-square overflow-hidden rounded-2xl bg-muted">
                       <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
@@ -445,7 +443,7 @@ export function SearchPage() {
             )}
             {activeTab === "clothes" && (
               <PageSection className="p-4">
-                <div className="mt-3 space-y-2">
+                <div className="space-y-2">
                   {clothesResults.map((item) => (
                     <div key={item.id} className={compactResultCardClass}>
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -462,7 +460,7 @@ export function SearchPage() {
             )}
             {activeTab === "brands" && (
               <PageSection className="p-4">
-                <div className="mt-3 space-y-2">
+                <div className="space-y-2">
                   {brandResults.map((brand) => (
                     <div key={brand.id} className={compactResultCardClass}>
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -480,8 +478,8 @@ export function SearchPage() {
             {activeTab === "stores" && (
               <div className="space-y-4">
                 <PageSection className="p-4">
-                  <div className="mb-3 flex items-center gap-2 text-left">
-                    <MapPin className="h-5 w-5" />
+                  <div className="mb-3 flex items-center gap-2">
+                    <MapPin className="h-4 w-4 text-muted-foreground" />
                     <h2 className="app-section-title">Stores Near You</h2>
                   </div>
                   <div className="overflow-hidden rounded-2xl border border-border bg-muted">
@@ -507,7 +505,7 @@ export function SearchPage() {
                         type="button"
                         onClick={() => setSelectedStoreId(store.id)}
                         className={`${compactResultCardClass} w-full text-left transition-colors ${
-                          selectedStoreId === store.id ? "border-zinc-800 bg-zinc-800 text-white" : "hover:bg-muted/60"
+                          selectedStoreId === store.id ? "border-foreground bg-foreground text-background" : "hover:bg-muted/60"
                         }`}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
@@ -515,12 +513,12 @@ export function SearchPage() {
                         </div>
                         <div className="min-w-0 flex-1">
                           <p
-                            className={`truncate text-sm font-medium ${selectedStoreId === store.id ? "text-white" : "text-foreground"}`}
+                            className={`truncate text-sm font-medium ${selectedStoreId === store.id ? "text-background" : "text-foreground"}`}
                           >
                             {store.name}
                           </p>
                           <p
-                            className={`truncate text-xs ${selectedStoreId === store.id ? "text-white/75" : "text-muted-foreground"}`}
+                            className={`truncate text-xs ${selectedStoreId === store.id ? "text-background/75" : "text-muted-foreground"}`}
                           >
                             {store.meta}
                           </p>
