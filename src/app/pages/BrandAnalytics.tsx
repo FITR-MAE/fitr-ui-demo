@@ -121,6 +121,15 @@ const wardrobeItems = [
   },
 ];
 
+function EmptyAnalyticsState({ title, body }: { title: string; body: string }) {
+  return (
+    <div className="rounded-2xl border border-dashed border-border bg-background p-5 text-center">
+      <p className="text-sm font-medium text-foreground">{title}</p>
+      <p className="mt-1 text-xs leading-5 text-muted-foreground">{body}</p>
+    </div>
+  );
+}
+
 function AccessState({ isBusiness }: { isBusiness: boolean }) {
   return (
     <PageShell>
@@ -195,6 +204,10 @@ function SegmentList({ items }: { items: { label: string; value: number }[] }) {
 export function BrandAnalytics() {
   const { activeAccount, activeRole, permissions } = useAccounts();
   const isBusiness = activeAccount.type === "business";
+  const hasAnalytics = activeAccount.id === "maison" || activeAccount.id === "lncc";
+  const accountMetricCards = hasAnalytics
+    ? metricCards
+    : metricCards.map((metric) => ({ ...metric, value: "0", change: "No data" }));
 
   if (!isBusiness || !permissions.viewAnalytics) {
     return <AccessState isBusiness={isBusiness} />;
@@ -213,7 +226,7 @@ export function BrandAnalytics() {
             <p className="text-xs text-muted-foreground">Compared with the previous 28 days</p>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-3">
-            {metricCards.map((metric) => (
+            {accountMetricCards.map((metric) => (
               <MetricCard key={metric.label} {...metric} />
             ))}
           </div>
@@ -230,36 +243,24 @@ export function BrandAnalytics() {
             </div>
             <span className="app-chip">Weekly</span>
           </div>
-          <ChartContainer config={trendConfig} className="mt-4 h-72 w-full">
-            <LineChart data={trendData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
-              <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
-              <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} />
-              <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} />
-              <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
-              <ChartLegend content={<ChartLegendContent />} />
-              <Line
-                type="monotone"
-                dataKey="reach"
-                stroke="var(--color-reach)"
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="profileViews"
-                stroke="var(--color-profileViews)"
-                strokeWidth={2}
-                dot={false}
-              />
-              <Line
-                type="monotone"
-                dataKey="linkClicks"
-                stroke="var(--color-linkClicks)"
-                strokeWidth={2}
-                dot={false}
-              />
-            </LineChart>
-          </ChartContainer>
+          {hasAnalytics ? (
+            <ChartContainer config={trendConfig} className="mt-4 h-72 w-full">
+              <LineChart data={trendData} margin={{ top: 8, right: 8, left: -18, bottom: 0 }}>
+                <CartesianGrid vertical={false} stroke="var(--border)" strokeDasharray="3 3" />
+                <XAxis dataKey="week" tickLine={false} axisLine={false} tickMargin={10} minTickGap={24} />
+                <YAxis tickLine={false} axisLine={false} tickMargin={8} width={40} />
+                <ChartTooltip content={<ChartTooltipContent indicator="line" />} />
+                <ChartLegend content={<ChartLegendContent />} />
+                <Line type="monotone" dataKey="reach" stroke="var(--color-reach)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="profileViews" stroke="var(--color-profileViews)" strokeWidth={2} dot={false} />
+                <Line type="monotone" dataKey="linkClicks" stroke="var(--color-linkClicks)" strokeWidth={2} dot={false} />
+              </LineChart>
+            </ChartContainer>
+          ) : (
+            <div className="mt-4">
+              <EmptyAnalyticsState title="No trend data yet" body="Publish posts and connect destinations to begin collecting performance data." />
+            </div>
+          )}
         </PageSection>
 
         <PageSection className="p-5 md:hidden">
@@ -291,7 +292,7 @@ export function BrandAnalytics() {
                 <p className="text-xs text-muted-foreground">Based on audience location signals</p>
               </div>
             </div>
-            <SegmentList items={regions} />
+            {hasAnalytics ? <SegmentList items={regions} /> : <EmptyAnalyticsState title="No audience data yet" body="Audience segments appear after your profile has enough activity." />}
           </PageSection>
 
           <PageSection className="p-5">
@@ -302,7 +303,7 @@ export function BrandAnalytics() {
                 <p className="text-xs text-muted-foreground">Self-reported, optional profile data</p>
               </div>
             </div>
-            <SegmentList items={nationalities} />
+            {hasAnalytics ? <SegmentList items={nationalities} /> : <EmptyAnalyticsState title="No self-reported data yet" body="This optional segment appears only once privacy thresholds are met." />}
           </PageSection>
         </div>
 
@@ -312,7 +313,7 @@ export function BrandAnalytics() {
               <h2 className="app-section-title">Most engaged users</h2>
               <span className="text-xs text-muted-foreground">28 days</span>
             </div>
-            <div className="space-y-1">
+            {hasAnalytics ? <div className="space-y-1">
               {engagedUsers.map((user, index) => (
                 <div key={user.handle} className="flex items-center gap-3 rounded-2xl px-2 py-2">
                   <span className="w-4 text-xs text-muted-foreground">{index + 1}</span>
@@ -326,7 +327,7 @@ export function BrandAnalytics() {
                   <span className="shrink-0 text-xs text-muted-foreground">{user.interactions}</span>
                 </div>
               ))}
-            </div>
+            </div> : <EmptyAnalyticsState title="No engagement ranking yet" body="Rankings appear after people interact with your posts and links." />}
           </PageSection>
 
           <PageSection className="p-5">
@@ -337,7 +338,7 @@ export function BrandAnalytics() {
               </div>
               <span className="text-xs text-muted-foreground">Presence</span>
             </div>
-            <div className="grid gap-2 sm:grid-cols-2">
+            {hasAnalytics ? <div className="grid gap-2 sm:grid-cols-2">
               {wardrobeItems.map((item) => (
                 <div key={item.name} className="flex items-center gap-3 rounded-2xl border border-border p-3">
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted">
@@ -351,7 +352,7 @@ export function BrandAnalytics() {
                   <span className="self-start text-xs font-medium text-foreground">{item.change}</span>
                 </div>
               ))}
-            </div>
+            </div> : <EmptyAnalyticsState title="No wardrobe placements yet" body="This view will show products users add to their wardrobes." />}
           </PageSection>
         </div>
 
@@ -362,12 +363,14 @@ export function BrandAnalytics() {
                 <Target className="h-4 w-4 text-muted-foreground" />
                 <h2 className="app-section-title">Peer benchmark</h2>
               </div>
-              <p className="mt-3 text-2xl font-semibold text-foreground">Top 18%</p>
+              <p className="mt-3 text-2xl font-semibold text-foreground">{hasAnalytics ? "Top 18%" : "Not enough data"}</p>
               <p className="mt-1 max-w-xl text-sm leading-6 text-muted-foreground">
-                Engagement is outperforming comparable luxury fashion profiles with a similar audience size.
+                {hasAnalytics
+                  ? "Engagement is outperforming comparable luxury fashion profiles with a similar audience size."
+                  : "Benchmarks appear after the account reaches the platform's minimum comparison threshold."}
               </p>
             </div>
-            <div className="grid grid-cols-2 gap-3">
+            {hasAnalytics ? <div className="grid grid-cols-2 gap-3">
               <div className="rounded-2xl border border-border bg-background p-4">
                 <span className="inline-flex items-center gap-1 text-xs text-foreground">
                   <ArrowUpRight className="h-3 w-3" /> 2.1 pts
@@ -382,7 +385,7 @@ export function BrandAnalytics() {
                 <p className="mt-3 text-xl font-semibold text-foreground">5.7%</p>
                 <p className="text-xs text-muted-foreground">Peer median</p>
               </div>
-            </div>
+            </div> : null}
           </div>
         </PageSection>
       </div>

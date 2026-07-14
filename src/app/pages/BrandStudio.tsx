@@ -116,6 +116,7 @@ export function BrandStudio() {
   const activePromotions = promotions.filter(
     (promotion) => promotion.status === "Live" || promotion.status === "Scheduled",
   );
+  const hasAnalytics = activeAccount.id === "maison" || activeAccount.id === "lncc";
   const businessType = activeAccount.businessKind === "store" ? "Store" : "Brand";
 
   return (
@@ -199,7 +200,10 @@ export function BrandStudio() {
             </Button>
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 lg:grid-cols-4">
-            {kpis.map((kpi) => (
+            {(hasAnalytics
+              ? kpis
+              : kpis.map((kpi) => ({ ...kpi, value: "0", change: "No data" }))
+            ).map((kpi) => (
               <div key={kpi.label} className="rounded-2xl border border-border bg-background p-4">
                 <p className="text-xs text-muted-foreground">{kpi.label}</p>
                 <div className="mt-2 flex flex-wrap items-end justify-between gap-2">

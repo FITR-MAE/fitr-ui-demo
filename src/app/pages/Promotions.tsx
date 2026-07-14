@@ -152,10 +152,15 @@ export function Promotions() {
 
   type ActionDef = { label: string; action: "publish" | "pause" | "end" | "resume" | "schedule"; variant: "default" | "outline"; icon: typeof Play };
 
-  const actionsFor = (status: PromotionStatus): ActionDef[] => {
-    if (status === "Draft") return [{ label: "Publish", action: "publish", variant: "default", icon: Play }];
-    if (status === "Live") return [{ label: "Pause", action: "pause", variant: "outline", icon: CirclePause }, { label: "End", action: "end", variant: "outline", icon: CirclePause }];
-    if (status === "Scheduled") return [{ label: "Publish now", action: "publish", variant: "default", icon: Play }];
+  const actionsFor = (promotion: Promotion): ActionDef[] => {
+    if (promotion.status === "Draft") {
+      return [
+        { label: "Schedule", action: "schedule", variant: "outline", icon: Clock3 },
+        { label: "Publish", action: "publish", variant: "default", icon: Play },
+      ];
+    }
+    if (promotion.status === "Live") return [{ label: "Pause", action: "pause", variant: "outline", icon: CirclePause }, { label: "End", action: "end", variant: "outline", icon: CirclePause }];
+    if (promotion.status === "Scheduled") return [{ label: "Publish now", action: "publish", variant: "default", icon: Play }, { label: "End", action: "end", variant: "outline", icon: CirclePause }];
     return [{ label: "Reopen", action: "resume", variant: "outline", icon: FilePenLine }];
   };
 
@@ -229,7 +234,7 @@ export function Promotions() {
                       </div>
                       {permissions.publishPromotions ? (
                         <div className="hidden flex-wrap items-center justify-end gap-2 md:flex">
-                          {actionsFor(promotion.status).map((actionDef) => {
+                          {actionsFor(promotion).map((actionDef) => {
                             const ActionIcon = actionDef.icon;
                             return (
                               <Button
