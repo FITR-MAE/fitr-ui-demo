@@ -1,5 +1,11 @@
 # UI Reference
 
+## Related documents
+
+- **`brand-direction.md`** — brand principles and naming explorations behind these surfaces.
+- **`design-guidelines.md`** — design system (tokens, typography, layout primitives, components) used to implement these surfaces in code.
+- **`AGENTS.md`** — repo setup, build commands, and implementation caveats.
+
 ## Purpose
 
 This document is a high-level reference for the layout, structure, and intended role of each major surface in the app.
@@ -17,6 +23,8 @@ The app is organized around a small set of core product surfaces:
 - Search
 
 Together, these surfaces should express the full product system: discovery, creation, intelligence, identity, and social interaction.
+
+> **Implementation status:** brand surface names → code routes are Flow=`/` (ForYou), Notifications=`/notifications`, Drops=`/post` (Post), Studio=`/stylist` (Stylist, page title "Studio"), Profile=`/profile`, Search=`/search`, plus a `/activity/:id` detail sub-page reached from Notifications. Only "Studio" matches its brand name in the UI today. This doc is aspirational; `design-guidelines.md` is authoritative for how surfaces are actually built.
 
 ## Navigation
 

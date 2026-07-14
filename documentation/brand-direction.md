@@ -1,5 +1,11 @@
 # Brand Direction
 
+## Related documents
+
+- **`ui.md`** — high-level UI reference mapping brand surfaces to screen structure.
+- **`design-guidelines.md`** — design system (tokens, typography, components) used to implement this brand direction in code.
+- **`AGENTS.md`** — repo setup, build commands, and implementation caveats.
+
 ## Overview
 
 Fitr is a personal style engine and identity platform, not just a fashion app.
@@ -37,6 +43,8 @@ The current product is built around six main surfaces:
 - Search
 
 Together, these pages should express the full system: discovery, creation, guidance, identity, and connection.
+
+> **Brand → code mapping:** these surface names are the intended product vocabulary; the codebase does not yet match it one-to-one. Flow = ForYou at `/`, Drops = Post at `/post`, Studio = Stylist at `/stylist` (page title "Studio"), Notifications = `/notifications`, Profile = `/profile`, Search = `/search`. Only "Studio" currently appears as its brand name in the UI. See `design-guidelines.md` for implementation conventions and `AGENTS.md` for route caveats (notably the `routes.ts`/`routes.tsx` shadowing that currently makes `/activity/:id` unreachable).
 
 ## Home
 
