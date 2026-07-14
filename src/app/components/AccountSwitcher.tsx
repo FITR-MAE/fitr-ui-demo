@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
-import { Check, Plus, LogOut, Building2, User as UserIcon } from "lucide-react";
+import { Check, Plus, LogOut, Building2, Store, User as UserIcon } from "lucide-react";
 import { motion } from "motion/react";
 import { toast } from "sonner";
 
@@ -32,7 +32,7 @@ type Props = {
 };
 
 export function AccountSwitcher({ open, onOpenChange }: Props) {
-  const { accounts, activeAccountId, activeAccount, setActive, addAccount, logout } = useAccounts();
+  const { accounts, activeAccountId, activeAccount, currentUser, getMembers, setActive, logout } = useAccounts();
   const [confirmOpen, setConfirmOpen] = useState(false);
   const accountTap = usePressFeedback(0.98);
   const addTap = usePressFeedback(0.98);
@@ -45,11 +45,9 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
     navigate("/profile");
   };
 
-  const handleAdd = () => {
-    addAccount();
+  const handleCreate = () => {
     onOpenChange(false);
-    navigate("/profile");
-    toast("Added a new personal account", { description: "Switched to the new account." });
+    navigate("/accounts/new");
   };
 
   const handleLogoutConfirm = () => {
@@ -68,14 +66,17 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
           <DrawerHeader className="pb-2">
             <DrawerTitle className="text-base font-semibold">Accounts</DrawerTitle>
             <DrawerDescription className="text-xs text-muted-foreground">
-              Switch between accounts, add a new one, or log out.
+              Tap an account to switch. Your role determines which business tools are available.
             </DrawerDescription>
           </DrawerHeader>
 
           <div className="px-4 pb-2 space-y-2">
             {accounts.map((account) => {
               const isActive = account.id === activeAccountId;
-              const TypeIcon = account.type === "business" ? Building2 : UserIcon;
+              const TypeIcon = account.businessKind === "store" ? Store : account.type === "business" ? Building2 : UserIcon;
+              const membership = getMembers(account.id).find((member) => member.user.id === currentUser.id);
+              const accountLabel =
+                account.type === "personal" ? "Personal" : account.businessKind === "store" ? "Store" : "Brand";
               return (
                 <motion.button
                   key={account.id}
@@ -91,7 +92,7 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
                     className={cn(
                       "relative h-12 w-12 shrink-0 overflow-hidden rounded-full",
                       isActive
-                        ? "ring-2 ring-purple-400 ring-offset-2 ring-offset-background"
+                        ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
                         : "ring-1 ring-border",
                     )}
                   >
@@ -102,10 +103,13 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
                       <p className="truncate text-sm font-medium">{account.name}</p>
                       <span className="app-chip inline-flex items-center gap-1">
                         <TypeIcon className="h-3 w-3" />
-                        {account.type === "business" ? "Business" : "Personal"}
+                        {accountLabel}
                       </span>
                     </div>
                     <p className="truncate text-xs text-muted-foreground">{account.handle}</p>
+                    {account.type === "business" && membership ? (
+                      <p className="mt-0.5 text-[11px] capitalize text-muted-foreground">{membership.role} access</p>
+                    ) : null}
                   </div>
                   {isActive && <Check className="h-4 w-4 shrink-0 text-foreground" />}
                 </motion.button>
@@ -116,7 +120,7 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
           <div className="mt-1 flex flex-col gap-2 p-4 pt-2">
             <motion.button
               type="button"
-              onClick={handleAdd}
+              onClick={handleCreate}
               {...addTap}
               className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-3 text-left hover:bg-muted/60"
             >
@@ -124,8 +128,8 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
                 <Plus className="h-5 w-5 text-white" />
               </div>
               <div className="min-w-0 flex-1">
-                <p className="text-sm font-medium">Add another account</p>
-                <p className="text-xs text-muted-foreground">Create a new personal profile for the demo.</p>
+                <p className="text-sm font-medium">Create a brand or store</p>
+                <p className="text-xs text-muted-foreground">Set up a shared profile and invite a team.</p>
               </div>
             </motion.button>
 
@@ -152,7 +156,7 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
           <AlertDialogHeader>
             <AlertDialogTitle>Log out of {activeAccount.name}?</AlertDialogTitle>
             <AlertDialogDescription>
-              This is a demo — logging out will simply return you to the default account
+              This is a demo. Logging out will simply return you to the default account
               ({accounts[0].name}). No real session will be ended.
             </AlertDialogDescription>
           </AlertDialogHeader>

@@ -1,8 +1,10 @@
 import { motion, AnimatePresence } from "motion/react";
-import { ImagePlus, X, MapPin, Users, ChevronRight } from "lucide-react";
+import { Building2, ChevronRight, ImagePlus, LockKeyhole, MapPin, Users, X } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
+import { toast } from "sonner";
 
+import { useAccounts } from "../components/AccountProvider";
 import { PageSection, PageShell } from "../components/Page";
 import { cn } from "../components/ui/utils";
 import { usePanelMotionWithScale } from "../components/motion";
@@ -37,6 +39,8 @@ const stepLabels: Record<Step, string> = {
 
 export function Post() {
   const navigate = useNavigate();
+  const { activeAccount, permissions, createPost } = useAccounts();
+  const isBusiness = activeAccount.type === "business";
   const frameMotionProps = usePanelMotionWithScale();
   const [currentStep, setCurrentStep] = useState<Step>("media");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
@@ -66,7 +70,10 @@ export function Post() {
   };
 
   const handlePost = () => {
-    navigate("/");
+    if (!selectedImage) return;
+    createPost({ image: selectedImage, caption: caption.trim(), tags }, activeAccount.id);
+    toast("Post shared", { description: `Published as ${activeAccount.name}.` });
+    navigate(isBusiness ? "/profile" : "/");
   };
 
   const toggleTag = (tag: string) => {
@@ -96,6 +103,24 @@ export function Post() {
         : "Finish the details and publish.";
 
   const canShare = currentStep === "details" && selectedIndex !== null;
+
+  if (isBusiness && !permissions.createContent) {
+    return (
+      <PageShell>
+        <div className="app-page-content">
+          <PageSection className="p-5">
+            <div className="flex h-12 w-12 items-center justify-center rounded-full bg-muted">
+              <LockKeyhole className="h-5 w-5 text-muted-foreground" />
+            </div>
+            <h1 className="mt-4 app-section-title">Content access required</h1>
+            <p className="mt-1 text-sm leading-6 text-muted-foreground">
+              Your role can review performance, but it cannot create posts for {activeAccount.name}.
+            </p>
+          </PageSection>
+        </div>
+      </PageShell>
+    );
+  }
 
   return (
     <PageShell>
@@ -132,6 +157,20 @@ export function Post() {
           <div className="mt-3">
             <p className="text-sm font-medium text-foreground">{stepLabels[currentStep]}</p>
             <p className="text-xs text-muted-foreground">{stepDescription}</p>
+          </div>
+          <div className="mt-3 flex items-center gap-3 rounded-2xl bg-muted/60 p-3">
+            <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted ring-1 ring-border">
+              <ImageWithFallback
+                src={activeAccount.avatar}
+                alt={activeAccount.name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-medium text-foreground">Posting as {activeAccount.name}</p>
+              <p className="truncate text-xs text-muted-foreground">{activeAccount.handle}</p>
+            </div>
+            {isBusiness ? <Building2 className="h-4 w-4 text-muted-foreground" /> : null}
           </div>
         </PageSection>
 
