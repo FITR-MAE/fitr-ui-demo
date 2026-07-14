@@ -251,4 +251,12 @@
   .app-section-copy {
     @apply text-sm leading-6 text-muted-foreground;
   }
+
+  .app-compact-row {
+    @apply flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3;
+  }
+
+  .app-compact-row-interactive {
+    @apply flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-muted/60 active:scale-[0.98];
+  }
 }

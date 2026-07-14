@@ -1,8 +1,12 @@
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { ChevronDown, MapPin, Search, Shirt, ShoppingBag, SlidersHorizontal, Store } from "lucide-react";
 import { useEffect, useState } from "react";
 
 import { PageSection, PageShell } from "../components/Page";
+import { PillTabs } from "../components/PillTabs";
+import { cn } from "../components/ui/utils";
+import { useShouldAnimate, useTabPanelMotion } from "../components/motion";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 const searchTabs = [
   { id: "posts", label: "Posts" },
@@ -156,16 +160,14 @@ const storeResults = [
   { id: 3, name: "Thread House", meta: "2.1 mi away", lat: 40.7223, lng: -73.9874 },
 ];
 
-const compactResultCardClass =
-  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3";
-
 export function SearchPage() {
   const [activeTab, setActiveTab] = useState<(typeof searchTabs)[number]["id"]>("posts");
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [filterState, setFilterState] = useState(defaultFilterState);
   const [openFilterMenu, setOpenFilterMenu] = useState<string | null>(null);
   const [selectedStoreId, setSelectedStoreId] = useState(storeResults[0].id);
-  const shouldAnimate = !useReducedMotion();
+  const shouldAnimate = useShouldAnimate();
+  const tabPanelMotionProps = useTabPanelMotion();
   const activeTabFilters = tabFilters[activeTab];
   const hasFilters = activeTabFilters.length > 0;
   const selectedStore = storeResults.find((store) => store.id === selectedStoreId) ?? storeResults[0];
@@ -176,13 +178,6 @@ export function SearchPage() {
     bottom: selectedStore.lat - 0.012,
   };
   const storeMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds.left}%2C${mapBounds.bottom}%2C${mapBounds.right}%2C${mapBounds.top}&layer=mapnik&marker=${selectedStore.lat}%2C${selectedStore.lng}`;
-  const tabPanelMotionProps = shouldAnimate
-    ? {
-        initial: { opacity: 0, transform: "translateY(10px) scale(0.985)" },
-        animate: { opacity: 1, transform: "translateY(0px) scale(1)" },
-        exit: { opacity: 0, transform: "translateY(-8px) scale(0.985)" },
-      }
-    : {};
   const filterPanelMotionProps = shouldAnimate
     ? {
         initial: { opacity: 0, y: -10, scale: 0.97 },
@@ -230,28 +225,7 @@ export function SearchPage() {
         transition={{ duration: 0.24, ease: "easeOut" }}
         className="app-page-content space-y-4"
       >
-        <motion.div
-          layout={shouldAnimate}
-          transition={{ duration: 0.24, ease: "easeOut" }}
-          className="flex justify-center"
-        >
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-border bg-card p-1">
-            {searchTabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+        <PillTabs tabs={searchTabs} activeTab={activeTab} onTabChange={setActiveTab} />
         <motion.div
           layout={shouldAnimate}
           transition={{ duration: 0.24, ease: "easeOut" }}
@@ -272,11 +246,12 @@ export function SearchPage() {
               type="button"
               whileTap={shouldAnimate ? { scale: 0.95 } : undefined}
               onClick={() => setFiltersOpen((prev) => !prev)}
-              className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors ${
+              className={cn(
+                "flex h-9 w-9 shrink-0 items-center justify-center rounded-full border transition-colors",
                 filtersOpen
                   ? "border-foreground bg-foreground text-background"
-                  : "border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-              }`}
+                  : "border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+              )}
               aria-label={filtersOpen ? "Hide filters" : "Show filters"}
               aria-expanded={filtersOpen}
             >
@@ -307,11 +282,12 @@ export function SearchPage() {
                           <button
                             type="button"
                             onClick={() => setOpenFilterMenu((prev) => (prev === filter.id ? null : filter.id))}
-                            className={`inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors ${
+                            className={cn(
+                              "inline-flex h-9 items-center gap-2 rounded-full border px-3 text-xs font-medium transition-colors",
                               openFilterMenu === filter.id
                                 ? "border-foreground bg-foreground text-background"
-                                : "border-border bg-card text-foreground hover:bg-muted/60"
-                            }`}
+                                : "border-border bg-card text-foreground hover:bg-muted/60",
+                            )}
                           >
                             <span className={openFilterMenu === filter.id ? "text-background/70" : "text-muted-foreground"}>
                               {filter.label}:
@@ -322,7 +298,10 @@ export function SearchPage() {
                               )}
                             </span>
                             <ChevronDown
-                              className={`h-3.5 w-3.5 transition-transform ${openFilterMenu === filter.id ? "rotate-180" : "rotate-0"}`}
+                              className={cn(
+                                "h-3.5 w-3.5 transition-transform",
+                                openFilterMenu === filter.id ? "rotate-180" : "rotate-0",
+                              )}
                             />
                           </button>
 
@@ -353,9 +332,10 @@ export function SearchPage() {
                                         }));
                                         setOpenFilterMenu(null);
                                       }}
-                                      className={`block w-full rounded-xl px-3 py-2 text-left text-xs font-medium transition-colors ${
-                                        selected ? "bg-foreground text-background" : "text-foreground hover:bg-muted/60"
-                                      }`}
+                                      className={cn(
+                                        "block w-full rounded-xl px-3 py-2 text-left text-xs font-medium transition-colors",
+                                        selected ? "bg-foreground text-background" : "text-foreground hover:bg-muted/60",
+                                      )}
                                     >
                                       {option}
                                     </button>
@@ -377,11 +357,12 @@ export function SearchPage() {
                               },
                             }))
                           }
-                          className={`h-9 rounded-full px-3 text-xs font-medium transition-colors ${
+                          className={cn(
+                            "h-9 rounded-full px-3 text-xs font-medium transition-colors",
                             filterState[activeTab][filter.id as keyof (typeof filterState)[typeof activeTab]]
                               ? "border-foreground bg-foreground text-background"
-                              : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                          }`}
+                              : "border border-border bg-card text-muted-foreground hover:bg-muted/60 hover:text-foreground",
+                          )}
                         >
                           {filter.label}
                         </button>
@@ -412,9 +393,9 @@ export function SearchPage() {
               <PageSection className="p-4">
                 <div className="space-y-2">
                   {userResults.map((user) => (
-                    <div key={user.id} className={compactResultCardClass}>
+                    <div key={user.id} className="app-compact-row">
                       <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                        <img src={user.photo} alt={user.name} className="h-full w-full object-cover" />
+                        <ImageWithFallback src={user.photo} alt={user.name} className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0 flex-1 space-y-0.5">
                         <p className="truncate text-sm font-medium text-foreground">{user.name}</p>
@@ -431,7 +412,7 @@ export function SearchPage() {
                 <div className="grid grid-cols-2 gap-2">
                   {postResults.map((post) => (
                     <div key={post.id} className="group relative aspect-square overflow-hidden rounded-2xl bg-muted">
-                      <img src={post.image} alt={post.title} className="h-full w-full object-cover" />
+                      <ImageWithFallback src={post.image} alt={post.title} className="h-full w-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
                       <div className="absolute bottom-2 left-2">
                         <p className="text-xs font-medium text-white">{post.meta}</p>
@@ -445,7 +426,7 @@ export function SearchPage() {
               <PageSection className="p-4">
                 <div className="space-y-2">
                   {clothesResults.map((item) => (
-                    <div key={item.id} className={compactResultCardClass}>
+                    <div key={item.id} className="app-compact-row">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <Shirt className="h-4 w-4" />
                       </div>
@@ -462,7 +443,7 @@ export function SearchPage() {
               <PageSection className="p-4">
                 <div className="space-y-2">
                   {brandResults.map((brand) => (
-                    <div key={brand.id} className={compactResultCardClass}>
+                    <div key={brand.id} className="app-compact-row">
                       <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                         <ShoppingBag className="h-4 w-4" />
                       </div>
@@ -504,21 +485,31 @@ export function SearchPage() {
                         key={store.id}
                         type="button"
                         onClick={() => setSelectedStoreId(store.id)}
-                        className={`${compactResultCardClass} w-full text-left transition-colors ${
-                          selectedStoreId === store.id ? "border-foreground bg-foreground text-background" : "hover:bg-muted/60"
-                        }`}
+                        className={cn(
+                          "app-compact-row-interactive",
+                          "w-full text-left",
+                          selectedStoreId === store.id
+                            ? "border-foreground bg-foreground text-background"
+                            : "hover:bg-muted/60",
+                        )}
                       >
                         <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
                           <Store className="h-4 w-4" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <p
-                            className={`truncate text-sm font-medium ${selectedStoreId === store.id ? "text-background" : "text-foreground"}`}
+                            className={cn(
+                              "truncate text-sm font-medium",
+                              selectedStoreId === store.id ? "text-background" : "text-foreground",
+                            )}
                           >
                             {store.name}
                           </p>
                           <p
-                            className={`truncate text-xs ${selectedStoreId === store.id ? "text-background/75" : "text-muted-foreground"}`}
+                            className={cn(
+                              "truncate text-xs",
+                              selectedStoreId === store.id ? "text-background/75" : "text-muted-foreground",
+                            )}
                           >
                             {store.meta}
                           </p>

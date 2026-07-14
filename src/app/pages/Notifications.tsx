@@ -1,37 +1,57 @@
-import { BadgeCent, ChevronRight, Heart, Store } from "lucide-react";
+import { BadgeCent, ChevronRight, Heart, Store, MessageCircle } from "lucide-react";
 
 import { Link } from "react-router";
 
 import { PageSection, PageShell } from "../components/Page";
+import { AvatarBadge } from "../components/AvatarBadge";
+import { cn } from "../components/ui/utils";
 
-const activityRows = [
+type ActivityRow = {
+  id: number;
+  icon: typeof Heart;
+  title: string;
+  detail: string;
+  time: string;
+  photo: string;
+};
+
+const activityRows: ActivityRow[] = [
   {
     id: 1,
     icon: Heart,
-    title: "Interactions",
+    title: "New interactions",
     detail: "ModernMuse and 71 others liked your post",
     time: "4m",
-    photo: "https://images.unsplash.com/photo-1690009996338-aebbf50a0b1e",
+    photo: "https://images.unsplash.com/photo-1726276986699-eed94c47eedc",
   },
   {
     id: 2,
     icon: BadgeCent,
     title: "Upcoming sales",
-    detail: "Maison Margiela and 3 other brands you follow have upcoming sales",
+    detail: "Maison Margiela and 3 brands you follow have sales soon",
     time: "2h",
     photo: "https://images.unsplash.com/photo-1654653068461-7ccc719064fa",
   },
   {
     id: 3,
     icon: Store,
-    title: "Near you",
-    detail: "You have 3 fashion stores within walking distance",
+    title: "Stores near you",
+    detail: "3 fashion stores within walking distance",
     time: "1d",
     photo: "https://images.unsplash.com/photo-1567401893414-76b7b1e33a76",
   },
-] as const;
+];
 
-const messages = [
+type Message = {
+  id: number;
+  user: string;
+  time: string;
+  message: string;
+  unread: boolean;
+  photo: string;
+};
+
+const messages: Message[] = [
   {
     id: 3,
     user: "UrbanChic",
@@ -90,36 +110,35 @@ const messages = [
   },
 ];
 
+const rowClass =
+  "flex items-center gap-3 rounded-2xl px-2 py-2 transition-colors hover:bg-muted/60";
+
 export function NotificationsPage() {
   return (
     <PageShell>
       <div className="app-page-content space-y-4">
         <PageSection className="p-4">
-          <div className="mb-3">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Activity</span>
           </div>
           <div className="space-y-1">
             {activityRows.map((row) => {
               const Icon = row.icon;
               return (
-                <Link
-                  key={row.id}
-                  to={`/activity/${row.id}`}
-                  className="flex items-center gap-3 rounded-2xl px-1 py-1.5 transition-colors hover:bg-muted/60"
-                >
-                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                    <img src={row.photo} alt={row.title} className="h-full w-full object-cover" />
-                  </div>
+                <Link key={row.id} to={`/activity/${row.id}`} className={rowClass}>
+                  <AvatarBadge
+                    src={row.photo}
+                    alt={row.title}
+                    badgeIcon={row.icon}
+                    badgeColor="foreground"
+                  />
                   <div className="min-w-0 flex-1">
-                    <div className="flex items-center gap-2">
-                      <Icon className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">{row.title}</span>
-                    </div>
-                    <span className="text-xs text-muted-foreground line-clamp-1">{row.detail}</span>
+                    <p className="text-sm font-medium">{row.title}</p>
+                    <p className="truncate text-xs text-muted-foreground">{row.detail}</p>
                   </div>
                   <div className="flex shrink-0 items-center gap-1">
                     <span className="text-xs text-muted-foreground">{row.time}</span>
-                    <ChevronRight className="w-4 h-4 shrink-0 text-muted-foreground" />
+                    <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
                   </div>
                 </Link>
               );
@@ -128,31 +147,35 @@ export function NotificationsPage() {
         </PageSection>
 
         <PageSection className="p-4">
-          <div className="mb-3">
+          <div className="mb-2 flex items-center justify-between">
             <span className="text-xs font-medium uppercase tracking-wider text-muted-foreground">Messages</span>
+            <span className="text-xs text-muted-foreground">
+              {messages.filter((m) => m.unread).length} unread
+            </span>
           </div>
           <div className="space-y-1">
             {messages.map((item) => (
-              <div
-                key={item.id}
-                className={`flex items-center gap-3 rounded-2xl px-1 py-1.5 ${item.unread ? "bg-accent/30" : ""}`}
-              >
-                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full">
-                  <img src={item.photo} alt={item.user} className="h-full w-full object-cover" />
-                </div>
+              <Link key={item.id} to={`/activity/${item.id}`} className={cn(rowClass, item.unread && "bg-accent/30")}>
+                <AvatarBadge
+                  src={item.photo}
+                  alt={item.user}
+                  badgeIcon={MessageCircle}
+                  badgeColor="blue"
+                  showBadge={item.unread}
+                />
                 <div className="min-w-0 flex-1">
-                  <span className={`text-sm ${item.unread ? "font-medium" : ""}`}>{item.user}</span>
+                  <p className={cn("truncate text-sm", item.unread && "font-medium")}>{item.user}</p>
                   <p
-                    className={`truncate text-xs ${item.unread ? "font-medium text-foreground" : "text-muted-foreground"}`}
+                    className={cn(
+                      "truncate text-xs",
+                      item.unread ? "font-medium text-foreground" : "text-muted-foreground",
+                    )}
                   >
                     {item.message}
                   </p>
                 </div>
-                <div className="flex shrink-0 items-center gap-1">
-                  {item.unread && <div className="w-2 h-2 rounded-full bg-blue-500" />}
-                  <span className="text-xs text-muted-foreground">{item.time}</span>
-                </div>
-              </div>
+                <span className="shrink-0 text-xs text-muted-foreground">{item.time}</span>
+              </Link>
             ))}
           </div>
         </PageSection>

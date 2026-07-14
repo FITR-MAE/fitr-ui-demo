@@ -1,5 +1,5 @@
 import { Check, ChevronRight, Cloud, Droplet, Heart, Plus, RefreshCw, Send, Sparkles, Sun } from "lucide-react";
-import { AnimatePresence, motion, useReducedMotion } from "motion/react";
+import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ReactFlow,
@@ -21,6 +21,10 @@ import "@xyflow/react/dist/style.css";
 
 import { PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
+import { cn } from "../components/ui/utils";
+import { PillTabs } from "../components/PillTabs";
+import { useShouldAnimate, useTabPanelMotion } from "../components/motion";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 type WeatherKind = "sunny" | "cloudy" | "rainy";
 type TabId = "ai" | "outfits" | "colour" | "inspirations";
@@ -129,7 +133,7 @@ const CircleNode: React.FC<NodeProps<Node<CircleNodeData>>> = ({ data }) => {
           background: isUser ? "#030213" : "#ffffff",
         }}
       >
-        {avatar ? <img src={avatar} alt={label} className="h-full w-full object-cover" /> : null}
+        {avatar ? <ImageWithFallback src={avatar} alt={label} className="h-full w-full object-cover" /> : null}
       </div>
     </div>
   );
@@ -498,9 +502,6 @@ const inspirationOutfits: InspirationOutfit[] = [
 
 const interactivePillClass = "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95";
 
-const compactListRowClass =
-  "flex min-h-[4.5rem] items-center gap-3 rounded-2xl border border-border bg-card p-3 transition-colors hover:bg-muted/40 active:scale-[0.98]";
-
 const sectionSurfaceClass = "app-surface p-3";
 const briefSectionClass = "app-surface px-3 py-2.5";
 
@@ -683,7 +684,8 @@ export function Stylist() {
       text: "I’m SŌEN. Give me the occasion, the weather, or one piece you want to wear, and I’ll turn it into a fit direction that feels like you.",
     },
   ]);
-  const shouldAnimate = !useReducedMotion();
+  const shouldAnimate = useShouldAnimate();
+  const tabPanelMotionProps = useTabPanelMotion();
 
   const generateTimeoutRef = useRef<number | null>(null);
   const replyTimeoutRef = useRef<number | null>(null);
@@ -817,13 +819,6 @@ export function Stylist() {
       strokeWidth: 1,
     },
   }));
-  const tabPanelMotionProps = shouldAnimate
-    ? {
-        initial: { opacity: 0, y: 8 },
-        animate: { opacity: 1, y: 0 },
-        exit: { opacity: 0, y: -8 },
-      }
-    : {};
 
   useEffect(() => {
     return () => {
@@ -883,7 +878,7 @@ export function Stylist() {
         transition={{ duration: 0.24, ease: "easeOut" }}
         className="app-page-content flex h-full min-h-0 flex-col gap-3 overflow-hidden px-0 pb-2"
       >
-        <div className={`${briefSectionClass} shrink-0`}>
+        <div className={cn(briefSectionClass, "shrink-0")}>
           <div className="flex items-start justify-between gap-3">
             <div className="min-w-0 flex-1">
               <p className="text-base font-semibold text-foreground">Today&apos;s direction</p>
@@ -897,28 +892,12 @@ export function Stylist() {
             </div>
           </div>
         </div>
-        <motion.div
-          layout={shouldAnimate}
-          transition={{ duration: 0.24, ease: "easeOut" }}
-          className="flex shrink-0 justify-center px-3"
-        >
-          <div className="inline-flex flex-wrap justify-center rounded-full border border-border bg-card p-1">
-            {tabs.map((tab) => (
-              <button
-                key={tab.id}
-                type="button"
-                onClick={() => setActiveTab(tab.id)}
-                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  activeTab === tab.id
-                    ? "bg-foreground text-background"
-                    : "text-muted-foreground hover:bg-muted/60 hover:text-foreground"
-                }`}
-              >
-                {tab.label}
-              </button>
-            ))}
-          </div>
-        </motion.div>
+        <PillTabs
+          tabs={tabs}
+          activeTab={activeTab}
+          onTabChange={setActiveTab}
+          className="shrink-0 px-3"
+        />
         <div className="min-h-0 flex-1 overflow-hidden px-3">
           <AnimatePresence mode="wait">
             {activeTab === "ai" && (
@@ -936,12 +915,13 @@ export function Stylist() {
                         {chatMessages.map((message) => (
                           <div
                             key={message.id}
-                            className={`flex ${message.role === "user" ? "justify-end" : "justify-start"}`}
+                            className={cn("flex", message.role === "user" ? "justify-end" : "justify-start")}
                           >
                             <div
-                              className={`max-w-[85%] rounded-2xl px-3 py-2 text-sm ${
-                                message.role === "user" ? "bg-foreground text-background" : "text-foreground"
-                              }`}
+                              className={cn(
+                                "max-w-[85%] rounded-2xl px-3 py-2 text-sm",
+                                message.role === "user" ? "bg-foreground text-background" : "text-foreground",
+                              )}
                             >
                               {message.text}
                             </div>
@@ -955,7 +935,7 @@ export function Stylist() {
                               key={prompt}
                               type="button"
                               onClick={() => handleSendMessage(prompt)}
-                              className={`${interactivePillClass} shrink-0 border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground`}
+                              className={cn(interactivePillClass, "shrink-0 border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground")}
                             >
                               {prompt}
                             </button>
@@ -1009,7 +989,7 @@ export function Stylist() {
                       variant="outline"
                       className="rounded-full border-border bg-transparent text-foreground"
                     >
-                      <RefreshCw className={`h-4 w-4 ${generating ? "animate-spin" : ""}`} />
+                      <RefreshCw className={cn("h-4 w-4", generating && "animate-spin")} />
                       {generating ? "Refreshing" : "Refresh"}
                     </Button>
                   </div>
@@ -1023,11 +1003,12 @@ export function Stylist() {
                           key={label}
                           type="button"
                           onClick={() => togglePreference(label)}
-                          className={`${interactivePillClass} ${
+                          className={cn(
+                            interactivePillClass,
                             selected
                               ? "border-foreground bg-foreground text-background"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                          }`}
+                          )}
                         >
                           <span className="inline-flex items-center gap-1">
                             {label}
@@ -1061,7 +1042,7 @@ export function Stylist() {
                         className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-border transition-transform active:scale-95"
                       >
                         <Heart
-                          className={`h-4 w-4 ${likedOutfits.has(featuredRecommendation.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`}
+                          className={cn("h-4 w-4", likedOutfits.has(featuredRecommendation.id) ? "fill-red-500 text-red-500" : "text-muted-foreground")}
                         />
                       </button>
 
@@ -1072,7 +1053,7 @@ export function Stylist() {
                             <p className="text-xs text-muted-foreground">{featuredRecommendation.occasion}</p>
                           </div>
                           <div className="shrink-0 text-right">
-                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                               {featuredRecommendation.confidence}%
                             </div>
                             <div className="mt-1 flex items-center justify-end gap-1">
@@ -1113,7 +1094,7 @@ export function Stylist() {
                             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-border transition-transform active:scale-95"
                           >
                             <Heart
-                              className={`h-4 w-4 ${likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : "text-muted-foreground"}`}
+                              className={cn("h-4 w-4", likedOutfits.has(rec.id) ? "fill-red-500 text-red-500" : "text-muted-foreground")}
                             />
                           </button>
 
@@ -1124,7 +1105,7 @@ export function Stylist() {
                                 <p className="text-xs text-muted-foreground">{rec.occasion}</p>
                               </div>
                               <div className="shrink-0 text-right">
-                                <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                                   {rec.confidence}%
                                 </div>
                                 <div className="mt-1 flex items-center justify-end gap-1">
@@ -1155,7 +1136,7 @@ export function Stylist() {
                   <div className="mt-4 space-y-2.5">
                     {fitReasons.map((reason) => (
                       <div key={reason.label} className="rounded-2xl border border-border px-3.5 py-3">
-                        <div className="text-xs font-medium uppercase tracking-[0.14em] text-muted-foreground">
+                        <div className="text-xs font-medium uppercase tracking-[0.16em] text-muted-foreground">
                           {reason.label}
                         </div>
                         <p className="mt-1.5 text-sm text-foreground">{reason.text}</p>
@@ -1207,7 +1188,7 @@ export function Stylist() {
                                 <p className="text-xs text-muted-foreground">{fit.occasion}</p>
                               </div>
                               <div className="shrink-0 text-right">
-                                <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                                   {fit.confidence}%
                                 </div>
                                 <div className="mt-1 flex items-center justify-end gap-1">
@@ -1220,7 +1201,7 @@ export function Stylist() {
                               {fit.outfit.top} with {fit.outfit.bottom} and {fit.outfit.shoes}
                             </p>
                             <p className="mt-1.5 text-xs text-muted-foreground">{fit.note}</p>
-                            <div className="mt-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                            <div className="mt-2 flex items-center gap-2 text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                               <span>{fit.date}</span>
                               <span className="h-1 w-1 rounded-full bg-border" />
                               <span>{fit.source}</span>
@@ -1256,7 +1237,7 @@ export function Stylist() {
                         <div className="mt-1 text-sm font-medium text-foreground">Tailored and Dangerous</div>
                       </div>
                       <div className="shrink-0 text-right">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Stability</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Stability</div>
                         <div className="mt-1 text-sm font-medium text-foreground">92%</div>
                       </div>
                     </div>
@@ -1298,14 +1279,14 @@ export function Stylist() {
                                 {item.base}
                               </div>
                               <div className="min-w-0">
-                                <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                                <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                                   {item.label}
                                 </div>
                                 <div className="mt-1 text-sm font-medium text-foreground">{item.trait}</div>
                               </div>
                             </div>
                             <div className="shrink-0 text-right">
-                              <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                              <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                                 Weight
                               </div>
                               <div className="mt-1 text-sm font-medium text-foreground">{item.score}%</div>
@@ -1340,11 +1321,12 @@ export function Stylist() {
                           key={tone.id}
                           type="button"
                           onClick={() => setSelectedSkinTone(tone.id)}
-                          className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95 ${
+                          className={cn(
+                            "rounded-full border px-3 py-1.5 text-xs font-medium transition-colors active:scale-95",
                             selected
                               ? "border-foreground bg-foreground text-background"
-                              : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                          }`}
+                              : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground",
+                          )}
                         >
                           <span className="inline-flex items-center gap-1.5">
                             {tone.label}
@@ -1371,11 +1353,12 @@ export function Stylist() {
                           key={palette.name}
                           type="button"
                           onClick={() => setSelectedPalette(palette.name)}
-                          className={`${interactivePillClass} ${
+                          className={cn(
+                            interactivePillClass,
                             selected
                               ? "border-foreground bg-foreground text-background"
                               : "border-border bg-transparent text-muted-foreground hover:bg-muted/40 hover:text-foreground"
-                          }`}
+                          )}
                         >
                           <span className="inline-flex items-center gap-1.5">
                             <span className="flex gap-0.5">
@@ -1478,7 +1461,7 @@ export function Stylist() {
 
                   <div className="mt-4 space-y-2.5">
                     {wardrobeItems.map((item) => (
-                      <div key={item.id} className={compactListRowClass}>
+                      <div key={item.id} className="app-compact-row">
                         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border">
                           <div
                             className="h-5 w-5 rounded-md border border-border"
@@ -1498,7 +1481,7 @@ export function Stylist() {
                     <div className="mb-3 text-xs font-medium text-muted-foreground">All wardrobe items</div>
                     <div className="space-y-2.5">
                       {wardrobeItems.map((item) => (
-                        <div key={item.id} className={compactListRowClass}>
+                        <div key={item.id} className="app-compact-row">
                           <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-2xl border border-border">
                             <div
                               className="h-6 w-6 rounded-lg border border-border"
@@ -1577,7 +1560,7 @@ export function Stylist() {
 
                   <div className="mt-4 rounded-2xl border border-border px-3.5 py-3">
                     <div className="flex items-start gap-3">
-                      <img
+                      <ImageWithFallback
                         src={selectedInspiration.avatar}
                         alt={selectedInspiration.name}
                         className="h-12 w-12 rounded-full border border-white/15 object-cover"
@@ -1590,7 +1573,7 @@ export function Stylist() {
                         <div className="mt-1 text-xs text-muted-foreground">{selectedInspiration.note}</div>
                       </div>
                       <div className="shrink-0 text-right">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                           {selectedInspiration.similarity}%
                         </div>
                         <div className="mt-1 text-xs text-muted-foreground">match</div>
@@ -1599,21 +1582,21 @@ export function Stylist() {
 
                     <div className="mt-4 grid gap-2.5 sm:grid-cols-3">
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Why in orbit</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Why in orbit</div>
                         <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.whyInOrbit}</p>
                       </div>
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Top overlap</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Top overlap</div>
                         <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.topOverlap}</p>
                       </div>
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Best borrowed move</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Best borrowed move</div>
                         <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.bestBorrowedMove}</p>
                       </div>
                     </div>
 
                     <div className="mt-3 rounded-2xl border border-border px-3 py-3">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">SŌEN note</div>
+                      <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">SŌEN note</div>
                       <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.soenNote}</p>
                     </div>
                   </div>
@@ -1632,14 +1615,14 @@ export function Stylist() {
                     </div>
 
                     <div className="mt-4 rounded-2xl border border-border overflow-hidden">
-                      <img src={borrowedOrbitFit.image} alt={borrowedOrbitFit.title} className="aspect-[4/5] w-full object-cover" />
+                      <ImageWithFallback src={borrowedOrbitFit.image} alt={borrowedOrbitFit.title} className="aspect-[4/5] w-full object-cover" />
                       <div className="space-y-3 px-4 py-4">
                         <div className="flex items-start justify-between gap-3">
                           <div>
                             <div className="text-sm font-medium text-foreground">{borrowedOrbitFit.title}</div>
                             <div className="mt-1 text-xs text-muted-foreground">{borrowedOrbitFit.signal}</div>
                           </div>
-                          <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">
+                          <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">
                             {selectedInspiration.similarity}% match
                           </div>
                         </div>
@@ -1669,26 +1652,26 @@ export function Stylist() {
                   <div className="mt-4 space-y-4">
                     {selectedInspirationOutfits.map((outfit) => (
                       <div key={outfit.id} className="rounded-2xl border border-border overflow-hidden">
-                        <img src={outfit.image} alt={outfit.title} className="aspect-[4/5] w-full object-cover" />
+                        <ImageWithFallback src={outfit.image} alt={outfit.title} className="aspect-[4/5] w-full object-cover" />
                         <div className="px-4 py-4 space-y-3">
                           <div className="flex items-start justify-between gap-3">
                             <div>
                               <div className="text-sm font-medium text-foreground">{outfit.title}</div>
                               <div className="mt-1 text-xs text-muted-foreground">{outfit.popularity}</div>
                             </div>
-                            <img
+                            <ImageWithFallback
                               src={selectedInspiration.avatar}
                               alt={selectedInspiration.name}
                               className="h-10 w-10 rounded-full object-cover"
                             />
                           </div>
                           <div className="rounded-2xl border border-border px-3 py-2">
-                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Signal</div>
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Signal</div>
                             <div className="mt-1 text-sm text-foreground">{outfit.signal}</div>
                           </div>
                           <p className="text-sm text-muted-foreground">{outfit.reason}</p>
                           <div className="rounded-2xl border border-border px-3 py-2">
-                            <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Why it translates</div>
+                            <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Why it translates</div>
                             <div className="mt-1 text-sm text-foreground">{outfit.translatesAs}</div>
                           </div>
                           <div className="flex flex-wrap gap-1.5">
@@ -1710,7 +1693,7 @@ export function Stylist() {
                     <div className="mb-3 text-xs font-medium text-muted-foreground">Shared signals</div>
                     <div className="grid gap-2.5 sm:grid-cols-2">
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Palette</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Palette</div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {selectedInspiration.sharedSignals.palette.map((item) => (
                             <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
@@ -1720,7 +1703,7 @@ export function Stylist() {
                         </div>
                       </div>
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Silhouette</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Silhouette</div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {selectedInspiration.sharedSignals.silhouette.map((item) => (
                             <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
@@ -1730,7 +1713,7 @@ export function Stylist() {
                         </div>
                       </div>
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Wardrobe</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Wardrobe</div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {selectedInspiration.sharedSignals.wardrobe.map((item) => (
                             <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
@@ -1740,7 +1723,7 @@ export function Stylist() {
                         </div>
                       </div>
                       <div className="rounded-2xl border border-border px-3 py-3">
-                        <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Energy</div>
+                        <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Energy</div>
                         <div className="mt-2 flex flex-wrap gap-1.5">
                           {selectedInspiration.sharedSignals.energy.map((item) => (
                             <span key={item} className="rounded-full border border-border px-3 py-1 text-xs font-medium text-foreground">
@@ -1752,7 +1735,7 @@ export function Stylist() {
                     </div>
 
                     <div className="mt-4 rounded-2xl border border-border px-3 py-3">
-                      <div className="text-[11px] uppercase tracking-[0.14em] text-muted-foreground">Next move</div>
+                      <div className="text-[11px] uppercase tracking-[0.16em] text-muted-foreground">Next move</div>
                       <p className="mt-1.5 text-sm text-foreground">{selectedInspiration.nextMove}</p>
                     </div>
                   </div>

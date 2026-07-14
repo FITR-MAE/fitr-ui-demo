@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router";
 
 import { PageHeader, PageSection, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 export function ActivityDetailPage() {
   const { id } = useParams();
@@ -33,7 +34,7 @@ export function ActivityDetailPage() {
                 <h2 className="app-section-title">ModernMuse commented on your post</h2>
                 <span className="app-chip">New</span>
               </div>
-              <p className="mt-2 app-section-copy">
+              <p className="mt-1 app-section-copy">
                 "Love this outfit. The structure and colours work really well together."
               </p>
               <div className="mt-4 flex items-center gap-2 text-sm text-muted-foreground">
@@ -52,7 +53,7 @@ export function ActivityDetailPage() {
           </div>
 
           <div className="overflow-hidden rounded-2xl bg-muted">
-            <img
+            <ImageWithFallback
               src="https://images.unsplash.com/photo-1651742532474-ea4401a34a10"
               alt="Featured outfit"
               className="aspect-[4/5] w-full object-cover"

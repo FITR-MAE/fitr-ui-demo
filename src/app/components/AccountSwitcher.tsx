@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import { Check, Plus, LogOut, Building2, User as UserIcon } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { toast } from "sonner";
 
 import {
@@ -22,6 +22,9 @@ import {
   AlertDialogTitle,
 } from "./ui/alert-dialog";
 import { useAccounts, type Account } from "./AccountProvider";
+import { usePressFeedback } from "./motion";
+import { cn } from "./ui/utils";
+import { ImageWithFallback } from "./figma/ImageWithFallback";
 
 type Props = {
   open: boolean;
@@ -31,7 +34,9 @@ type Props = {
 export function AccountSwitcher({ open, onOpenChange }: Props) {
   const { accounts, activeAccountId, activeAccount, setActive, addAccount, logout } = useAccounts();
   const [confirmOpen, setConfirmOpen] = useState(false);
-  const shouldAnimate = !useReducedMotion();
+  const accountTap = usePressFeedback(0.98);
+  const addTap = usePressFeedback(0.98);
+  const logoutTap = usePressFeedback(0.98);
   const navigate = useNavigate();
 
   const handleSelect = (account: Account) => {
@@ -76,20 +81,21 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
                   key={account.id}
                   type="button"
                   onClick={() => handleSelect(account)}
-                  whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-                  transition={{ duration: 0.15, ease: "easeOut" }}
-                  className={`flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors ${
-                    isActive
-                      ? "border-border bg-accent/40"
-                      : "border-border bg-card hover:bg-muted/60"
-                  }`}
+                  {...accountTap}
+                  className={cn(
+                    "flex w-full items-center gap-3 rounded-2xl border p-3 text-left transition-colors",
+                    isActive ? "border-border bg-accent/40" : "border-border bg-card hover:bg-muted/60",
+                  )}
                 >
                   <div
-                    className={`relative h-12 w-12 shrink-0 overflow-hidden rounded-full ${
-                      isActive ? "ring-2 ring-purple-400 ring-offset-2 ring-offset-background" : "ring-1 ring-border"
-                    }`}
+                    className={cn(
+                      "relative h-12 w-12 shrink-0 overflow-hidden rounded-full",
+                      isActive
+                        ? "ring-2 ring-purple-400 ring-offset-2 ring-offset-background"
+                        : "ring-1 ring-border",
+                    )}
                   >
-                    <img src={account.avatar} alt={account.name} className="h-full w-full object-cover" />
+                    <ImageWithFallback src={account.avatar} alt={account.name} className="h-full w-full object-cover" />
                   </div>
                   <div className="min-w-0 flex-1">
                     <div className="flex items-center gap-2">
@@ -111,8 +117,7 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
             <motion.button
               type="button"
               onClick={handleAdd}
-              whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              {...addTap}
               className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-border bg-card p-3 text-left hover:bg-muted/60"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
@@ -127,8 +132,7 @@ export function AccountSwitcher({ open, onOpenChange }: Props) {
             <motion.button
               type="button"
               onClick={() => setConfirmOpen(true)}
-              whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              {...logoutTap}
               className="flex w-full items-center gap-3 rounded-2xl border border-border bg-card p-3 text-left hover:bg-muted/60"
             >
               <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-full bg-destructive/10">

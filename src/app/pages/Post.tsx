@@ -1,9 +1,12 @@
-import { motion, AnimatePresence, useReducedMotion } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { ImagePlus, X, MapPin, Users, ChevronRight } from "lucide-react";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 
 import { PageSection, PageShell } from "../components/Page";
+import { cn } from "../components/ui/utils";
+import { usePanelMotionWithScale } from "../components/motion";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 type Step = "media" | "edit" | "details";
 
@@ -34,7 +37,7 @@ const stepLabels: Record<Step, string> = {
 
 export function Post() {
   const navigate = useNavigate();
-  const shouldReduceMotion = useReducedMotion();
+  const frameMotionProps = usePanelMotionWithScale();
   const [currentStep, setCurrentStep] = useState<Step>("media");
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [caption, setCaption] = useState("");
@@ -85,15 +88,6 @@ export function Post() {
     setCurrentStep("edit");
   };
 
-  const frameMotionProps = shouldReduceMotion
-    ? {}
-    : {
-        initial: { opacity: 0, y: 8, scale: 0.98 },
-        animate: { opacity: 1, y: 0, scale: 1 },
-        exit: { opacity: 0, y: -8, scale: 0.98 },
-        transition: { duration: 0.2, ease: "easeOut" as const },
-      };
-
   const stepDescription =
     currentStep === "media"
       ? "Choose a photo to start your post."
@@ -120,13 +114,14 @@ export function Post() {
               {steps.map((step, index) => (
                 <div
                   key={step}
-                  className={`h-1.5 rounded-full transition-all duration-200 ${
+                  className={cn(
+                    "h-1.5 rounded-full transition-all duration-200",
                     currentStep === step
                       ? "w-8 bg-foreground"
                       : index < currentStepIndex
                         ? "w-3 bg-foreground/40"
-                        : "w-3 bg-foreground/20"
-                  }`}
+                        : "w-3 bg-foreground/20",
+                  )}
                 />
               ))}
             </div>
@@ -146,7 +141,7 @@ export function Post() {
               <PageSection className="overflow-hidden p-0">
                 <div className="relative aspect-[4/5] w-full bg-muted">
                   {selectedImage ? (
-                    <img src={selectedImage} alt="Selected post preview" className="h-full w-full object-cover" />
+                    <ImageWithFallback src={selectedImage} alt="Selected post preview" className="h-full w-full object-cover" />
                   ) : (
                     <div className="flex h-full flex-col items-center justify-center gap-3 px-6 text-center">
                       <div className="flex h-14 w-14 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400">
@@ -184,14 +179,15 @@ export function Post() {
                       <button
                         key={image}
                         onClick={() => handleSelectImage(index)}
-                        className={`relative overflow-hidden rounded-2xl bg-muted text-left transition-transform active:scale-[0.98] ${
+                        className={cn(
+                          "relative overflow-hidden rounded-2xl bg-muted text-left transition-transform active:scale-[0.98]",
                           isSelected
                             ? "ring-2 ring-foreground ring-offset-2 ring-offset-background"
-                            : "hover:opacity-90"
-                        }`}
+                            : "hover:opacity-90",
+                        )}
                         aria-label={`Select image ${index + 1}`}
                       >
-                        <img src={image} alt="Post option" className="aspect-square w-full object-cover" />
+                        <ImageWithFallback src={image} alt="Post option" className="aspect-square w-full object-cover" />
                         {isSelected ? <div className="absolute inset-0 bg-black/10" /> : null}
                       </button>
                     );
@@ -206,7 +202,7 @@ export function Post() {
               <PageSection className="overflow-hidden p-0">
                 <div className="relative aspect-[4/5] w-full bg-muted">
                   {selectedImage ? (
-                    <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
+                    <ImageWithFallback src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
                   ) : null}
                   <button
                     onClick={() => {
@@ -255,7 +251,7 @@ export function Post() {
               <PageSection className="overflow-hidden p-0">
                 <div className="relative aspect-[4/5] w-full bg-muted">
                   {selectedImage ? (
-                    <img src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
+                    <ImageWithFallback src={selectedImage} alt="Selected" className="h-full w-full object-cover" />
                   ) : null}
                   {caption ? (
                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-black/70 to-transparent px-4 pb-4 pt-10">
@@ -275,11 +271,12 @@ export function Post() {
                     <button
                       key={tag}
                       onClick={() => toggleTag(tag)}
-                      className={`rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95 ${
+                      className={cn(
+                        "rounded-full px-3 py-1 text-xs font-medium transition-all active:scale-95",
                         tags.includes(tag)
                           ? "bg-gradient-to-br from-purple-400 to-pink-400 text-white"
-                          : "border border-border bg-card text-muted-foreground hover:bg-muted/60"
-                      }`}
+                          : "border border-border bg-card text-muted-foreground hover:bg-muted/60",
+                      )}
                     >
                       #{tag}
                     </button>

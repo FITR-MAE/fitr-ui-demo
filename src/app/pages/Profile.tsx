@@ -1,12 +1,22 @@
 import { Grid, Bookmark, Heart, Settings, Shirt, Building2, BarChart3, Store, MapPin, type LucideIcon } from "lucide-react";
 import { useState } from "react";
-import { motion, AnimatePresence, useReducedMotion, type Variants } from "motion/react";
+import { motion, AnimatePresence } from "motion/react";
 import { Area, AreaChart, CartesianGrid, XAxis } from "recharts";
 
 import { PageHeader, PageSection, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
+import { cn } from "../components/ui/utils";
 import { ChartContainer, ChartTooltip, ChartTooltipContent, type ChartConfig } from "../components/ui/chart";
 import { useAccounts } from "../components/AccountProvider";
+import {
+  useFadeUpVariants,
+  useScaleInVariants,
+  usePanelMotion,
+  staggerVariants,
+  usePressFeedback,
+} from "../components/motion";
+import { formatCount } from "../lib/format";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
 
 const wardrobeItems = [
   {
@@ -137,8 +147,6 @@ const profileStats = [
   { label: "Following", value: "847" },
 ];
 
-const formatLikes = (n: number) => (n > 999 ? `${Math.floor(n / 1000)}k` : `${n}`);
-
 const businessStats = [
   { label: "Profile views", value: "48.2k", delta: "+12%" },
   { label: "Reach", value: "312k", delta: "+8%" },
@@ -190,37 +198,21 @@ export function Profile() {
   const { activeAccount } = useAccounts();
   const isBusiness = activeAccount.type === "business";
   const [activeTab, setActiveTab] = useState<TabId>("posts");
-  const shouldAnimate = !useReducedMotion();
 
-  const staggerVariants = {
-    hidden: {},
-    visible: { transition: { staggerChildren: 0.08 } },
-  };
-
-  const fadeUpVariants: Variants = {
-    hidden: shouldAnimate ? { opacity: 0, y: 8 } : {},
-    visible: shouldAnimate ? { opacity: 1, y: 0, transition: { duration: 0.25, ease: "easeOut" } } : {},
-  };
-
-  const scaleInVariants: Variants = {
-    hidden: shouldAnimate ? { opacity: 0, scale: 0.95 } : {},
-    visible: shouldAnimate ? { opacity: 1, scale: 1, transition: { duration: 0.25, ease: "easeOut" } } : {},
-  };
-
-  const panelMotion = shouldAnimate
-    ? {
-        initial: { opacity: 0, y: 8 },
-        animate: { opacity: 1, y: 0, transition: { duration: 0.2, ease: "easeOut" as const } },
-        exit: { opacity: 0, y: -8 },
-      }
-    : {};
+  const fadeUpVariants = useFadeUpVariants();
+  const scaleInVariants = useScaleInVariants();
+  const panelMotion = usePanelMotion();
+  const settingsTap = usePressFeedback(0.9);
+  const tabTap = usePressFeedback(0.96);
+  const postTap = usePressFeedback(0.97);
+  const wardrobeTap = usePressFeedback(0.95);
 
   return (
     <PageShell>
       <PageHeader
         title={activeAccount.name}
         trailing={
-          <motion.div whileTap={{ scale: 0.9 }} transition={{ duration: 0.15, ease: "easeOut" }}>
+          <motion.div {...settingsTap}>
             <Button variant="ghost" aria-label="Settings" className="h-[18px] w-[18px] rounded-full p-0">
               <Settings className="h-[18px] w-[18px]" />
             </Button>
@@ -232,8 +224,8 @@ export function Profile() {
         <PageSection className="p-5">
           <motion.div className="space-y-4" variants={staggerVariants} initial="hidden" animate="visible">
             <motion.div className="flex items-start gap-4" variants={fadeUpVariants}>
-              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full shadow-sm ring-1 ring-border">
-                <img src={activeAccount.avatar} alt={activeAccount.name} className="h-full w-full object-cover" />
+              <div className="relative h-20 w-20 shrink-0 overflow-hidden rounded-full ring-1 ring-border">
+                <ImageWithFallback src={activeAccount.avatar} alt={activeAccount.name} className="h-full w-full object-cover" />
               </div>
 
               <div className="min-w-0 flex-1">
@@ -266,11 +258,7 @@ export function Profile() {
         </PageSection>
 
         {isBusiness ? (
-          <BusinessView
-            shouldAnimate={shouldAnimate}
-            fadeUpVariants={fadeUpVariants}
-            staggerVariants={staggerVariants}
-          />
+          <BusinessView />
         ) : (
           <>
             <PageSection className="p-3">
@@ -283,11 +271,11 @@ export function Profile() {
                       key={tab.id}
                       type="button"
                       onClick={() => setActiveTab(tab.id)}
-                      whileTap={{ scale: 0.96 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
-                      className={`flex min-h-[56px] flex-col items-center justify-center rounded-2xl px-2 py-2 text-center transition-colors ${
-                        isActive ? "bg-accent/40 text-foreground" : "text-muted-foreground hover:bg-muted/60"
-                      }`}
+                      {...tabTap}
+                      className={cn(
+                        "flex min-h-[56px] flex-col items-center justify-center rounded-2xl px-2 py-2 text-center transition-colors",
+                        isActive ? "bg-accent/40 text-foreground" : "text-muted-foreground hover:bg-muted/60",
+                      )}
                     >
                       <Icon className="w-5 h-5" />
                       <span className="mt-1 text-[11px] font-medium">{tab.label}</span>
@@ -311,15 +299,14 @@ export function Profile() {
                     <motion.div
                       key={post.id}
                       variants={scaleInVariants}
-                      whileTap={{ scale: 0.97 }}
-                      transition={{ duration: 0.15, ease: "easeOut" }}
+                      {...postTap}
                       className="group relative aspect-square cursor-pointer overflow-hidden rounded-2xl bg-muted"
                     >
-                      <img src={post.image} alt={`Post ${post.id}`} className="w-full h-full object-cover" />
+                      <ImageWithFallback src={post.image} alt={`Post ${post.id}`} className="w-full h-full object-cover" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
                       <div className="absolute bottom-2 left-2 flex items-center gap-1 rounded-full border border-white/10 bg-black/35 px-1.5 py-0.75 text-white/85 backdrop-blur-sm">
                         <Heart className="h-3 w-3 text-white/70" />
-                        <span className="text-[10px] font-medium text-white/75">{formatLikes(post.likes)}</span>
+                        <span className="text-[10px] font-medium text-white/75">{formatCount(post.likes)}</span>
                       </div>
                     </motion.div>
                   ))}
@@ -348,11 +335,10 @@ export function Profile() {
                     {wardrobeItems.map((item) => (
                       <motion.div
                         key={item.id}
-                        whileTap={{ scale: 0.95 }}
-                        transition={{ duration: 0.15, ease: "easeOut" }}
+                        {...wardrobeTap}
                         className="group relative aspect-square overflow-hidden rounded-2xl bg-muted"
                       >
-                        <img src={item.image} alt={item.category} className="w-full h-full object-cover" />
+                        <ImageWithFallback src={item.image} alt={item.category} className="w-full h-full object-cover" />
                         <div className="absolute bottom-0 left-0 right-0 bg-black/50 p-1">
                           <span className="text-xs text-white">{item.category}</span>
                         </div>
@@ -379,13 +365,9 @@ export function Profile() {
   );
 }
 
-type BusinessViewProps = {
-  shouldAnimate: boolean;
-  fadeUpVariants: Variants;
-  staggerVariants: { hidden: object; visible: object };
-};
-
-function BusinessView({ shouldAnimate, fadeUpVariants, staggerVariants }: BusinessViewProps) {
+function BusinessView() {
+  const fadeUpVariants = useFadeUpVariants();
+  const storeAddTap = usePressFeedback(0.98);
   const statusTone: Record<StoreStatus, string> = {
     Open: "bg-foreground/10 text-foreground",
     "Coming soon": "bg-purple-400/15 text-purple-500",
@@ -474,7 +456,7 @@ function BusinessView({ shouldAnimate, fadeUpVariants, staggerVariants }: Busine
               className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
             >
               <div className="relative h-14 w-14 shrink-0 overflow-hidden rounded-xl bg-muted">
-                <img src={store.cover} alt={store.name} className="h-full w-full object-cover" />
+                <ImageWithFallback src={store.cover} alt={store.name} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium">{store.name}</p>
@@ -484,7 +466,7 @@ function BusinessView({ shouldAnimate, fadeUpVariants, staggerVariants }: Busine
                 </p>
               </div>
               <span
-                className={`shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium ${statusTone[store.status]}`}
+                className={cn("shrink-0 rounded-full px-2.5 py-1 text-[11px] font-medium", statusTone[store.status])}
               >
                 {store.status}
               </span>
@@ -494,8 +476,7 @@ function BusinessView({ shouldAnimate, fadeUpVariants, staggerVariants }: Busine
 
         <motion.button
           type="button"
-          whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-          transition={{ duration: 0.15, ease: "easeOut" }}
+          {...storeAddTap}
           className="mt-3 flex w-full items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-card p-3 text-sm font-medium text-muted-foreground hover:bg-muted/60"
         >
           <Store className="h-4 w-4" />

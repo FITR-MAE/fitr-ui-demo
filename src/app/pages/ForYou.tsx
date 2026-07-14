@@ -1,8 +1,15 @@
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 import { Heart, MessageCircle, Share2, Bookmark, Search, ChevronRight } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router";
-import { toast } from "sonner";
+
+import { CommentsPanel, mockComments } from "../components/CommentsPanel";
+import { SharePanel } from "../components/SharePanel";
+import { PillTabs } from "../components/PillTabs";
+import { useShouldAnimate, usePressFeedback } from "../components/motion";
+import { formatCount } from "../lib/format";
+import { ImageWithFallback } from "../components/figma/ImageWithFallback";
+import { cn } from "../components/ui/utils";
 
 const outfits = [
   {
@@ -93,18 +100,20 @@ const feedModes = [
   { id: "following", label: "Following" },
 ] as const;
 
-const formatCount = (count: number) => (count > 999 ? `${Math.floor(count / 1000)}k` : count);
-
 export function ForYou() {
   const [liked, setLiked] = useState<Set<number>>(new Set());
   const [saved, setSaved] = useState<Set<number>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
   const [likeAnim, setLikeAnim] = useState<Set<number>>(new Set());
   const [feedMode, setFeedMode] = useState<(typeof feedModes)[number]["id"]>("for-you");
+  const [commentsOpen, setCommentsOpen] = useState(false);
+  const [shareOpen, setShareOpen] = useState(false);
+  const [activeOutfit, setActiveOutfit] = useState<(typeof outfits)[number] | null>(null);
   const likeTimerRef = useRef(new Map<number, ReturnType<typeof setTimeout>>());
   const feedContainerRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
-  const shouldAnimate = !useReducedMotion();
+  const shouldAnimate = useShouldAnimate();
+  const feedActionTap = usePressFeedback(0.98);
   const visibleOutfits =
     feedMode === "friends" ? friendsOnlyOutfits : feedMode === "following" ? followingOutfits : outfits;
 
@@ -161,21 +170,9 @@ export function ForYou() {
     });
   };
 
-  const shareOutfit = async (outfit: (typeof outfits)[number]) => {
-    const shareText = `${outfit.user}: ${outfit.caption}`;
-
-    try {
-      if (navigator.share) {
-        await navigator.share({ text: shareText });
-        return;
-      }
-
-      if (navigator.clipboard?.writeText) {
-        await navigator.clipboard.writeText(shareText);
-      }
-    } catch {
-      // Ignore share failures on restricted browsers.
-    }
+  const shareOutfit = (outfit: (typeof outfits)[number]) => {
+    setActiveOutfit(outfit);
+    setShareOpen(true);
   };
 
   useEffect(() => {
@@ -202,20 +199,12 @@ export function ForYou() {
     <div className="relative h-full bg-black">
         <div className="pointer-events-none absolute left-0 right-0 z-20 px-4" style={{ top: "0.75rem" }}>
           <div className="pointer-events-auto flex flex-col items-center gap-2">
-            <div className="inline-flex rounded-full border border-white/10 bg-white/10 p-1 backdrop-blur-md">
-              {feedModes.map((mode) => (
-                <button
-                  key={mode.id}
-                  type="button"
-                  onClick={() => setFeedMode(mode.id)}
-                  className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                    feedMode === mode.id ? "bg-white text-black" : "text-white/75 hover:bg-white/10 hover:text-white"
-                  }`}
-                >
-                  {mode.label}
-                </button>
-              ))}
-            </div>
+            <PillTabs
+              tabs={feedModes}
+              activeTab={feedMode}
+              onTabChange={setFeedMode}
+              variant="overlay"
+            />
           </div>
         </div>
 
@@ -239,7 +228,7 @@ export function ForYou() {
             key={outfit.id}
             className="relative flex h-full min-h-full w-full snap-start items-center justify-center bg-black"
           >
-            <img
+            <ImageWithFallback
               src={outfit.image}
               alt={outfit.caption}
               className="absolute inset-0 w-full h-full object-cover"
@@ -254,7 +243,7 @@ export function ForYou() {
             >
               <motion.button
                 type="button"
-                whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
+                {...feedActionTap}
                 onClick={() => toggleLike(outfit.id)}
                 className="flex flex-col items-center gap-1"
                 aria-pressed={liked.has(outfit.id)}
@@ -270,9 +259,10 @@ export function ForYou() {
                   className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm"
                 >
                   <Heart
-                    className={`h-5 w-5 transition-colors duration-200 ${
-                      liked.has(outfit.id) ? "fill-red-500 text-red-500" : "text-white"
-                    }`}
+                    className={cn(
+                      "h-5 w-5 transition-colors duration-200",
+                      liked.has(outfit.id) ? "fill-red-500 text-red-500" : "text-white",
+                    )}
                   />
                 </motion.div>
                 <span className="text-xs text-white drop-shadow-lg">
@@ -282,8 +272,11 @@ export function ForYou() {
 
               <motion.button
                 type="button"
-                whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
-                onClick={() => toast("Comments coming soon", { description: `Reply to @${outfit.user}'s look.` })}
+                {...feedActionTap}
+                onClick={() => {
+                  setActiveOutfit(outfit);
+                  setCommentsOpen(true);
+                }}
                 className="flex flex-col items-center gap-1"
                 aria-label="Open post comments"
               >
@@ -295,7 +288,7 @@ export function ForYou() {
 
               <motion.button
                 type="button"
-                whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
+                {...feedActionTap}
                 onClick={() => void shareOutfit(outfit)}
                 className="flex flex-col items-center gap-1"
                 aria-label="Share"
@@ -308,7 +301,7 @@ export function ForYou() {
 
               <motion.button
                 type="button"
-                whileTap={shouldAnimate ? { scale: 0.98 } : undefined}
+                {...feedActionTap}
                 onClick={() => toggleSave(outfit.id)}
                 className="flex flex-col items-center gap-1"
                 aria-pressed={saved.has(outfit.id)}
@@ -316,9 +309,10 @@ export function ForYou() {
               >
                 <div className="flex h-11 w-11 items-center justify-center rounded-full border border-white/20 bg-white/15 backdrop-blur-sm">
                   <Bookmark
-                    className={`h-5 w-5 transition-colors duration-200 ${
-                      saved.has(outfit.id) ? "fill-white text-white" : "text-white"
-                    }`}
+                    className={cn(
+                      "h-5 w-5 transition-colors duration-200",
+                      saved.has(outfit.id) ? "fill-white text-white" : "text-white",
+                    )}
                   />
                 </div>
                 <span className="text-xs text-white drop-shadow-lg">
@@ -354,6 +348,25 @@ export function ForYou() {
           </div>
         ))}
       </div>
+
+      {activeOutfit && (
+        <>
+          <CommentsPanel
+            open={commentsOpen}
+            onOpenChange={setCommentsOpen}
+            postUser={activeOutfit.user}
+            postImage={activeOutfit.image}
+            initialComments={mockComments()}
+          />
+          <SharePanel
+            open={shareOpen}
+            onOpenChange={setShareOpen}
+            postUser={activeOutfit.user}
+            postImage={activeOutfit.image}
+            caption={activeOutfit.caption}
+          />
+        </>
+      )}
     </div>
   );
 }

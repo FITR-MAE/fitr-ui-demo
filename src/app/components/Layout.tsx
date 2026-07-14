@@ -1,9 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import { Outlet, NavLink, useLocation, useNavigate } from "react-router";
 import { Sparkles, Home, Bell, PlusSquare, User } from "lucide-react";
-import { motion, useReducedMotion } from "motion/react";
+import { motion } from "motion/react";
 
 import { AccountSwitcher } from "./AccountSwitcher";
+import { usePressFeedback } from "./motion";
+import { cn } from "./ui/utils";
 
 type RouteMeta = {
   title: string;
@@ -95,7 +97,7 @@ export function Layout() {
   const location = useLocation();
   const isFullHeightRoute = location.pathname === "/stylist";
   const navigate = useNavigate();
-  const shouldAnimate = !useReducedMotion();
+  const profileTap = usePressFeedback(0.9);
 
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const pressTimer = useRef<number | null>(null);
@@ -152,9 +154,10 @@ export function Layout() {
             <NavLink
               to="/"
               className={({ isActive }) =>
-                `p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`
+                cn(
+                  "p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )
               }
             >
               <Home className="w-6 h-6" />
@@ -162,9 +165,10 @@ export function Layout() {
             <NavLink
               to="/notifications"
               className={({ isActive }) =>
-                `p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`
+                cn(
+                  "p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )
               }
             >
               <Bell className="w-6 h-6" />
@@ -172,9 +176,10 @@ export function Layout() {
             <NavLink
               to="/post"
               className={({ isActive }) =>
-                `p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`
+                cn(
+                  "p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )
               }
             >
               <PlusSquare className="w-6 h-6" />
@@ -182,9 +187,10 @@ export function Layout() {
             <NavLink
               to="/stylist"
               className={({ isActive }) =>
-                `p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center ${
-                  isActive ? "text-foreground" : "text-muted-foreground"
-                }`
+                cn(
+                  "p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center",
+                  isActive ? "text-foreground" : "text-muted-foreground",
+                )
               }
             >
               <Sparkles className="w-6 h-6" />
@@ -196,12 +202,12 @@ export function Layout() {
               onPointerLeave={handlePointerLeave}
               onPointerCancel={handlePointerUp}
               onClick={handleTriggerClick}
-              whileTap={shouldAnimate ? { scale: 0.9 } : undefined}
-              transition={{ duration: 0.15, ease: "easeOut" }}
+              {...profileTap}
               aria-label="Profile — press and hold to switch accounts"
-              className={`p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer ${
-                location.pathname === "/profile" ? "text-foreground" : "text-muted-foreground"
-              }`}
+              className={cn(
+                "p-3 transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center cursor-pointer",
+                location.pathname === "/profile" ? "text-foreground" : "text-muted-foreground",
+              )}
             >
               <User className="w-6 h-6" />
             </motion.button>

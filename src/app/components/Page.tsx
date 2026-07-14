@@ -1,5 +1,7 @@
 import type { ReactNode } from "react";
 
+import { cn } from "./ui/utils";
+
 type PageShellProps = {
   children: ReactNode;
   contentClassName?: string;
@@ -17,12 +19,8 @@ type PageSectionProps = {
   className?: string;
 };
 
-function cx(...values: Array<string | undefined>) {
-  return values.filter(Boolean).join(" ");
-}
-
 export function PageShell({ children, contentClassName }: PageShellProps) {
-  return <div className={cx("app-page", contentClassName)}>{children}</div>;
+  return <div className={cn("app-page", contentClassName)}>{children}</div>;
 }
 
 export function PageHeader({ title, subtitle, leading, trailing }: PageHeaderProps) {
@@ -45,5 +43,5 @@ export function PageHeader({ title, subtitle, leading, trailing }: PageHeaderPro
 }
 
 export function PageSection({ children, className }: PageSectionProps) {
-  return <section className={cx("app-surface", className)}>{children}</section>;
+  return <section className={cn("app-surface", className)}>{children}</section>;
 }
