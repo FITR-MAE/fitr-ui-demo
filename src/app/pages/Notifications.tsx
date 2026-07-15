@@ -1,46 +1,11 @@
-import { BadgeCent, ChevronRight, Heart, Store, MessageCircle } from "lucide-react";
+import { ChevronRight, MessageCircle } from "lucide-react";
 
 import { Link } from "react-router";
 
 import { PageSection, PageShell } from "../components/Page";
 import { AvatarBadge } from "../components/AvatarBadge";
 import { cn } from "../components/ui/utils";
-
-type ActivityRow = {
-  id: number;
-  icon: typeof Heart;
-  title: string;
-  detail: string;
-  time: string;
-  photo: string;
-};
-
-const activityRows: ActivityRow[] = [
-  {
-    id: 1,
-    icon: Heart,
-    title: "New interactions",
-    detail: "ModernMuse and 71 others liked your post",
-    time: "4m",
-    photo: "https://images.unsplash.com/photo-1726276986699-eed94c47eedc",
-  },
-  {
-    id: 2,
-    icon: BadgeCent,
-    title: "Upcoming sales",
-    detail: "Maison Margiela and 3 brands you follow have sales soon",
-    time: "2h",
-    photo: "https://images.unsplash.com/photo-1654653068461-7ccc719064fa",
-  },
-  {
-    id: 3,
-    icon: Store,
-    title: "Stores near you",
-    detail: "3 fashion stores within walking distance",
-    time: "1d",
-    photo: "https://images.unsplash.com/photo-1567401893414-76b7b1e33a76",
-  },
-];
+import { activityRows } from "../data/activity";
 
 type Message = {
   id: number;

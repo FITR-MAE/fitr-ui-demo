@@ -27,9 +27,7 @@ const kpis = [
 
 const roleLabels: Record<AccountRole, string> = {
   owner: "Owner",
-  admin: "Admin",
   editor: "Editor",
-  analyst: "Analyst",
 };
 
 type StatusCardProps = {
@@ -181,10 +179,10 @@ export function BrandStudio() {
             <p className="mt-4 text-2xl font-semibold text-foreground">{roleLabels[activeRole]}</p>
             <p className="mt-1 text-sm leading-6 text-muted-foreground">
               {permissions.publishPromotions
-                ? "Full publishing and promotion controls are available."
+                ? "You control profile settings, the team, and live promotions."
                 : permissions.createContent
-                  ? "You can create content and prepare promotion drafts."
-                  : "Your access is focused on performance and audience insights."}
+                  ? "You can create content, update storefront content, and prepare promotion drafts."
+                  : "Your access is focused on business performance."}
             </p>
           </PageSection>
         </div>

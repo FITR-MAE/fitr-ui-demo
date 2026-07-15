@@ -83,6 +83,7 @@ export function Promotions() {
   const [form, setForm] = useState<PromotionForm>(emptyForm);
   const [formError, setFormError] = useState("");
   const isBusiness = activeAccount.type === "business";
+  const roleLabel = activeRole === "owner" ? "Owner" : "Editor";
 
   if (!isBusiness || !permissions.draftPromotions) {
     return <AccessState isBusiness={isBusiness} />;
@@ -166,7 +167,7 @@ export function Promotions() {
 
   return (
     <PageShell>
-      <PageHeader title="Promotions" subtitle={`${activeAccount.name} | ${activeRole}`} />
+      <PageHeader title="Promotions" subtitle={`${activeAccount.name} | ${roleLabel}`} />
       <div className="app-page-content max-w-6xl space-y-4">
         <PageSection className="p-5">
           <div className="flex flex-wrap items-start justify-between gap-3">
@@ -283,7 +284,7 @@ export function Promotions() {
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               {permissions.publishPromotions
                 ? "Save the details now, then publish when the promotion is ready."
-                : "Editors can prepare drafts for an owner or admin to publish."}
+                : "Editors can prepare drafts for an owner to publish."}
             </p>
 
             <form className="mt-4 space-y-3" onSubmit={handleCreate}>

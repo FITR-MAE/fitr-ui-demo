@@ -1,6 +1,5 @@
 import { useState, type FormEvent } from "react";
 import {
-  Check,
   Clock3,
   LockKeyhole,
   Mail,
@@ -10,7 +9,6 @@ import {
   Trash2,
   UserMinus,
   Users,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -19,35 +17,20 @@ import {
   type AccountRole,
   type Invitation,
   type InvitationStatus,
-  type InviteRole,
 } from "../components/AccountProvider";
 import { PageHeader, PageSection, PageShell } from "../components/Page";
 import { Button } from "../components/ui/button";
 import { Input } from "../components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "../components/ui/select";
 import { cn } from "../components/ui/utils";
 
 const roleLabels: Record<AccountRole, string> = {
   owner: "Owner",
-  admin: "Admin",
   editor: "Editor",
-  analyst: "Analyst",
 };
-
-const inviteRoles: InviteRole[] = ["admin", "editor", "analyst"];
 
 const statusTone: Record<InvitationStatus, string> = {
   pending: "bg-accent text-accent-foreground",
-  accepted: "bg-foreground text-background",
-  declined: "bg-muted text-muted-foreground",
   revoked: "bg-muted text-muted-foreground",
-  expired: "border border-border bg-background text-muted-foreground",
 };
 
 function formatDate(value: string) {
@@ -74,7 +57,7 @@ function AccessState({ isBusiness }: { isBusiness: boolean }) {
           </h2>
           <p className="mt-1 max-w-lg text-sm leading-6 text-muted-foreground">
             {isBusiness
-              ? "Only owners and admins can invite collaborators or change member access."
+              ? "Only the owner can invite or remove collaborators."
               : "Team access is available for active brand and store profiles."}
           </p>
         </PageSection>
@@ -92,15 +75,11 @@ export function TeamAccess() {
     getMembers,
     getInvitations,
     inviteMember,
-    acceptInvitation,
-    declineInvitation,
     resendInvitation,
     revokeInvitation,
-    updateMemberRole,
     removeMember,
   } = useAccounts();
   const [email, setEmail] = useState("");
-  const [inviteRole, setInviteRole] = useState<InviteRole>("editor");
   const [inviteError, setInviteError] = useState("");
   const isBusiness = activeAccount.type === "business";
 
@@ -132,16 +111,10 @@ export function TeamAccess() {
       return;
     }
 
-    inviteMember(normalizedEmail, inviteRole, activeAccount.id);
+    inviteMember(normalizedEmail, activeAccount.id);
     setEmail("");
-    setInviteRole("editor");
     setInviteError("");
-    toast("Invitation sent", { description: `${normalizedEmail} was invited as ${roleLabels[inviteRole]}.` });
-  };
-
-  const handleMemberRole = (membershipId: string, role: InviteRole, name: string) => {
-    updateMemberRole(membershipId, role);
-    toast("Role updated", { description: `${name} is now an ${role === "admin" ? "admin" : role}.` });
+    toast("Invitation sent", { description: `${normalizedEmail} was invited as an Editor.` });
   };
 
   const handleRemoveMember = (membershipId: string, name: string) => {
@@ -151,16 +124,12 @@ export function TeamAccess() {
 
   const handleInvitationAction = (
     invitation: Invitation,
-    action: "accept" | "decline" | "resend" | "revoke",
+    action: "resend" | "revoke",
   ) => {
-    if (action === "accept") acceptInvitation(invitation.id);
-    if (action === "decline") declineInvitation(invitation.id);
     if (action === "resend") resendInvitation(invitation.id);
     if (action === "revoke") revokeInvitation(invitation.id);
 
     const messages = {
-      accept: ["Invitation accepted", `${invitation.email} is now a team member.`],
-      decline: ["Invitation declined", `${invitation.email} declined the invitation.`],
       resend: ["Invitation resent", `A new invitation was sent to ${invitation.email}.`],
       revoke: ["Invitation revoked", `${invitation.email} can no longer use this invitation.`],
     } as const;
@@ -204,7 +173,7 @@ export function TeamAccess() {
             <div>
               <h2 className="app-section-title">Manage team on desktop</h2>
               <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Mobile shows team status only. Open Brand Studio on a larger screen to invite people or change access.
+                Mobile shows team status only. Open Brand Studio on a larger screen to invite or remove editors.
               </p>
             </div>
           </div>
@@ -251,23 +220,7 @@ export function TeamAccess() {
                         </div>
                       ) : (
                         <div className="flex items-center gap-2 self-end sm:self-auto">
-                          <Select
-                            value={member.role}
-                            onValueChange={(value) =>
-                              handleMemberRole(member.id, value as InviteRole, member.user.name)
-                            }
-                          >
-                            <SelectTrigger className="w-28" aria-label={`Role for ${member.user.name}`}>
-                              <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {inviteRoles.map((role) => (
-                                <SelectItem key={role} value={role}>
-                                  {roleLabels[role]}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
+                          <span className="app-chip">Editor</span>
                           <Button
                             type="button"
                             variant="ghost"
@@ -292,7 +245,7 @@ export function TeamAccess() {
                   <Mail className="mt-0.5 h-4 w-4 text-muted-foreground" />
                   <div>
                     <h2 className="app-section-title">Invitations</h2>
-                    <p className="text-xs text-muted-foreground">Use response actions to exercise the demo lifecycle.</p>
+                    <p className="text-xs text-muted-foreground">Pending invitations can be resent or revoked.</p>
                   </div>
                 </div>
                 <span className="text-xs text-muted-foreground">{invitations.length} total</span>
@@ -334,26 +287,6 @@ export function TeamAccess() {
                             </Button>
                             <Button
                               type="button"
-                              variant="outline"
-                              size="sm"
-                              className="rounded-full"
-                              onClick={() => handleInvitationAction(invitation, "accept")}
-                            >
-                              <Check className="h-4 w-4" />
-                              Accept
-                            </Button>
-                            <Button
-                              type="button"
-                              variant="ghost"
-                              size="sm"
-                              className="rounded-full"
-                              onClick={() => handleInvitationAction(invitation, "decline")}
-                            >
-                              <X className="h-4 w-4" />
-                              Decline
-                            </Button>
-                            <Button
-                              type="button"
                               variant="ghost"
                               size="sm"
                               className="rounded-full text-destructive hover:text-destructive"
@@ -363,7 +296,7 @@ export function TeamAccess() {
                               Revoke
                             </Button>
                           </>
-                        ) : invitation.status !== "accepted" ? (
+                        ) : (
                           <Button
                             type="button"
                             variant="outline"
@@ -374,7 +307,7 @@ export function TeamAccess() {
                             <RefreshCw className="h-4 w-4" />
                             Resend
                           </Button>
-                        ) : null}
+                        )}
                       </div>
                     </div>
                   ))}
@@ -394,7 +327,7 @@ export function TeamAccess() {
               <h2 className="app-section-title">Invite collaborator</h2>
             </div>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Choose the smallest role that gives the collaborator the access they need.
+              Editors can create posts, update storefront content, and prepare promotion drafts.
             </p>
 
             <form className="mt-4 space-y-3" onSubmit={handleInvite}>
@@ -413,29 +346,8 @@ export function TeamAccess() {
                   placeholder="name@studio.com"
                 />
               </div>
-              <div className="space-y-1.5">
-                <label htmlFor="invite-role" className="text-xs font-medium text-foreground">
-                  Role
-                </label>
-                <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as InviteRole)}>
-                  <SelectTrigger id="invite-role">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {inviteRoles.map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {roleLabels[role]}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
               <div className="rounded-2xl bg-muted p-3 text-xs leading-5 text-muted-foreground">
-                {inviteRole === "admin"
-                  ? "Admins can manage the profile, storefront, promotions, and team."
-                  : inviteRole === "editor"
-                    ? "Editors can publish content, manage the storefront, and prepare drafts."
-                    : "Analysts can view the overview and analytics without editing access."}
+                Invitations always grant Editor access. Owners retain control of the profile, team, and live promotions.
               </div>
               {inviteError ? <p className="text-xs text-destructive">{inviteError}</p> : null}
               <Button type="submit" className="h-11 w-full rounded-full bg-foreground text-background hover:bg-foreground/90">

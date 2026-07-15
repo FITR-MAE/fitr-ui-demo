@@ -10,9 +10,8 @@ import {
 
 export type AccountType = "personal" | "business";
 export type BusinessKind = "brand" | "store";
-export type AccountRole = "owner" | "admin" | "editor" | "analyst";
-export type InviteRole = Exclude<AccountRole, "owner">;
-export type InvitationStatus = "pending" | "accepted" | "declined" | "revoked" | "expired";
+export type AccountRole = "owner" | "editor";
+export type InvitationStatus = "pending" | "revoked";
 export type PromotionStatus = "Draft" | "Scheduled" | "Live" | "Ended";
 
 export type User = {
@@ -46,7 +45,7 @@ export type Invitation = {
   id: string;
   accountId: string;
   email: string;
-  role: InviteRole;
+  role: "editor";
   status: InvitationStatus;
   invitedAt: string;
 };
@@ -121,12 +120,9 @@ type AccountContextValue = {
   updateAccount: (id: string, updates: Partial<Account>) => void;
   getMembers: (accountId?: string) => AccountMember[];
   getInvitations: (accountId?: string) => Invitation[];
-  inviteMember: (email: string, role: InviteRole, accountId?: string) => string;
-  acceptInvitation: (id: string) => void;
-  declineInvitation: (id: string) => void;
+  inviteMember: (email: string, accountId?: string) => string;
   resendInvitation: (id: string) => void;
   revokeInvitation: (id: string) => void;
-  updateMemberRole: (membershipId: string, role: InviteRole) => void;
   removeMember: (membershipId: string) => void;
   getPromotions: (accountId?: string) => Promotion[];
   createPromotion: (input: PromotionInput, accountId?: string) => string;
@@ -209,11 +205,11 @@ const initialState: AccountState = {
   memberships: [
     { id: "member-sarah-personal", userId: CURRENT_USER_ID, accountId: "sarah", role: "owner" },
     { id: "member-sarah-maison", userId: CURRENT_USER_ID, accountId: "maison", role: "owner" },
-    { id: "member-amelia-maison", userId: "user-amelia", accountId: "maison", role: "admin" },
+    { id: "member-amelia-maison", userId: "user-amelia", accountId: "maison", role: "editor" },
     { id: "member-theo-maison", userId: "user-theo", accountId: "maison", role: "editor" },
-    { id: "member-noor-maison", userId: "user-noor", accountId: "maison", role: "analyst" },
+    { id: "member-noor-maison", userId: "user-noor", accountId: "maison", role: "editor" },
     { id: "member-amelia-lncc", userId: "user-amelia", accountId: "lncc", role: "owner" },
-    { id: "member-sarah-lncc", userId: CURRENT_USER_ID, accountId: "lncc", role: "analyst" },
+    { id: "member-sarah-lncc", userId: CURRENT_USER_ID, accountId: "lncc", role: "editor" },
   ],
   invitations: [
     {
@@ -285,34 +281,12 @@ const rolePermissions: Record<AccountRole, AccountPermissions> = {
     manageMembers: true,
     manageOwnership: true,
   },
-  admin: {
-    viewOverview: true,
-    viewAnalytics: true,
-    createContent: true,
-    manageStorefront: true,
-    draftPromotions: true,
-    publishPromotions: true,
-    manageProfile: true,
-    manageMembers: true,
-    manageOwnership: false,
-  },
   editor: {
     viewOverview: true,
     viewAnalytics: true,
     createContent: true,
     manageStorefront: true,
     draftPromotions: true,
-    publishPromotions: false,
-    manageProfile: false,
-    manageMembers: false,
-    manageOwnership: false,
-  },
-  analyst: {
-    viewOverview: true,
-    viewAnalytics: true,
-    createContent: false,
-    manageStorefront: false,
-    draftPromotions: false,
     publishPromotions: false,
     manageProfile: false,
     manageMembers: false,
@@ -342,11 +316,21 @@ function loadState(): AccountState {
     const saved = window.localStorage.getItem(STORAGE_KEY);
     if (!saved) return initialState;
     const parsed = JSON.parse(saved) as AccountState;
+    const memberships = parsed.memberships.map((membership) => ({
+      ...membership,
+      role: membership.role === "owner" ? "owner" : "editor",
+    }));
+    const invitations = parsed.invitations.map((invitation) => ({
+      ...invitation,
+      role: "editor" as const,
+      status: invitation.status === "pending" ? "pending" : "revoked",
+    }));
     const hasActiveMembership = parsed.memberships.some(
       (membership) =>
         membership.userId === CURRENT_USER_ID && membership.accountId === parsed.activeAccountId,
     );
-    return hasActiveMembership ? parsed : { ...parsed, activeAccountId: "sarah" };
+    const normalized = { ...parsed, memberships, invitations };
+    return hasActiveMembership ? normalized : { ...normalized, activeAccountId: "sarah" };
   } catch {
     return initialState;
   }
@@ -456,7 +440,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
   );
 
   const inviteMember = useCallback(
-    (email: string, role: InviteRole, accountId = activeAccount.id) => {
+    (email: string, accountId = activeAccount.id) => {
       const id = makeId("invite");
       setState((current) => {
         if (!canUsePermission(current, accountId, "manageMembers")) return current;
@@ -468,7 +452,7 @@ export function AccountProvider({ children }: { children: ReactNode }) {
               id,
               accountId,
               email: email.trim().toLowerCase(),
-              role,
+              role: "editor",
               status: "pending",
               invitedAt: new Date().toISOString(),
             },
@@ -491,57 +475,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
-  const acceptInvitation = useCallback((id: string) => {
-    setState((current) => {
-      const invitation = current.invitations.find((item) => item.id === id);
-      if (
-        !invitation ||
-        invitation.status !== "pending" ||
-        !canUsePermission(current, invitation.accountId, "manageMembers")
-      ) {
-        return current;
-      }
-      let user = current.users.find((item) => item.email === invitation.email);
-      const users = [...current.users];
-      if (!user) {
-        const name = invitation.email
-          .split("@")[0]
-          .split(/[._-]/)
-          .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-          .join(" ");
-        user = {
-          id: makeId("user"),
-          name,
-          email: invitation.email,
-          avatar: placeholderAvatars[users.length % placeholderAvatars.length],
-        };
-        users.push(user);
-      }
-      const hasMembership = current.memberships.some(
-        (membership) => membership.userId === user.id && membership.accountId === invitation.accountId,
-      );
-      return {
-        ...current,
-        users,
-        memberships: hasMembership
-          ? current.memberships
-          : [
-              ...current.memberships,
-              {
-                id: makeId("member"),
-                userId: user.id,
-                accountId: invitation.accountId,
-                role: invitation.role,
-              },
-            ],
-        invitations: current.invitations.map((item) =>
-          item.id === id ? { ...item, status: "accepted" } : item,
-        ),
-      };
-    });
-  }, []);
-
-  const declineInvitation = useCallback((id: string) => updateInvitation(id, "declined"), [updateInvitation]);
   const revokeInvitation = useCallback((id: string) => updateInvitation(id, "revoked"), [updateInvitation]);
 
   const resendInvitation = useCallback((id: string) => {
@@ -552,19 +485,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
         ...current,
         invitations: current.invitations.map((invite) =>
           invite.id === id ? { ...invite, status: "pending", invitedAt: new Date().toISOString() } : invite,
-        ),
-      };
-    });
-  }, []);
-
-  const updateMemberRole = useCallback((membershipId: string, role: InviteRole) => {
-    setState((current) => {
-      const target = current.memberships.find((membership) => membership.id === membershipId);
-      if (!target || !canUsePermission(current, target.accountId, "manageMembers")) return current;
-      return {
-        ...current,
-        memberships: current.memberships.map((membership) =>
-          membership.id === membershipId && membership.role !== "owner" ? { ...membership, role } : membership,
         ),
       };
     });
@@ -668,11 +588,8 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       getMembers,
       getInvitations,
       inviteMember,
-      acceptInvitation,
-      declineInvitation,
       resendInvitation,
       revokeInvitation,
-      updateMemberRole,
       removeMember,
       getPromotions,
       createPromotion,
@@ -682,7 +599,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       logout,
     }),
     [
-      acceptInvitation,
       accounts,
       activeAccount,
       activeMembership,
@@ -691,7 +607,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       createPromotion,
       createPost,
       currentUser,
-      declineInvitation,
       getInvitations,
       getMembers,
       getPromotions,
@@ -703,7 +618,6 @@ export function AccountProvider({ children }: { children: ReactNode }) {
       revokeInvitation,
       setActive,
       updateAccount,
-      updateMemberRole,
       updatePromotionStatus,
     ],
   );

@@ -143,9 +143,9 @@ const postResults = [
 ];
 
 const clothesResults = [
-  { id: 1, name: "Boxy wool blazer", meta: "Outerwear" },
-  { id: 2, name: "Wide-leg pleated trousers", meta: "Bottoms" },
-  { id: 3, name: "Leather ankle boots", meta: "Shoes" },
+  { id: 1, name: "Boxy wool blazer", meta: "Outerwear", detail: "Structured wool layer with a relaxed shoulder and room for knitwear." },
+  { id: 2, name: "Wide-leg pleated trousers", meta: "Bottoms", detail: "High-rise tailoring with a full leg and a clean front pleat." },
+  { id: 3, name: "Leather ankle boots", meta: "Shoes", detail: "Polished leather boot with a low stacked heel for everyday wear." },
 ];
 
 const brandResults = [
@@ -155,9 +155,9 @@ const brandResults = [
 ];
 
 const storeResults = [
-  { id: 1, name: "Maison Margiela", meta: "0.8 mi away", lat: 40.7411, lng: -73.9897 },
-  { id: 2, name: "Canvas Studio", meta: "1.4 mi away", lat: 40.7297, lng: -73.9987 },
-  { id: 3, name: "Thread House", meta: "2.1 mi away", lat: 40.7223, lng: -73.9874 },
+  { id: 1, name: "Maison Margiela", distance: "0.8 mi away", address: "1 Great Marlborough Street, London W1F 7JQ", hours: "Open today until 7 PM", category: "Luxury fashion" },
+  { id: 2, name: "Canvas Studio", distance: "1.4 mi away", address: "32 Redchurch Street, London E2 7DP", hours: "Open today until 6 PM", category: "Independent boutique" },
+  { id: 3, name: "Thread House", distance: "2.1 mi away", address: "55 Chiltern Street, London W1U 6JQ", hours: "Opens tomorrow at 10 AM", category: "Vintage and resale" },
 ];
 
 export function SearchPage() {
@@ -166,18 +166,13 @@ export function SearchPage() {
   const [filterState, setFilterState] = useState(defaultFilterState);
   const [openFilterMenu, setOpenFilterMenu] = useState<string | null>(null);
   const [selectedStoreId, setSelectedStoreId] = useState(storeResults[0].id);
+  const [storeDetailsOpen, setStoreDetailsOpen] = useState(false);
+  const [expandedClothingId, setExpandedClothingId] = useState<number | null>(null);
   const shouldAnimate = useShouldAnimate();
   const tabPanelMotionProps = useTabPanelMotion();
   const activeTabFilters = tabFilters[activeTab];
   const hasFilters = activeTabFilters.length > 0;
   const selectedStore = storeResults.find((store) => store.id === selectedStoreId) ?? storeResults[0];
-  const mapBounds = {
-    left: selectedStore.lng - 0.018,
-    right: selectedStore.lng + 0.018,
-    top: selectedStore.lat + 0.012,
-    bottom: selectedStore.lat - 0.012,
-  };
-  const storeMapUrl = `https://www.openstreetmap.org/export/embed.html?bbox=${mapBounds.left}%2C${mapBounds.bottom}%2C${mapBounds.right}%2C${mapBounds.top}&layer=mapnik&marker=${selectedStore.lat}%2C${selectedStore.lng}`;
   const filterPanelMotionProps = shouldAnimate
     ? {
         initial: { opacity: 0, y: -10, scale: 0.97 },
@@ -426,15 +421,25 @@ export function SearchPage() {
               <PageSection className="p-4">
                 <div className="space-y-2">
                   {clothesResults.map((item) => (
-                    <div key={item.id} className="app-compact-row">
-                      <div className="flex h-10 w-10 items-center justify-center rounded-full bg-muted text-muted-foreground">
-                        <Shirt className="h-4 w-4" />
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setExpandedClothingId((current) => (current === item.id ? null : item.id))}
+                      aria-expanded={expandedClothingId === item.id}
+                      className="w-full rounded-2xl border border-border bg-card p-3 text-left transition-colors hover:bg-muted/60"
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                          <Shirt className="h-4 w-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
+                          <p className="truncate text-xs text-muted-foreground">{item.meta}</p>
+                        </div>
+                        <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedClothingId === item.id && "rotate-180")} />
                       </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium text-foreground">{item.name}</p>
-                        <p className="truncate text-xs text-muted-foreground">{item.meta}</p>
-                      </div>
-                    </div>
+                      {expandedClothingId === item.id ? <p className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">{item.detail}</p> : null}
+                    </button>
                   ))}
                 </div>
               </PageSection>
@@ -463,18 +468,30 @@ export function SearchPage() {
                     <MapPin className="h-4 w-4 text-muted-foreground" />
                     <h2 className="app-section-title">Stores Near You</h2>
                   </div>
-                  <div className="overflow-hidden rounded-2xl border border-border bg-muted">
-                    <iframe
-                      title={`Map for ${selectedStore.name}`}
-                      src={storeMapUrl}
-                      className="h-56 w-full border-0"
-                      loading="lazy"
-                      referrerPolicy="no-referrer-when-downgrade"
-                    />
+                  <div className="rounded-2xl border border-border bg-background p-4">
+                    <div className="flex items-start gap-3">
+                      <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-muted text-muted-foreground">
+                        <Store className="h-4 w-4" />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className="flex items-center justify-between gap-3">
+                          <p className="text-sm font-medium text-foreground">{selectedStore.name}</p>
+                          <span className="shrink-0 text-xs text-muted-foreground">{selectedStore.distance}</span>
+                        </div>
+                        <p className="mt-1 text-xs text-muted-foreground">{selectedStore.category}</p>
+                      </div>
+                    </div>
+                    {storeDetailsOpen ? (
+                      <div className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
+                        <p>{selectedStore.address}</p>
+                        <p>{selectedStore.hours}</p>
+                      </div>
+                    ) : null}
+                    <button type="button" onClick={() => setStoreDetailsOpen((current) => !current)} className="mt-3 inline-flex items-center gap-1.5 text-xs font-medium text-foreground">
+                      {storeDetailsOpen ? "Hide details" : "View details"}
+                      <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", storeDetailsOpen && "rotate-180")} />
+                    </button>
                   </div>
-                  <p className="mt-3 text-xs text-muted-foreground">
-                    Centered on {selectedStore.name}, {selectedStore.meta}
-                  </p>
                 </PageSection>
 
                 <PageSection className="p-4">
@@ -484,7 +501,10 @@ export function SearchPage() {
                       <button
                         key={store.id}
                         type="button"
-                        onClick={() => setSelectedStoreId(store.id)}
+                        onClick={() => {
+                          setSelectedStoreId(store.id);
+                          setStoreDetailsOpen(true);
+                        }}
                         className={cn(
                           "app-compact-row-interactive",
                           "w-full text-left",
@@ -511,7 +531,7 @@ export function SearchPage() {
                               selectedStoreId === store.id ? "text-background/75" : "text-muted-foreground",
                             )}
                           >
-                            {store.meta}
+                            {store.distance}
                           </p>
                         </div>
                       </button>

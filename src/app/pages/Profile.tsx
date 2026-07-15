@@ -2,6 +2,7 @@ import {
   ArrowUpRight,
   Bookmark,
   Building2,
+  ChevronDown,
   ExternalLink,
   Grid,
   Heart,
@@ -624,6 +625,7 @@ function BusinessProfile() {
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState<BusinessTabId>("posts");
   const [storefrontSort, setStorefrontSort] = useState<StorefrontSort>("trending");
+  const [expandedStorefrontItemId, setExpandedStorefrontItemId] = useState<string | null>(null);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const fadeUpVariants = useFadeUpVariants();
   const scaleInVariants = useScaleInVariants();
@@ -891,25 +893,39 @@ function BusinessProfile() {
                           <span className="app-chip">{item.groupType}</span>
                           <span className="text-xs font-medium text-foreground">{item.groupName}</span>
                         </div>
-                        <motion.div
+                        <motion.button
+                          type="button"
+                          onClick={() => setExpandedStorefrontItemId((current) => (current === item.id ? null : item.id))}
+                          aria-expanded={expandedStorefrontItemId === item.id}
                           {...cardTap}
-                          className="flex items-center gap-3 rounded-2xl border border-border bg-card p-3"
+                          className="w-full rounded-2xl border border-border bg-card p-3 text-left"
                         >
-                          <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
-                            <ImageWithFallback src={item.image} alt={item.name} className="h-full w-full object-cover" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium">{item.name}</p>
-                            <p className="mt-0.5 text-sm text-foreground">{item.price}</p>
-                            <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                              <span>{item.releaseLabel}</span>
-                              <span className="inline-flex items-center gap-1">
-                                <Heart className="h-3 w-3" />
-                                {formatCount(item.likes)}
-                              </span>
+                          <div className="flex items-center gap-3">
+                            <div className="h-20 w-20 shrink-0 overflow-hidden rounded-xl bg-muted">
+                              <ImageWithFallback src={item.image} alt={item.name} className="h-full w-full object-cover" />
+                            </div>
+                            <div className="min-w-0 flex-1">
+                              <div className="flex items-start justify-between gap-3">
+                                <p className="text-sm font-medium">{item.name}</p>
+                                <ChevronDown className={cn("h-4 w-4 shrink-0 text-muted-foreground transition-transform", expandedStorefrontItemId === item.id && "rotate-180")} />
+                              </div>
+                              <p className="mt-0.5 text-sm text-foreground">{item.price}</p>
+                              <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
+                                <span>{item.releaseLabel}</span>
+                                <span className="inline-flex items-center gap-1">
+                                  <Heart className="h-3 w-3" />
+                                  {formatCount(item.likes)}
+                                </span>
+                              </div>
                             </div>
                           </div>
-                        </motion.div>
+                          {expandedStorefrontItemId === item.id ? (
+                            <div className="mt-3 border-t border-border pt-3 text-xs leading-5 text-muted-foreground">
+                              <p>{item.groupName} | {item.groupType}</p>
+                              <p className="mt-1">Explore current pieces from this release on the business profile.</p>
+                            </div>
+                          ) : null}
+                        </motion.button>
                       </motion.div>
                     ))}
                   </motion.div>

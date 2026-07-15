@@ -9,7 +9,6 @@ import {
   Globe2,
   LoaderCircle,
   MapPin,
-  ShieldCheck,
   Store,
 } from "lucide-react";
 
@@ -93,7 +92,6 @@ export function CreateBusinessAccount() {
   const [businessKind, setBusinessKind] = useState<BusinessKind>("brand");
   const [name, setName] = useState("");
   const [handle, setHandle] = useState("");
-  const [bio, setBio] = useState("");
   const [website, setWebsite] = useState("");
   const [category, setCategory] = useState("");
   const [address, setAddress] = useState("");
@@ -102,8 +100,6 @@ export function CreateBusinessAccount() {
 
   const normalizedHandle = normalizeHandle(handle);
   const previewHandle = normalizedHandle ? `@${normalizedHandle}` : "@yourhandle";
-  const previewName = name.trim() || (businessKind === "brand" ? "Your brand" : "Your store");
-  const previewInitial = name.trim().charAt(0).toUpperCase() || (businessKind === "brand" ? "B" : "S");
   const currentCategories = categories[businessKind];
 
   const clearError = (field: FieldName) => {
@@ -161,7 +157,7 @@ export function CreateBusinessAccount() {
         businessKind,
         name: accountName,
         handle: `@${normalizedHandle}`,
-        bio: bio.trim(),
+        bio: "",
         website: website.trim(),
         category,
         address: businessKind === "store" ? address.trim() : undefined,
@@ -390,23 +386,6 @@ export function CreateBusinessAccount() {
               ) : null}
             </div>
 
-            <div className="space-y-2 sm:col-span-2">
-              <div className="flex items-center justify-between gap-3">
-                <Label htmlFor="business-bio">
-                  Bio <span className="font-normal text-muted-foreground">Optional</span>
-                </Label>
-                <span className="text-xs text-muted-foreground">{bio.length}/160</span>
-              </div>
-              <Textarea
-                id="business-bio"
-                value={bio}
-                onChange={(event) => setBio(event.target.value)}
-                placeholder="Describe your point of view, products, or community."
-                maxLength={160}
-                className="min-h-24 rounded-xl bg-background"
-              />
-            </div>
-
             {businessKind === "store" ? (
               <div className="space-y-2 sm:col-span-2">
                 <Label htmlFor="business-address">Physical address</Label>
@@ -437,58 +416,6 @@ export function CreateBusinessAccount() {
                 )}
               </div>
             ) : null}
-          </div>
-        </PageSection>
-
-        <PageSection className="overflow-hidden p-0">
-          <div className="border-b border-border px-5 py-4">
-            <p className="text-xs font-medium uppercase tracking-wider text-muted-foreground">
-              Account preview
-            </p>
-          </div>
-          <div className="p-5">
-            <div className="flex items-start gap-4">
-              <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-gradient-to-br from-purple-400 to-pink-400 text-lg font-semibold text-white">
-                {previewInitial}
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex flex-wrap items-center gap-2">
-                  <p className="truncate text-base font-semibold text-foreground">{previewName}</p>
-                  <span className="app-chip">{businessKind}</span>
-                </div>
-                <p className="mt-0.5 text-sm text-muted-foreground">{previewHandle}</p>
-                <p className="mt-2 text-xs leading-relaxed text-muted-foreground">
-                  {bio.trim() || "Your bio will help people understand what makes this business distinct."}
-                </p>
-              </div>
-            </div>
-
-            <div className="mt-4 grid gap-2 border-t border-border pt-4 sm:grid-cols-2">
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                {businessKind === "brand" ? (
-                  <Building2 className="h-4 w-4 shrink-0" />
-                ) : (
-                  <Store className="h-4 w-4 shrink-0" />
-                )}
-                <span className="truncate">{category || "Category not selected"}</span>
-              </div>
-              <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                <ShieldCheck className="h-4 w-4 shrink-0" />
-                <span>You will be the Owner</span>
-              </div>
-              {website.trim() ? (
-                <div className="flex items-center gap-2 text-xs text-muted-foreground sm:col-span-2">
-                  <Globe2 className="h-4 w-4 shrink-0" />
-                  <span className="truncate">{website.trim()}</span>
-                </div>
-              ) : null}
-              {businessKind === "store" && address.trim() ? (
-                <div className="flex items-start gap-2 text-xs text-muted-foreground sm:col-span-2">
-                  <MapPin className="mt-0.5 h-4 w-4 shrink-0" />
-                  <span>{address.trim()}</span>
-                </div>
-              ) : null}
-            </div>
           </div>
         </PageSection>
 

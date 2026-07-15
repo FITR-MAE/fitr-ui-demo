@@ -204,6 +204,7 @@ function SegmentList({ items }: { items: { label: string; value: number }[] }) {
 export function BrandAnalytics() {
   const { activeAccount, activeRole, permissions } = useAccounts();
   const isBusiness = activeAccount.type === "business";
+  const roleLabel = activeRole === "owner" ? "Owner" : "Editor";
   const hasAnalytics = activeAccount.id === "maison" || activeAccount.id === "lncc";
   const accountMetricCards = hasAnalytics
     ? metricCards
@@ -215,7 +216,7 @@ export function BrandAnalytics() {
 
   return (
     <PageShell>
-      <PageHeader title="Analytics" subtitle={`${activeAccount.name} | ${activeRole}`} />
+      <PageHeader title="Analytics" subtitle={`${activeAccount.name} | ${roleLabel}`} />
       <div className="app-page-content max-w-6xl space-y-4">
         <PageSection className="p-5">
           <div className="flex flex-wrap items-end justify-between gap-3">
